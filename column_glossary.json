@@ -1,0 +1,6 @@
+{
+  "dbo.journal_records.jtype": {
+    "S": "Subscription",
+    "O": "Open Access"
+  }
+}

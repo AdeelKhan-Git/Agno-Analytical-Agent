@@ -1,0 +1,11 @@
+.env
+ssh
+ssh.pub
+Bike.bacpac
+BikeStores.bak
+BikeStores.db
+BikeStores2.db
+__pycache__/
+*.py[cod]
+*$py.class
+covert.py

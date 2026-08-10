@@ -1,0 +1,15 @@
+agno
+anthropic
+streamlit
+pandas
+sqlalchemy
+plotly
+pydantic
+pyodbc
+google-genai
+python-dotenv
+openai
+psycopg2-binary
+rapidfuzz
+ollama
+mysqlclient

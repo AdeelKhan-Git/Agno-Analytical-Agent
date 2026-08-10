@@ -1,0 +1,13 @@
+__pycache__/
+*.pyc
+.env
+.git/
+.gitignore
+*.xlsx
+*.xls
+*.csv
+summary_agent.py
+summary_tools.py
+team.py
+sql.py
+README.md
