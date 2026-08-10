@@ -8,4 +8,4 @@ BikeStores2.db
 __pycache__/
 *.py[cod]
 *$py.class
-covert.py
+convert.py
