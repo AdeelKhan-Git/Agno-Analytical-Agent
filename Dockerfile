@@ -28,7 +28,10 @@ COPY agno_agent.py .
 COPY glossary_tools.py .
 COPY column_glossary.json .
 COPY column_descriptions.json .
+COPY table_descriptions.json .
+COPY schema_knowledge.py .
 COPY instructions.py .
+COPY rebuild.py .
 COPY logging_config.py .
 COPY db.py .
 COPY app.py .

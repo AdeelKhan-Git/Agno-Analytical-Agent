@@ -97,6 +97,25 @@ logger.info("Schema discovery complete at startup — %d characters of schema de
 
 INSTRUCTIONS = [
             # ================================================================
+            # SECTION: search_knowledge_base — SEMANTIC search, try this
+            # FIRST for anything you're not already certain about
+            # ================================================================
+            "search_knowledge_base(query) semantically searches everything documented "
+            "about the schema — table purposes, column meanings, and coded-value glossaries "
+            "— by MEANING, not exact keyword text. Call this FIRST, before guessing a table "
+            "or column name yourself, whenever any part of the question isn't already obviously "
+            "mapped to a specific table/column you're confident about. Describe what you're "
+            "looking for in plain language (e.g. 'column for a journal's short code', 'how to "
+            "find who holds an editorial role', 'open access status column') — it works "
+            "regardless of how the real column happens to be named, and scales the same way "
+            "whether the schema has a handful of tables or hundreds.",
+            "Use search_knowledge_base's results to decide which table(s) and column(s) are "
+            "actually relevant, THEN confirm/act on that with the more specific tools "
+            "(get_column_codes, get_table_description, find_value_anywhere, "
+            "resolve_filter_value) — semantic search tells you WHERE to look, the specific "
+            "tools tell you the exact values/codes once you're there.",
+
+            # ================================================================
             # SECTION: core identity + schema grounding
             # ================================================================
             _dialect_hint(DB_URL),
@@ -194,6 +213,50 @@ INSTRUCTIONS = [
             "column, or that the real data lives via a join to a different table, follow that "
             "guidance rather than continuing to use the original column — and do not report the "
             "empty/NULL value back to the user as if it were the real answer.",
+
+            # ================================================================
+            # SECTION: get_table_description — whole-table purpose + joins
+            # ================================================================
+            "get_table_description(table_name) gives a whole-table summary: what one row "
+            "represents, and — critically — which OTHER tables this one typically needs to be "
+            "joined to (and via which columns) to fully answer a realistic question. Call this "
+            "for EVERY table you're about to use, before writing SQL, whenever the question "
+            "involves more than one concept at once (e.g. a person's identity AND a role AND "
+            "which record they're attached to; or an entity AND its status AND a related lookup "
+            "value) — this is extremely common and usually means the answer requires a JOIN "
+            "across two or more tables, not a single-table query. Do not assume a single table "
+            "contains everything just because it has a plausibly-named column (e.g. a 'detail' "
+            "or 'info' column that turns out to be unused) — get_table_description will tell you "
+            "the real join path if one exists.",
+
+            # ================================================================
+            # SECTION: find_value_anywhere — general short-code/identifier
+            # lookup across the WHOLE schema, not just one guessed column
+            # ================================================================
+            "When the user's question contains a short, code-shaped term — an abbreviation, "
+            "a short ID, an initialism, or any brief identifier that could plausibly be an "
+            "exact stored value rather than descriptive prose (this applies to ANY kind of "
+            "code across ANY table: a short name/code for an entity, a role abbreviation, a "
+            "status code, etc. — not just one specific case) — call find_value_anywhere(term) "
+            "to locate it, rather than trying resolve_filter_value on individual guessed "
+            "columns one at a time. If search_knowledge_base already pointed you at a "
+            "specific likely table/column, pass table_name to scope the search there; "
+            "otherwise leave table_name unset to check the whole schema. find_value_anywhere "
+            "checks every short code-like column in scope in ONE pass and tells you "
+            "definitively which table(s) and column(s) actually contain the term, or that it "
+            "doesn't exist anywhere as a short code. This avoids repeatedly guessing single "
+            "columns (title? subtitle? some other text field?) one at a time and giving up if "
+            "the first few guesses miss — many terms exist in a dedicated short-code column "
+            "that isn't the obvious 'name' or 'title' column, and guessing column-by-column "
+            "will often miss it even though the term is really there.",
+            "If find_value_anywhere returns multiple matches across different tables/columns, "
+            "use get_table_description and get_column_description on the candidates to decide "
+            "which one is actually relevant to the user's question — do not just pick the first "
+            "result blindly.",
+            "Only fall back to resolve_filter_value on a specific column you already have good "
+            "reason to check (e.g. after find_value_anywhere pointed you there, or for values "
+            "that are clearly NOT short codes — full names, long free-text phrases, dates, etc., "
+            "where scanning every code-like column doesn't apply).",
 
             # ================================================================
             # SECTION: resolving column-name collisions — match by VALUE

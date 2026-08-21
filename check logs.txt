@@ -1,0 +1,1008 @@
+Fri Aug 21 2026 15:58:45 GMT+0500 (Pakistan Standard Time) llama_context: n_seq_max             = 1
+Fri Aug 21 2026 15:58:45 GMT+0500 (Pakistan Standard Time) llama_context: n_ctx                 = 2048
+Fri Aug 21 2026 15:58:45 GMT+0500 (Pakistan Standard Time) llama_context: n_ctx_seq             = 2048
+Fri Aug 21 2026 15:58:45 GMT+0500 (Pakistan Standard Time) llama_context: n_batch               = 2048
+Fri Aug 21 2026 15:58:45 GMT+0500 (Pakistan Standard Time) llama_context: n_ubatch              = 2048
+Fri Aug 21 2026 15:58:45 GMT+0500 (Pakistan Standard Time) llama_context: causal_attn           = 0
+Fri Aug 21 2026 15:58:45 GMT+0500 (Pakistan Standard Time) llama_context: flash_attn            = auto
+Fri Aug 21 2026 15:58:45 GMT+0500 (Pakistan Standard Time) llama_context: kv_unified            = false
+Fri Aug 21 2026 15:58:45 GMT+0500 (Pakistan Standard Time) llama_context: freq_base             = 1000.0
+Fri Aug 21 2026 15:58:45 GMT+0500 (Pakistan Standard Time) llama_context: freq_scale            = 1
+Fri Aug 21 2026 15:58:45 GMT+0500 (Pakistan Standard Time) llama_context: n_rs_seq              = 0
+Fri Aug 21 2026 15:58:45 GMT+0500 (Pakistan Standard Time) llama_context: n_outputs_max         = 2048
+Fri Aug 21 2026 15:58:45 GMT+0500 (Pakistan Standard Time) llama_context: n_outputs_max_per_seq = 1
+Fri Aug 21 2026 15:58:45 GMT+0500 (Pakistan Standard Time) llama_context:        CPU  output buffer size =     0.12 MiB
+Fri Aug 21 2026 15:58:45 GMT+0500 (Pakistan Standard Time) sched_reserve: reserving ...
+Fri Aug 21 2026 15:58:45 GMT+0500 (Pakistan Standard Time) resolve_fused_ops: Flash Attention enabled
+Fri Aug 21 2026 15:58:45 GMT+0500 (Pakistan Standard Time) resolve_fused_ops: resolving fused Gated Delta Net support:
+Fri Aug 21 2026 15:58:45 GMT+0500 (Pakistan Standard Time) resolve_fused_ops: fused Gated Delta Net (autoregressive) enabled
+Fri Aug 21 2026 15:58:45 GMT+0500 (Pakistan Standard Time) resolve_fused_ops: fused Gated Delta Net (chunked) enabled
+Fri Aug 21 2026 15:58:45 GMT+0500 (Pakistan Standard Time) resolve_fused_ops: resolving fused Lightning Indexer support:
+Fri Aug 21 2026 15:58:45 GMT+0500 (Pakistan Standard Time) resolve_fused_ops: Lightning Indexer enabled
+Fri Aug 21 2026 15:58:45 GMT+0500 (Pakistan Standard Time) resolve_fused_ops: resolving fused DeepSeek V4 HC support:
+Fri Aug 21 2026 15:58:45 GMT+0500 (Pakistan Standard Time) resolve_fused_ops: fused DeepSeek V4 HC pre enabled
+Fri Aug 21 2026 15:58:45 GMT+0500 (Pakistan Standard Time) resolve_fused_ops: fused DeepSeek V4 HC comb enabled
+Fri Aug 21 2026 15:58:45 GMT+0500 (Pakistan Standard Time) resolve_fused_ops: fused DeepSeek V4 HC post enabled
+Fri Aug 21 2026 15:58:45 GMT+0500 (Pakistan Standard Time) sched_reserve:      CUDA0 compute buffer size =    98.00 MiB
+Fri Aug 21 2026 15:58:45 GMT+0500 (Pakistan Standard Time) sched_reserve:  CUDA_Host compute buffer size =    20.03 MiB
+Fri Aug 21 2026 15:58:45 GMT+0500 (Pakistan Standard Time) sched_reserve: graph nodes  = 335
+Fri Aug 21 2026 15:58:45 GMT+0500 (Pakistan Standard Time) sched_reserve: graph splits = 112 (with bs=2048), 1 (with bs=1)
+Fri Aug 21 2026 15:58:45 GMT+0500 (Pakistan Standard Time) sched_reserve: reserve took 12.00 ms, sched copies = 1
+Fri Aug 21 2026 15:58:45 GMT+0500 (Pakistan Standard Time) cmn          init: llama threadpool init, n_threads = 48
+Fri Aug 21 2026 15:58:45 GMT+0500 (Pakistan Standard Time) cmn  common_init_: KV cache shifting is not supported for this context, disabling KV cache shifting
+Fri Aug 21 2026 15:58:45 GMT+0500 (Pakistan Standard Time) cmn  common_init_: warming up the model with an empty run - please wait ... (--no-warmup to disable)
+Fri Aug 21 2026 15:58:45 GMT+0500 (Pakistan Standard Time) srv    load_model: speculative decoding not supported by this context
+Fri Aug 21 2026 15:58:45 GMT+0500 (Pakistan Standard Time) srv    load_model: initializing, n_slots = 1, n_ctx_slot = 2048, kv_unified = 'false'
+Fri Aug 21 2026 15:58:45 GMT+0500 (Pakistan Standard Time) slot   load_model: id  0 | task -1 | new slot, n_ctx = 2048
+Fri Aug 21 2026 15:58:45 GMT+0500 (Pakistan Standard Time) srv    load_model: prompt cache is enabled, size limit: 8192 MiB
+Fri Aug 21 2026 15:58:45 GMT+0500 (Pakistan Standard Time) srv    load_model: use `--cache-ram 0` to disable the prompt cache
+Fri Aug 21 2026 15:58:45 GMT+0500 (Pakistan Standard Time) srv    load_model: for more info see https://github.com/ggml-org/llama.cpp/pull/16391
+Fri Aug 21 2026 15:58:45 GMT+0500 (Pakistan Standard Time) srv    load_model: context checkpoints enabled, max = 32, min spacing = 8192
+Fri Aug 21 2026 15:58:45 GMT+0500 (Pakistan Standard Time) srv          init: idle slots will be saved to prompt cache upon starting a new task
+Fri Aug 21 2026 15:58:45 GMT+0500 (Pakistan Standard Time) srv          init: init: chat template, example_format: '<|im_start|>system
+Fri Aug 21 2026 15:58:45 GMT+0500 (Pakistan Standard Time) You are a helpful assistant<|im_end|>
+Fri Aug 21 2026 15:58:45 GMT+0500 (Pakistan Standard Time) <|im_start|>user
+Fri Aug 21 2026 15:58:45 GMT+0500 (Pakistan Standard Time) Hello<|im_end|>
+Fri Aug 21 2026 15:58:45 GMT+0500 (Pakistan Standard Time) <|im_start|>assistant
+Fri Aug 21 2026 15:58:45 GMT+0500 (Pakistan Standard Time) Hi there<|im_end|>
+Fri Aug 21 2026 15:58:45 GMT+0500 (Pakistan Standard Time) <|im_start|>user
+Fri Aug 21 2026 15:58:45 GMT+0500 (Pakistan Standard Time) How are you?<|im_end|>
+Fri Aug 21 2026 15:58:45 GMT+0500 (Pakistan Standard Time) <|im_start|>assistant
+Fri Aug 21 2026 15:58:45 GMT+0500 (Pakistan Standard Time) '
+Fri Aug 21 2026 15:58:45 GMT+0500 (Pakistan Standard Time) srv          init: init: chat template, thinking = 0
+Fri Aug 21 2026 15:58:45 GMT+0500 (Pakistan Standard Time) srv  llama_server: model loaded
+Fri Aug 21 2026 15:58:45 GMT+0500 (Pakistan Standard Time) srv  llama_server: listening on http://127.0.0.1:46277
+Fri Aug 21 2026 15:58:45 GMT+0500 (Pakistan Standard Time) srv  update_slots: all slots are idle
+Fri Aug 21 2026 15:58:45 GMT+0500 (Pakistan Standard Time) time=2026-08-21T10:58:45.901Z level=INFO source=llama_server.go:1362 msg="llama-server started in 1.51 seconds"
+Fri Aug 21 2026 15:58:45 GMT+0500 (Pakistan Standard Time) time=2026-08-21T10:58:45.901Z level=INFO source=images.go:374 msg="template selection" model=registry.ollama.ai/library/nomic-embed-text:latest selected=none renderer="" parser="" go_template=null chat_template=null harmony=null renderer_parser=null
+Fri Aug 21 2026 15:58:45 GMT+0500 (Pakistan Standard Time) time=2026-08-21T10:58:45.901Z level=INFO source=sched.go:728 msg="loaded runners" count=2
+Fri Aug 21 2026 15:58:45 GMT+0500 (Pakistan Standard Time) time=2026-08-21T10:58:45.901Z level=INFO source=llama_server.go:1295 msg="waiting for llama-server to start responding"
+Fri Aug 21 2026 15:58:45 GMT+0500 (Pakistan Standard Time) time=2026-08-21T10:58:45.902Z level=INFO source=llama_server.go:1362 msg="llama-server started in 1.51 seconds"
+Fri Aug 21 2026 15:58:45 GMT+0500 (Pakistan Standard Time) slot get_availabl: id  0 | task -1 |  - skipping, slot is empty
+Fri Aug 21 2026 15:58:45 GMT+0500 (Pakistan Standard Time) slot get_availabl: id  0 | task -1 | selected slot by LRU, t_last = -1
+Fri Aug 21 2026 15:58:45 GMT+0500 (Pakistan Standard Time) slot launch_slot_: id  0 | task 0 | processing task, is_child = 0
+Fri Aug 21 2026 15:58:45 GMT+0500 (Pakistan Standard Time) slot   operator(): id  0 | task 0 | new prompt, n_ctx_slot = 2048, n_keep = 0, task.n_tokens = 236
+Fri Aug 21 2026 15:58:45 GMT+0500 (Pakistan Standard Time) slot   operator(): id  0 | task 0 | cached n_tokens = 0, memory_seq_rm [0, end)
+Fri Aug 21 2026 15:58:46 GMT+0500 (Pakistan Standard Time) slot      release: id  0 | task 0 | stop processing: n_tokens = 236, truncated = 0
+Fri Aug 21 2026 15:58:46 GMT+0500 (Pakistan Standard Time) srv  update_slots: all slots are idle
+Fri Aug 21 2026 15:58:46 GMT+0500 (Pakistan Standard Time) [GIN] 2026/08/21 - 10:58:46 | 200 |  1.992425909s |       127.0.0.1 | POST     "/api/embed"
+Fri Aug 21 2026 15:58:46 GMT+0500 (Pakistan Standard Time) slot get_availabl: id  0 | task -1 |  - checking sim = 0.018 (4/221) > 0.100
+Fri Aug 21 2026 15:58:46 GMT+0500 (Pakistan Standard Time) slot get_availabl: id  0 | task -1 | selected slot by LRU, t_last = 768227814170
+Fri Aug 21 2026 15:58:46 GMT+0500 (Pakistan Standard Time) slot launch_slot_: id  0 | task 2 | processing task, is_child = 0
+Fri Aug 21 2026 15:58:46 GMT+0500 (Pakistan Standard Time) slot   operator(): id  0 | task 2 | new prompt, n_ctx_slot = 2048, n_keep = 0, task.n_tokens = 221
+Fri Aug 21 2026 15:58:46 GMT+0500 (Pakistan Standard Time) slot   operator(): id  0 | task 2 | cached n_tokens = 0, memory_seq_rm [0, end)
+Fri Aug 21 2026 15:58:46 GMT+0500 (Pakistan Standard Time) slot      release: id  0 | task 2 | stop processing: n_tokens = 221, truncated = 0
+Fri Aug 21 2026 15:58:46 GMT+0500 (Pakistan Standard Time) srv  update_slots: all slots are idle
+Fri Aug 21 2026 15:58:46 GMT+0500 (Pakistan Standard Time) [GIN] 2026/08/21 - 10:58:46 | 200 |  672.546477ms |       127.0.0.1 | POST     "/api/embed"
+Fri Aug 21 2026 15:58:47 GMT+0500 (Pakistan Standard Time) slot get_availabl: id  0 | task -1 |  - checking sim = 0.051 (9/177) > 0.100
+Fri Aug 21 2026 15:58:47 GMT+0500 (Pakistan Standard Time) slot get_availabl: id  0 | task -1 | selected slot by LRU, t_last = 768228508528
+Fri Aug 21 2026 15:58:47 GMT+0500 (Pakistan Standard Time) slot launch_slot_: id  0 | task 4 | processing task, is_child = 0
+Fri Aug 21 2026 15:58:47 GMT+0500 (Pakistan Standard Time) slot   operator(): id  0 | task 4 | new prompt, n_ctx_slot = 2048, n_keep = 0, task.n_tokens = 177
+Fri Aug 21 2026 15:58:47 GMT+0500 (Pakistan Standard Time) slot   operator(): id  0 | task 4 | cached n_tokens = 0, memory_seq_rm [0, end)
+Fri Aug 21 2026 15:58:47 GMT+0500 (Pakistan Standard Time) slot      release: id  0 | task 4 | stop processing: n_tokens = 177, truncated = 0
+Fri Aug 21 2026 15:58:47 GMT+0500 (Pakistan Standard Time) srv  update_slots: all slots are idle
+Fri Aug 21 2026 15:58:47 GMT+0500 (Pakistan Standard Time) [GIN] 2026/08/21 - 10:58:47 | 200 |  402.635376ms |       127.0.0.1 | POST     "/api/embed"
+Fri Aug 21 2026 15:58:47 GMT+0500 (Pakistan Standard Time) slot get_availabl: id  0 | task -1 |  - checking sim = 0.047 (7/150) > 0.100
+Fri Aug 21 2026 15:58:47 GMT+0500 (Pakistan Standard Time) slot get_availabl: id  0 | task -1 | selected slot by LRU, t_last = 768229011266
+Fri Aug 21 2026 15:58:47 GMT+0500 (Pakistan Standard Time) slot launch_slot_: id  0 | task 6 | processing task, is_child = 0
+Fri Aug 21 2026 15:58:47 GMT+0500 (Pakistan Standard Time) slot   operator(): id  0 | task 6 | new prompt, n_ctx_slot = 2048, n_keep = 0, task.n_tokens = 150
+Fri Aug 21 2026 15:58:47 GMT+0500 (Pakistan Standard Time) slot   operator(): id  0 | task 6 | cached n_tokens = 0, memory_seq_rm [0, end)
+Fri Aug 21 2026 15:58:48 GMT+0500 (Pakistan Standard Time) slot      release: id  0 | task 6 | stop processing: n_tokens = 150, truncated = 0
+Fri Aug 21 2026 15:58:48 GMT+0500 (Pakistan Standard Time) srv  update_slots: all slots are idle
+Fri Aug 21 2026 15:58:48 GMT+0500 (Pakistan Standard Time) [GIN] 2026/08/21 - 10:58:48 | 200 |  426.611524ms |       127.0.0.1 | POST     "/api/embed"
+Fri Aug 21 2026 15:58:48 GMT+0500 (Pakistan Standard Time) slot get_availabl: id  0 | task -1 |  - checking sim = 0.087 (4/46) > 0.100
+Fri Aug 21 2026 15:58:48 GMT+0500 (Pakistan Standard Time) slot get_availabl: id  0 | task -1 | selected slot by LRU, t_last = 768229539342
+Fri Aug 21 2026 15:58:48 GMT+0500 (Pakistan Standard Time) slot launch_slot_: id  0 | task 8 | processing task, is_child = 0
+Fri Aug 21 2026 15:58:48 GMT+0500 (Pakistan Standard Time) slot   operator(): id  0 | task 8 | new prompt, n_ctx_slot = 2048, n_keep = 0, task.n_tokens = 46
+Fri Aug 21 2026 15:58:48 GMT+0500 (Pakistan Standard Time) slot   operator(): id  0 | task 8 | cached n_tokens = 0, memory_seq_rm [0, end)
+Fri Aug 21 2026 15:58:48 GMT+0500 (Pakistan Standard Time) slot      release: id  0 | task 8 | stop processing: n_tokens = 46, truncated = 0
+Fri Aug 21 2026 15:58:48 GMT+0500 (Pakistan Standard Time) srv  update_slots: all slots are idle
+Fri Aug 21 2026 15:58:48 GMT+0500 (Pakistan Standard Time) [GIN] 2026/08/21 - 10:58:48 | 200 |  235.473048ms |       127.0.0.1 | POST     "/api/embed"
+Fri Aug 21 2026 15:58:48 GMT+0500 (Pakistan Standard Time) slot get_availabl: id  0 | task -1 |  - checking sim = 0.132 (7/53) > 0.100
+Fri Aug 21 2026 15:58:48 GMT+0500 (Pakistan Standard Time) slot get_availabl: id  0 | task -1 | selected slot by LCP similarity, f_sim_best = 0.132 (> 0.100 thold), f_keep = 0.152
+Fri Aug 21 2026 15:58:48 GMT+0500 (Pakistan Standard Time) slot launch_slot_: id  0 | task 10 | processing task, is_child = 0
+Fri Aug 21 2026 15:58:48 GMT+0500 (Pakistan Standard Time) slot   operator(): id  0 | task 10 | new prompt, n_ctx_slot = 2048, n_keep = 0, task.n_tokens = 53
+Fri Aug 21 2026 15:58:48 GMT+0500 (Pakistan Standard Time) slot   operator(): id  0 | task 10 | cached n_tokens = 0, memory_seq_rm [0, end)
+Fri Aug 21 2026 15:58:48 GMT+0500 (Pakistan Standard Time) slot      release: id  0 | task 10 | stop processing: n_tokens = 53, truncated = 0
+Fri Aug 21 2026 15:58:48 GMT+0500 (Pakistan Standard Time) srv  update_slots: all slots are idle
+Fri Aug 21 2026 15:58:48 GMT+0500 (Pakistan Standard Time) [GIN] 2026/08/21 - 10:58:48 | 200 |  529.063242ms |       127.0.0.1 | POST     "/api/embed"
+Fri Aug 21 2026 15:58:49 GMT+0500 (Pakistan Standard Time) slot get_availabl: id  0 | task -1 |  - checking sim = 0.143 (7/49) > 0.100
+Fri Aug 21 2026 15:58:49 GMT+0500 (Pakistan Standard Time) slot get_availabl: id  0 | task -1 | selected slot by LCP similarity, f_sim_best = 0.143 (> 0.100 thold), f_keep = 0.132
+Fri Aug 21 2026 15:58:49 GMT+0500 (Pakistan Standard Time) slot launch_slot_: id  0 | task 12 | processing task, is_child = 0
+Fri Aug 21 2026 15:58:49 GMT+0500 (Pakistan Standard Time) slot   operator(): id  0 | task 12 | new prompt, n_ctx_slot = 2048, n_keep = 0, task.n_tokens = 49
+Fri Aug 21 2026 15:58:49 GMT+0500 (Pakistan Standard Time) slot   operator(): id  0 | task 12 | cached n_tokens = 0, memory_seq_rm [0, end)
+Fri Aug 21 2026 15:58:49 GMT+0500 (Pakistan Standard Time) slot      release: id  0 | task 12 | stop processing: n_tokens = 49, truncated = 0
+Fri Aug 21 2026 15:58:49 GMT+0500 (Pakistan Standard Time) srv  update_slots: all slots are idle
+Fri Aug 21 2026 15:58:49 GMT+0500 (Pakistan Standard Time) [GIN] 2026/08/21 - 10:58:49 | 200 |  288.365063ms |       127.0.0.1 | POST     "/api/embed"
+Fri Aug 21 2026 15:58:49 GMT+0500 (Pakistan Standard Time) slot get_availabl: id  0 | task -1 |  - checking sim = 0.135 (7/52) > 0.100
+Fri Aug 21 2026 15:58:49 GMT+0500 (Pakistan Standard Time) slot get_availabl: id  0 | task -1 | selected slot by LCP similarity, f_sim_best = 0.135 (> 0.100 thold), f_keep = 0.143
+Fri Aug 21 2026 15:58:49 GMT+0500 (Pakistan Standard Time) slot launch_slot_: id  0 | task 14 | processing task, is_child = 0
+Fri Aug 21 2026 15:58:49 GMT+0500 (Pakistan Standard Time) slot   operator(): id  0 | task 14 | new prompt, n_ctx_slot = 2048, n_keep = 0, task.n_tokens = 52
+Fri Aug 21 2026 15:58:49 GMT+0500 (Pakistan Standard Time) slot   operator(): id  0 | task 14 | cached n_tokens = 0, memory_seq_rm [0, end)
+Fri Aug 21 2026 15:58:49 GMT+0500 (Pakistan Standard Time) slot      release: id  0 | task 14 | stop processing: n_tokens = 52, truncated = 0
+Fri Aug 21 2026 15:58:49 GMT+0500 (Pakistan Standard Time) srv  update_slots: all slots are idle
+Fri Aug 21 2026 15:58:49 GMT+0500 (Pakistan Standard Time) [GIN] 2026/08/21 - 10:58:49 | 200 |  435.635899ms |       127.0.0.1 | POST     "/api/embed"
+Fri Aug 21 2026 15:58:49 GMT+0500 (Pakistan Standard Time) slot get_availabl: id  0 | task -1 |  - checking sim = 0.125 (7/56) > 0.100
+Fri Aug 21 2026 15:58:49 GMT+0500 (Pakistan Standard Time) slot get_availabl: id  0 | task -1 | selected slot by LCP similarity, f_sim_best = 0.125 (> 0.100 thold), f_keep = 0.135
+Fri Aug 21 2026 15:58:49 GMT+0500 (Pakistan Standard Time) slot launch_slot_: id  0 | task 16 | processing task, is_child = 0
+Fri Aug 21 2026 15:58:49 GMT+0500 (Pakistan Standard Time) slot   operator(): id  0 | task 16 | new prompt, n_ctx_slot = 2048, n_keep = 0, task.n_tokens = 56
+Fri Aug 21 2026 15:58:49 GMT+0500 (Pakistan Standard Time) slot   operator(): id  0 | task 16 | cached n_tokens = 0, memory_seq_rm [0, end)
+Fri Aug 21 2026 15:58:50 GMT+0500 (Pakistan Standard Time) slot      release: id  0 | task 16 | stop processing: n_tokens = 56, truncated = 0
+Fri Aug 21 2026 15:58:50 GMT+0500 (Pakistan Standard Time) srv  update_slots: all slots are idle
+Fri Aug 21 2026 15:58:50 GMT+0500 (Pakistan Standard Time) [GIN] 2026/08/21 - 10:58:50 | 200 |  229.698348ms |       127.0.0.1 | POST     "/api/embed"
+Fri Aug 21 2026 15:58:50 GMT+0500 (Pakistan Standard Time) slot get_availabl: id  0 | task -1 |  - checking sim = 0.093 (7/75) > 0.100
+Fri Aug 21 2026 15:58:50 GMT+0500 (Pakistan Standard Time) slot get_availabl: id  0 | task -1 | selected slot by LRU, t_last = 768231608108
+Fri Aug 21 2026 15:58:50 GMT+0500 (Pakistan Standard Time) slot launch_slot_: id  0 | task 18 | processing task, is_child = 0
+Fri Aug 21 2026 15:58:50 GMT+0500 (Pakistan Standard Time) slot   operator(): id  0 | task 18 | new prompt, n_ctx_slot = 2048, n_keep = 0, task.n_tokens = 75
+Fri Aug 21 2026 15:58:50 GMT+0500 (Pakistan Standard Time) slot   operator(): id  0 | task 18 | cached n_tokens = 0, memory_seq_rm [0, end)
+Fri Aug 21 2026 15:58:50 GMT+0500 (Pakistan Standard Time) slot      release: id  0 | task 18 | stop processing: n_tokens = 75, truncated = 0
+Fri Aug 21 2026 15:58:50 GMT+0500 (Pakistan Standard Time) srv  update_slots: all slots are idle
+Fri Aug 21 2026 15:58:50 GMT+0500 (Pakistan Standard Time) [GIN] 2026/08/21 - 10:58:50 | 200 |  427.946388ms |       127.0.0.1 | POST     "/api/embed"
+Fri Aug 21 2026 15:58:50 GMT+0500 (Pakistan Standard Time) slot get_availabl: id  0 | task -1 |  - checking sim = 0.167 (7/42) > 0.100
+Fri Aug 21 2026 15:58:50 GMT+0500 (Pakistan Standard Time) slot get_availabl: id  0 | task -1 | selected slot by LCP similarity, f_sim_best = 0.167 (> 0.100 thold), f_keep = 0.093
+Fri Aug 21 2026 15:58:50 GMT+0500 (Pakistan Standard Time) slot launch_slot_: id  0 | task 20 | processing task, is_child = 0
+Fri Aug 21 2026 15:58:50 GMT+0500 (Pakistan Standard Time) slot   operator(): id  0 | task 20 | new prompt, n_ctx_slot = 2048, n_keep = 0, task.n_tokens = 42
+Fri Aug 21 2026 15:58:50 GMT+0500 (Pakistan Standard Time) slot   operator(): id  0 | task 20 | cached n_tokens = 0, memory_seq_rm [0, end)
+Fri Aug 21 2026 15:58:51 GMT+0500 (Pakistan Standard Time) slot      release: id  0 | task 20 | stop processing: n_tokens = 42, truncated = 0
+Fri Aug 21 2026 15:58:51 GMT+0500 (Pakistan Standard Time) srv  update_slots: all slots are idle
+Fri Aug 21 2026 15:58:51 GMT+0500 (Pakistan Standard Time) [GIN] 2026/08/21 - 10:58:51 | 200 |  283.537504ms |       127.0.0.1 | POST     "/api/embed"
+Fri Aug 21 2026 15:58:51 GMT+0500 (Pakistan Standard Time) slot get_availabl: id  0 | task -1 |  - checking sim = 0.149 (7/47) > 0.100
+Fri Aug 21 2026 15:58:51 GMT+0500 (Pakistan Standard Time) slot get_availabl: id  0 | task -1 | selected slot by LCP similarity, f_sim_best = 0.149 (> 0.100 thold), f_keep = 0.167
+Fri Aug 21 2026 15:58:51 GMT+0500 (Pakistan Standard Time) slot launch_slot_: id  0 | task 22 | processing task, is_child = 0
+Fri Aug 21 2026 15:58:51 GMT+0500 (Pakistan Standard Time) slot   operator(): id  0 | task 22 | new prompt, n_ctx_slot = 2048, n_keep = 0, task.n_tokens = 47
+Fri Aug 21 2026 15:58:51 GMT+0500 (Pakistan Standard Time) slot   operator(): id  0 | task 22 | cached n_tokens = 0, memory_seq_rm [0, end)
+Fri Aug 21 2026 15:58:51 GMT+0500 (Pakistan Standard Time) slot      release: id  0 | task 22 | stop processing: n_tokens = 47, truncated = 0
+Fri Aug 21 2026 15:58:51 GMT+0500 (Pakistan Standard Time) srv  update_slots: all slots are idle
+Fri Aug 21 2026 15:58:51 GMT+0500 (Pakistan Standard Time) [GIN] 2026/08/21 - 10:58:51 | 200 |  333.780223ms |       127.0.0.1 | POST     "/api/embed"
+Fri Aug 21 2026 15:58:51 GMT+0500 (Pakistan Standard Time) slot get_availabl: id  0 | task -1 |  - checking sim = 0.121 (7/58) > 0.100
+Fri Aug 21 2026 15:58:51 GMT+0500 (Pakistan Standard Time) slot get_availabl: id  0 | task -1 | selected slot by LCP similarity, f_sim_best = 0.121 (> 0.100 thold), f_keep = 0.149
+Fri Aug 21 2026 15:58:51 GMT+0500 (Pakistan Standard Time) slot launch_slot_: id  0 | task 24 | processing task, is_child = 0
+Fri Aug 21 2026 15:58:51 GMT+0500 (Pakistan Standard Time) slot   operator(): id  0 | task 24 | new prompt, n_ctx_slot = 2048, n_keep = 0, task.n_tokens = 58
+Fri Aug 21 2026 15:58:51 GMT+0500 (Pakistan Standard Time) slot   operator(): id  0 | task 24 | cached n_tokens = 0, memory_seq_rm [0, end)
+Fri Aug 21 2026 15:58:51 GMT+0500 (Pakistan Standard Time) slot      release: id  0 | task 24 | stop processing: n_tokens = 58, truncated = 0
+Fri Aug 21 2026 15:58:51 GMT+0500 (Pakistan Standard Time) srv  update_slots: all slots are idle
+Fri Aug 21 2026 15:58:51 GMT+0500 (Pakistan Standard Time) [GIN] 2026/08/21 - 10:58:51 | 200 |  238.354043ms |       127.0.0.1 | POST     "/api/embed"
+Fri Aug 21 2026 15:58:52 GMT+0500 (Pakistan Standard Time) slot get_availabl: id  0 | task -1 |  - checking sim = 0.068 (7/103) > 0.100
+Fri Aug 21 2026 15:58:52 GMT+0500 (Pakistan Standard Time) slot get_availabl: id  0 | task -1 | selected slot by LRU, t_last = 768233509147
+Fri Aug 21 2026 15:58:52 GMT+0500 (Pakistan Standard Time) slot launch_slot_: id  0 | task 26 | processing task, is_child = 0
+Fri Aug 21 2026 15:58:52 GMT+0500 (Pakistan Standard Time) slot   operator(): id  0 | task 26 | new prompt, n_ctx_slot = 2048, n_keep = 0, task.n_tokens = 103
+Fri Aug 21 2026 15:58:52 GMT+0500 (Pakistan Standard Time) slot   operator(): id  0 | task 26 | cached n_tokens = 0, memory_seq_rm [0, end)
+Fri Aug 21 2026 15:58:52 GMT+0500 (Pakistan Standard Time) slot      release: id  0 | task 26 | stop processing: n_tokens = 103, truncated = 0
+Fri Aug 21 2026 15:58:52 GMT+0500 (Pakistan Standard Time) srv  update_slots: all slots are idle
+Fri Aug 21 2026 15:58:52 GMT+0500 (Pakistan Standard Time) [GIN] 2026/08/21 - 10:58:52 | 200 |  500.301544ms |       127.0.0.1 | POST     "/api/embed"
+Fri Aug 21 2026 15:58:53 GMT+0500 (Pakistan Standard Time) slot get_availabl: id  0 | task -1 |  - checking sim = 0.163 (7/43) > 0.100
+Fri Aug 21 2026 15:58:53 GMT+0500 (Pakistan Standard Time) slot get_availabl: id  0 | task -1 | selected slot by LCP similarity, f_sim_best = 0.163 (> 0.100 thold), f_keep = 0.068
+Fri Aug 21 2026 15:58:53 GMT+0500 (Pakistan Standard Time) slot launch_slot_: id  0 | task 28 | processing task, is_child = 0
+Fri Aug 21 2026 15:58:53 GMT+0500 (Pakistan Standard Time) slot   operator(): id  0 | task 28 | new prompt, n_ctx_slot = 2048, n_keep = 0, task.n_tokens = 43
+Fri Aug 21 2026 15:58:53 GMT+0500 (Pakistan Standard Time) slot   operator(): id  0 | task 28 | cached n_tokens = 0, memory_seq_rm [0, end)
+Fri Aug 21 2026 15:58:53 GMT+0500 (Pakistan Standard Time) slot      release: id  0 | task 28 | stop processing: n_tokens = 43, truncated = 0
+Fri Aug 21 2026 15:58:53 GMT+0500 (Pakistan Standard Time) srv  update_slots: all slots are idle
+Fri Aug 21 2026 15:58:53 GMT+0500 (Pakistan Standard Time) [GIN] 2026/08/21 - 10:58:53 | 200 |  597.923514ms |       127.0.0.1 | POST     "/api/embed"
+Fri Aug 21 2026 15:58:54 GMT+0500 (Pakistan Standard Time) slot get_availabl: id  0 | task -1 |  - checking sim = 0.123 (7/57) > 0.100
+Fri Aug 21 2026 15:58:54 GMT+0500 (Pakistan Standard Time) slot get_availabl: id  0 | task -1 | selected slot by LCP similarity, f_sim_best = 0.123 (> 0.100 thold), f_keep = 0.163
+Fri Aug 21 2026 15:58:54 GMT+0500 (Pakistan Standard Time) slot launch_slot_: id  0 | task 30 | processing task, is_child = 0
+Fri Aug 21 2026 15:58:54 GMT+0500 (Pakistan Standard Time) slot   operator(): id  0 | task 30 | new prompt, n_ctx_slot = 2048, n_keep = 0, task.n_tokens = 57
+Fri Aug 21 2026 15:58:54 GMT+0500 (Pakistan Standard Time) slot   operator(): id  0 | task 30 | cached n_tokens = 0, memory_seq_rm [0, end)
+Fri Aug 21 2026 15:58:54 GMT+0500 (Pakistan Standard Time) slot      release: id  0 | task 30 | stop processing: n_tokens = 57, truncated = 0
+Fri Aug 21 2026 15:58:54 GMT+0500 (Pakistan Standard Time) srv  update_slots: all slots are idle
+Fri Aug 21 2026 15:58:54 GMT+0500 (Pakistan Standard Time) [GIN] 2026/08/21 - 10:58:54 | 200 |  503.093514ms |       127.0.0.1 | POST     "/api/embed"
+Fri Aug 21 2026 15:58:55 GMT+0500 (Pakistan Standard Time) slot get_availabl: id  0 | task -1 |  - checking sim = 0.212 (7/33) > 0.100
+Fri Aug 21 2026 15:58:55 GMT+0500 (Pakistan Standard Time) slot get_availabl: id  0 | task -1 | selected slot by LCP similarity, f_sim_best = 0.212 (> 0.100 thold), f_keep = 0.123
+Fri Aug 21 2026 15:58:55 GMT+0500 (Pakistan Standard Time) slot launch_slot_: id  0 | task 32 | processing task, is_child = 0
+Fri Aug 21 2026 15:58:55 GMT+0500 (Pakistan Standard Time) slot   operator(): id  0 | task 32 | new prompt, n_ctx_slot = 2048, n_keep = 0, task.n_tokens = 33
+Fri Aug 21 2026 15:58:55 GMT+0500 (Pakistan Standard Time) slot   operator(): id  0 | task 32 | cached n_tokens = 0, memory_seq_rm [0, end)
+Fri Aug 21 2026 15:58:55 GMT+0500 (Pakistan Standard Time) slot      release: id  0 | task 32 | stop processing: n_tokens = 33, truncated = 0
+Fri Aug 21 2026 15:58:55 GMT+0500 (Pakistan Standard Time) srv  update_slots: all slots are idle
+Fri Aug 21 2026 15:58:55 GMT+0500 (Pakistan Standard Time) [GIN] 2026/08/21 - 10:58:55 | 200 |   492.14763ms |       127.0.0.1 | POST     "/api/embed"
+Fri Aug 21 2026 15:58:55 GMT+0500 (Pakistan Standard Time) slot get_availabl: id  0 | task -1 |  - checking sim = 0.175 (7/40) > 0.100
+Fri Aug 21 2026 15:58:55 GMT+0500 (Pakistan Standard Time) slot get_availabl: id  0 | task -1 | selected slot by LCP similarity, f_sim_best = 0.175 (> 0.100 thold), f_keep = 0.212
+Fri Aug 21 2026 15:58:55 GMT+0500 (Pakistan Standard Time) slot launch_slot_: id  0 | task 34 | processing task, is_child = 0
+Fri Aug 21 2026 15:58:55 GMT+0500 (Pakistan Standard Time) slot   operator(): id  0 | task 34 | new prompt, n_ctx_slot = 2048, n_keep = 0, task.n_tokens = 40
+Fri Aug 21 2026 15:58:55 GMT+0500 (Pakistan Standard Time) slot   operator(): id  0 | task 34 | cached n_tokens = 0, memory_seq_rm [0, end)
+Fri Aug 21 2026 15:58:56 GMT+0500 (Pakistan Standard Time) slot      release: id  0 | task 34 | stop processing: n_tokens = 40, truncated = 0
+Fri Aug 21 2026 16:01:14 GMT+0500 (Pakistan Standard Time) slot   operator(): id  0 | task 346 | cached n_tokens = 0, memory_seq_rm [0, end)
+Fri Aug 21 2026 16:01:14 GMT+0500 (Pakistan Standard Time) slot      release: id  0 | task 346 | stop processing: n_tokens = 49, truncated = 0
+Fri Aug 21 2026 16:01:14 GMT+0500 (Pakistan Standard Time) srv  update_slots: all slots are idle
+Fri Aug 21 2026 16:01:14 GMT+0500 (Pakistan Standard Time) [GIN] 2026/08/21 - 11:01:14 | 200 |  268.385424ms |       127.0.0.1 | POST     "/api/embed"
+Fri Aug 21 2026 16:01:15 GMT+0500 (Pakistan Standard Time) slot get_availabl: id  0 | task -1 |  - checking sim = 0.161 (10/62) > 0.100
+Fri Aug 21 2026 16:01:15 GMT+0500 (Pakistan Standard Time) slot get_availabl: id  0 | task -1 | selected slot by LCP similarity, f_sim_best = 0.161 (> 0.100 thold), f_keep = 0.204
+Fri Aug 21 2026 16:01:15 GMT+0500 (Pakistan Standard Time) slot launch_slot_: id  0 | task 348 | processing task, is_child = 0
+Fri Aug 21 2026 16:01:15 GMT+0500 (Pakistan Standard Time) slot   operator(): id  0 | task 348 | new prompt, n_ctx_slot = 2048, n_keep = 0, task.n_tokens = 62
+Fri Aug 21 2026 16:01:15 GMT+0500 (Pakistan Standard Time) slot   operator(): id  0 | task 348 | cached n_tokens = 0, memory_seq_rm [0, end)
+Fri Aug 21 2026 16:01:15 GMT+0500 (Pakistan Standard Time) slot      release: id  0 | task 348 | stop processing: n_tokens = 62, truncated = 0
+Fri Aug 21 2026 16:01:15 GMT+0500 (Pakistan Standard Time) srv  update_slots: all slots are idle
+Fri Aug 21 2026 16:01:15 GMT+0500 (Pakistan Standard Time) [GIN] 2026/08/21 - 11:01:15 | 200 |  250.307631ms |       127.0.0.1 | POST     "/api/embed"
+Fri Aug 21 2026 16:01:16 GMT+0500 (Pakistan Standard Time) slot get_availabl: id  0 | task -1 |  - checking sim = 0.082 (4/49) > 0.100
+Fri Aug 21 2026 16:01:16 GMT+0500 (Pakistan Standard Time) slot get_availabl: id  0 | task -1 | selected slot by LRU, t_last = 768377012812
+Fri Aug 21 2026 16:01:16 GMT+0500 (Pakistan Standard Time) slot launch_slot_: id  0 | task 350 | processing task, is_child = 0
+Fri Aug 21 2026 16:01:16 GMT+0500 (Pakistan Standard Time) slot   operator(): id  0 | task 350 | new prompt, n_ctx_slot = 2048, n_keep = 0, task.n_tokens = 49
+Fri Aug 21 2026 16:01:16 GMT+0500 (Pakistan Standard Time) slot   operator(): id  0 | task 350 | cached n_tokens = 0, memory_seq_rm [0, end)
+Fri Aug 21 2026 16:01:16 GMT+0500 (Pakistan Standard Time) slot      release: id  0 | task 350 | stop processing: n_tokens = 49, truncated = 0
+Fri Aug 21 2026 16:01:16 GMT+0500 (Pakistan Standard Time) srv  update_slots: all slots are idle
+Fri Aug 21 2026 16:01:16 GMT+0500 (Pakistan Standard Time) [GIN] 2026/08/21 - 11:01:16 | 200 |  220.315165ms |       127.0.0.1 | POST     "/api/embed"
+Fri Aug 21 2026 16:01:17 GMT+0500 (Pakistan Standard Time) slot get_availabl: id  0 | task -1 |  - checking sim = 0.143 (7/49) > 0.100
+Fri Aug 21 2026 16:01:17 GMT+0500 (Pakistan Standard Time) slot get_availabl: id  0 | task -1 | selected slot by LCP similarity, f_sim_best = 0.143 (> 0.100 thold), f_keep = 0.143
+Fri Aug 21 2026 16:01:17 GMT+0500 (Pakistan Standard Time) slot launch_slot_: id  0 | task 352 | processing task, is_child = 0
+Fri Aug 21 2026 16:01:17 GMT+0500 (Pakistan Standard Time) slot   operator(): id  0 | task 352 | new prompt, n_ctx_slot = 2048, n_keep = 0, task.n_tokens = 49
+Fri Aug 21 2026 16:01:17 GMT+0500 (Pakistan Standard Time) slot   operator(): id  0 | task 352 | cached n_tokens = 0, memory_seq_rm [0, end)
+Fri Aug 21 2026 16:01:17 GMT+0500 (Pakistan Standard Time) slot      release: id  0 | task 352 | stop processing: n_tokens = 49, truncated = 0
+Fri Aug 21 2026 16:01:17 GMT+0500 (Pakistan Standard Time) srv  update_slots: all slots are idle
+Fri Aug 21 2026 16:01:17 GMT+0500 (Pakistan Standard Time) [GIN] 2026/08/21 - 11:01:17 | 200 |  247.367954ms |       127.0.0.1 | POST     "/api/embed"
+Fri Aug 21 2026 16:01:18 GMT+0500 (Pakistan Standard Time) slot get_availabl: id  0 | task -1 |  - checking sim = 0.146 (7/48) > 0.100
+Fri Aug 21 2026 16:01:18 GMT+0500 (Pakistan Standard Time) slot get_availabl: id  0 | task -1 | selected slot by LCP similarity, f_sim_best = 0.146 (> 0.100 thold), f_keep = 0.143
+Fri Aug 21 2026 16:01:18 GMT+0500 (Pakistan Standard Time) slot launch_slot_: id  0 | task 354 | processing task, is_child = 0
+Fri Aug 21 2026 16:01:18 GMT+0500 (Pakistan Standard Time) slot   operator(): id  0 | task 354 | new prompt, n_ctx_slot = 2048, n_keep = 0, task.n_tokens = 48
+Fri Aug 21 2026 16:01:18 GMT+0500 (Pakistan Standard Time) slot   operator(): id  0 | task 354 | cached n_tokens = 0, memory_seq_rm [0, end)
+Fri Aug 21 2026 16:01:18 GMT+0500 (Pakistan Standard Time) slot      release: id  0 | task 354 | stop processing: n_tokens = 48, truncated = 0
+Fri Aug 21 2026 16:01:18 GMT+0500 (Pakistan Standard Time) srv  update_slots: all slots are idle
+Fri Aug 21 2026 16:01:18 GMT+0500 (Pakistan Standard Time) [GIN] 2026/08/21 - 11:01:18 | 200 |  192.097519ms |       127.0.0.1 | POST     "/api/embed"
+Fri Aug 21 2026 16:01:19 GMT+0500 (Pakistan Standard Time) slot get_availabl: id  0 | task -1 |  - checking sim = 0.146 (7/48) > 0.100
+Fri Aug 21 2026 16:01:19 GMT+0500 (Pakistan Standard Time) slot get_availabl: id  0 | task -1 | selected slot by LCP similarity, f_sim_best = 0.146 (> 0.100 thold), f_keep = 0.146
+Fri Aug 21 2026 16:01:19 GMT+0500 (Pakistan Standard Time) slot launch_slot_: id  0 | task 356 | processing task, is_child = 0
+Fri Aug 21 2026 16:01:19 GMT+0500 (Pakistan Standard Time) slot   operator(): id  0 | task 356 | new prompt, n_ctx_slot = 2048, n_keep = 0, task.n_tokens = 48
+Fri Aug 21 2026 16:01:19 GMT+0500 (Pakistan Standard Time) slot   operator(): id  0 | task 356 | cached n_tokens = 0, memory_seq_rm [0, end)
+Fri Aug 21 2026 16:01:19 GMT+0500 (Pakistan Standard Time) slot      release: id  0 | task 356 | stop processing: n_tokens = 48, truncated = 0
+Fri Aug 21 2026 16:01:19 GMT+0500 (Pakistan Standard Time) srv  update_slots: all slots are idle
+Fri Aug 21 2026 16:01:19 GMT+0500 (Pakistan Standard Time) [GIN] 2026/08/21 - 11:01:19 | 200 |  262.624851ms |       127.0.0.1 | POST     "/api/embed"
+Fri Aug 21 2026 16:01:20 GMT+0500 (Pakistan Standard Time) slot get_availabl: id  0 | task -1 |  - checking sim = 0.156 (7/45) > 0.100
+Fri Aug 21 2026 16:01:20 GMT+0500 (Pakistan Standard Time) slot get_availabl: id  0 | task -1 | selected slot by LCP similarity, f_sim_best = 0.156 (> 0.100 thold), f_keep = 0.146
+Fri Aug 21 2026 16:01:20 GMT+0500 (Pakistan Standard Time) slot launch_slot_: id  0 | task 358 | processing task, is_child = 0
+Fri Aug 21 2026 16:01:20 GMT+0500 (Pakistan Standard Time) slot   operator(): id  0 | task 358 | new prompt, n_ctx_slot = 2048, n_keep = 0, task.n_tokens = 45
+Fri Aug 21 2026 16:01:20 GMT+0500 (Pakistan Standard Time) slot   operator(): id  0 | task 358 | cached n_tokens = 0, memory_seq_rm [0, end)
+Fri Aug 21 2026 16:01:20 GMT+0500 (Pakistan Standard Time) slot      release: id  0 | task 358 | stop processing: n_tokens = 45, truncated = 0
+Fri Aug 21 2026 16:01:20 GMT+0500 (Pakistan Standard Time) srv  update_slots: all slots are idle
+Fri Aug 21 2026 16:01:20 GMT+0500 (Pakistan Standard Time) [GIN] 2026/08/21 - 11:01:20 | 200 |  261.701473ms |       127.0.0.1 | POST     "/api/embed"
+Fri Aug 21 2026 16:01:21 GMT+0500 (Pakistan Standard Time) slot get_availabl: id  0 | task -1 |  - checking sim = 0.121 (7/58) > 0.100
+Fri Aug 21 2026 16:01:21 GMT+0500 (Pakistan Standard Time) slot get_availabl: id  0 | task -1 | selected slot by LCP similarity, f_sim_best = 0.121 (> 0.100 thold), f_keep = 0.156
+Fri Aug 21 2026 16:01:21 GMT+0500 (Pakistan Standard Time) slot launch_slot_: id  0 | task 360 | processing task, is_child = 0
+Fri Aug 21 2026 16:01:21 GMT+0500 (Pakistan Standard Time) slot   operator(): id  0 | task 360 | new prompt, n_ctx_slot = 2048, n_keep = 0, task.n_tokens = 58
+Fri Aug 21 2026 16:01:21 GMT+0500 (Pakistan Standard Time) slot   operator(): id  0 | task 360 | cached n_tokens = 0, memory_seq_rm [0, end)
+Fri Aug 21 2026 16:01:21 GMT+0500 (Pakistan Standard Time) slot      release: id  0 | task 360 | stop processing: n_tokens = 58, truncated = 0
+Fri Aug 21 2026 16:01:21 GMT+0500 (Pakistan Standard Time) srv  update_slots: all slots are idle
+Fri Aug 21 2026 16:01:21 GMT+0500 (Pakistan Standard Time) [GIN] 2026/08/21 - 11:01:21 | 200 |   212.83546ms |       127.0.0.1 | POST     "/api/embed"
+Fri Aug 21 2026 16:01:22 GMT+0500 (Pakistan Standard Time) slot get_availabl: id  0 | task -1 |  - checking sim = 0.171 (7/41) > 0.100
+Fri Aug 21 2026 16:01:22 GMT+0500 (Pakistan Standard Time) slot get_availabl: id  0 | task -1 | selected slot by LCP similarity, f_sim_best = 0.171 (> 0.100 thold), f_keep = 0.121
+Fri Aug 21 2026 16:01:22 GMT+0500 (Pakistan Standard Time) slot launch_slot_: id  0 | task 362 | processing task, is_child = 0
+Fri Aug 21 2026 16:01:22 GMT+0500 (Pakistan Standard Time) slot   operator(): id  0 | task 362 | new prompt, n_ctx_slot = 2048, n_keep = 0, task.n_tokens = 41
+Fri Aug 21 2026 16:01:22 GMT+0500 (Pakistan Standard Time) slot   operator(): id  0 | task 362 | cached n_tokens = 0, memory_seq_rm [0, end)
+Fri Aug 21 2026 16:01:22 GMT+0500 (Pakistan Standard Time) slot      release: id  0 | task 362 | stop processing: n_tokens = 41, truncated = 0
+Fri Aug 21 2026 16:01:22 GMT+0500 (Pakistan Standard Time) srv  update_slots: all slots are idle
+Fri Aug 21 2026 16:01:22 GMT+0500 (Pakistan Standard Time) [GIN] 2026/08/21 - 11:01:22 | 200 |   258.07615ms |       127.0.0.1 | POST     "/api/embed"
+Fri Aug 21 2026 16:01:23 GMT+0500 (Pakistan Standard Time) slot get_availabl: id  0 | task -1 |  - checking sim = 0.156 (7/45) > 0.100
+Fri Aug 21 2026 16:01:23 GMT+0500 (Pakistan Standard Time) slot get_availabl: id  0 | task -1 | selected slot by LCP similarity, f_sim_best = 0.156 (> 0.100 thold), f_keep = 0.171
+Fri Aug 21 2026 16:01:23 GMT+0500 (Pakistan Standard Time) slot launch_slot_: id  0 | task 364 | processing task, is_child = 0
+Fri Aug 21 2026 16:01:23 GMT+0500 (Pakistan Standard Time) slot   operator(): id  0 | task 364 | new prompt, n_ctx_slot = 2048, n_keep = 0, task.n_tokens = 45
+Fri Aug 21 2026 16:01:23 GMT+0500 (Pakistan Standard Time) slot   operator(): id  0 | task 364 | cached n_tokens = 0, memory_seq_rm [0, end)
+Fri Aug 21 2026 16:01:23 GMT+0500 (Pakistan Standard Time) slot      release: id  0 | task 364 | stop processing: n_tokens = 45, truncated = 0
+Fri Aug 21 2026 16:01:23 GMT+0500 (Pakistan Standard Time) srv  update_slots: all slots are idle
+Fri Aug 21 2026 16:01:23 GMT+0500 (Pakistan Standard Time) [GIN] 2026/08/21 - 11:01:23 | 200 |  243.145134ms |       127.0.0.1 | POST     "/api/embed"
+Fri Aug 21 2026 16:01:24 GMT+0500 (Pakistan Standard Time) slot get_availabl: id  0 | task -1 |  - checking sim = 0.108 (7/65) > 0.100
+Fri Aug 21 2026 16:01:24 GMT+0500 (Pakistan Standard Time) slot get_availabl: id  0 | task -1 | selected slot by LCP similarity, f_sim_best = 0.108 (> 0.100 thold), f_keep = 0.156
+Fri Aug 21 2026 16:01:24 GMT+0500 (Pakistan Standard Time) slot launch_slot_: id  0 | task 366 | processing task, is_child = 0
+Fri Aug 21 2026 16:01:24 GMT+0500 (Pakistan Standard Time) slot   operator(): id  0 | task 366 | new prompt, n_ctx_slot = 2048, n_keep = 0, task.n_tokens = 65
+Fri Aug 21 2026 16:01:24 GMT+0500 (Pakistan Standard Time) slot   operator(): id  0 | task 366 | cached n_tokens = 0, memory_seq_rm [0, end)
+Fri Aug 21 2026 16:01:24 GMT+0500 (Pakistan Standard Time) slot      release: id  0 | task 366 | stop processing: n_tokens = 65, truncated = 0
+Fri Aug 21 2026 16:01:24 GMT+0500 (Pakistan Standard Time) srv  update_slots: all slots are idle
+Fri Aug 21 2026 16:01:24 GMT+0500 (Pakistan Standard Time) [GIN] 2026/08/21 - 11:01:24 | 200 |  269.111658ms |       127.0.0.1 | POST     "/api/embed"
+Fri Aug 21 2026 16:01:25 GMT+0500 (Pakistan Standard Time) slot get_availabl: id  0 | task -1 |  - checking sim = 0.140 (7/50) > 0.100
+Fri Aug 21 2026 16:01:25 GMT+0500 (Pakistan Standard Time) slot get_availabl: id  0 | task -1 | selected slot by LCP similarity, f_sim_best = 0.140 (> 0.100 thold), f_keep = 0.108
+Fri Aug 21 2026 16:01:25 GMT+0500 (Pakistan Standard Time) slot launch_slot_: id  0 | task 368 | processing task, is_child = 0
+Fri Aug 21 2026 16:01:25 GMT+0500 (Pakistan Standard Time) slot   operator(): id  0 | task 368 | new prompt, n_ctx_slot = 2048, n_keep = 0, task.n_tokens = 50
+Fri Aug 21 2026 16:01:25 GMT+0500 (Pakistan Standard Time) slot   operator(): id  0 | task 368 | cached n_tokens = 0, memory_seq_rm [0, end)
+Fri Aug 21 2026 16:01:25 GMT+0500 (Pakistan Standard Time) slot      release: id  0 | task 368 | stop processing: n_tokens = 50, truncated = 0
+Fri Aug 21 2026 16:01:25 GMT+0500 (Pakistan Standard Time) srv  update_slots: all slots are idle
+Fri Aug 21 2026 16:01:25 GMT+0500 (Pakistan Standard Time) [GIN] 2026/08/21 - 11:01:25 | 200 |  264.171995ms |       127.0.0.1 | POST     "/api/embed"
+Fri Aug 21 2026 16:01:26 GMT+0500 (Pakistan Standard Time) slot get_availabl: id  0 | task -1 |  - checking sim = 0.121 (7/58) > 0.100
+Fri Aug 21 2026 16:01:26 GMT+0500 (Pakistan Standard Time) slot get_availabl: id  0 | task -1 | selected slot by LCP similarity, f_sim_best = 0.121 (> 0.100 thold), f_keep = 0.140
+Fri Aug 21 2026 16:01:26 GMT+0500 (Pakistan Standard Time) slot launch_slot_: id  0 | task 370 | processing task, is_child = 0
+Fri Aug 21 2026 16:01:26 GMT+0500 (Pakistan Standard Time) slot   operator(): id  0 | task 370 | new prompt, n_ctx_slot = 2048, n_keep = 0, task.n_tokens = 58
+Fri Aug 21 2026 16:01:26 GMT+0500 (Pakistan Standard Time) slot   operator(): id  0 | task 370 | cached n_tokens = 0, memory_seq_rm [0, end)
+Fri Aug 21 2026 16:01:26 GMT+0500 (Pakistan Standard Time) slot      release: id  0 | task 370 | stop processing: n_tokens = 58, truncated = 0
+Fri Aug 21 2026 16:01:26 GMT+0500 (Pakistan Standard Time) srv  update_slots: all slots are idle
+Fri Aug 21 2026 16:01:26 GMT+0500 (Pakistan Standard Time) [GIN] 2026/08/21 - 11:01:26 | 200 |  235.955236ms |       127.0.0.1 | POST     "/api/embed"
+Fri Aug 21 2026 16:01:27 GMT+0500 (Pakistan Standard Time) slot get_availabl: id  0 | task -1 |  - checking sim = 0.091 (4/44) > 0.100
+Fri Aug 21 2026 16:01:27 GMT+0500 (Pakistan Standard Time) slot get_availabl: id  0 | task -1 | selected slot by LRU, t_last = 768388006769
+Fri Aug 21 2026 16:01:27 GMT+0500 (Pakistan Standard Time) slot launch_slot_: id  0 | task 372 | processing task, is_child = 0
+Fri Aug 21 2026 16:01:27 GMT+0500 (Pakistan Standard Time) slot   operator(): id  0 | task 372 | new prompt, n_ctx_slot = 2048, n_keep = 0, task.n_tokens = 44
+Fri Aug 21 2026 16:01:27 GMT+0500 (Pakistan Standard Time) slot   operator(): id  0 | task 372 | cached n_tokens = 0, memory_seq_rm [0, end)
+Fri Aug 21 2026 16:01:27 GMT+0500 (Pakistan Standard Time) slot      release: id  0 | task 372 | stop processing: n_tokens = 44, truncated = 0
+Fri Aug 21 2026 16:01:27 GMT+0500 (Pakistan Standard Time) srv  update_slots: all slots are idle
+Fri Aug 21 2026 16:01:27 GMT+0500 (Pakistan Standard Time) [GIN] 2026/08/21 - 11:01:27 | 200 |  286.723198ms |       127.0.0.1 | POST     "/api/embed"
+Fri Aug 21 2026 16:01:50 GMT+0500 (Pakistan Standard Time) 2026-08-21 11:01:50 | INFO     | db | engine created
+Fri Aug 21 2026 16:01:58 GMT+0500 (Pakistan Standard Time) 2026-08-21 11:01:58 | INFO     | instructions | discover_schema() found 6 table(s)
+Fri Aug 21 2026 16:01:58 GMT+0500 (Pakistan Standard Time) 2026-08-21 11:01:58 | INFO     | instructions | Schema discovery complete at startup — 8378 characters of schema description built
+Fri Aug 21 2026 16:02:17 GMT+0500 (Pakistan Standard Time) 2026-08-21 11:02:17 | INFO     | __main__ | User submitted prompt: 'tell me eic name of cmc journal'
+Fri Aug 21 2026 16:02:17 GMT+0500 (Pakistan Standard Time) 2026-08-21 11:02:17 | INFO     | agno_agent | plan() called (retries left=2) — prompt: 'tell me eic name of cmc journal'
+Fri Aug 21 2026 16:02:18 GMT+0500 (Pakistan Standard Time) time=2026-08-21T11:02:18.888Z level=INFO source=sched.go:1332 msg="updated VRAM based on existing loaded models" gpu=0 library=CUDA total="47.4 GiB" available="901.0 MiB"
+Fri Aug 21 2026 16:02:18 GMT+0500 (Pakistan Standard Time) time=2026-08-21T11:02:18.996Z level=INFO source=sched.go:551 msg="llama-server model predicted to exceed available memory, evicting" predicted="18.3 GiB" predicted_num_ctx=8192 num_batch=512 available="901.0 MiB" gpu_free="901.0 MiB" system_free="459.9 GiB" system_limited=false
+Fri Aug 21 2026 16:02:21 GMT+0500 (Pakistan Standard Time) time=2026-08-21T11:02:21.724Z level=INFO source=server.go:109 msg="using llama-server for model" model=data/ollama-models/blobs/sha256-b33e4376e3581d11236ea53ced6b38399f6e91c0a391488486dc0827972f23f6
+Fri Aug 21 2026 16:02:21 GMT+0500 (Pakistan Standard Time) time=2026-08-21T11:02:21.724Z level=INFO source=llama_server.go:433 msg="starting llama-server" cmd="/usr/local/lib/ollama/llama-server --model data/ollama-models/blobs/sha256-b33e4376e3581d11236ea53ced6b38399f6e91c0a391488486dc0827972f23f6 --port 44225 --host 127.0.0.1 --no-webui --offline -c 8192 -np 1 --log-verbosity 4 --no-log-prefix --no-log-timestamps --no-jinja --chat-template chatml --flash-attn auto -b 1024 -ub 1024 --context-shift --keep 4"
+Fri Aug 21 2026 16:02:21 GMT+0500 (Pakistan Standard Time) time=2026-08-21T11:02:21.725Z level=INFO source=sched.go:613 msg="system memory" total="503.5 GiB" free="460.1 GiB" free_swap="0 B"
+Fri Aug 21 2026 16:02:21 GMT+0500 (Pakistan Standard Time) time=2026-08-21T11:02:21.725Z level=INFO source=sched.go:620 msg="gpu memory" id=0 library=CUDA available="46.7 GiB" free="47.2 GiB" minimum="457.0 MiB" overhead="0 B"
+Fri Aug 21 2026 16:02:21 GMT+0500 (Pakistan Standard Time) time=2026-08-21T11:02:21.725Z level=INFO source=llama_server.go:1048 msg="loading model via llama-server" model=data/ollama-models/blobs/sha256-b33e4376e3581d11236ea53ced6b38399f6e91c0a391488486dc0827972f23f6
+Fri Aug 21 2026 16:02:21 GMT+0500 (Pakistan Standard Time) time=2026-08-21T11:02:21.725Z level=INFO source=llama_server.go:1295 msg="waiting for llama-server to start responding"
+Fri Aug 21 2026 16:02:21 GMT+0500 (Pakistan Standard Time) time=2026-08-21T11:02:21.725Z level=INFO source=llama_server.go:1350 msg="waiting for llama-server to become available" status="llm server not responding"
+Fri Aug 21 2026 16:02:21 GMT+0500 (Pakistan Standard Time) cmn  common_param: common_params_print_info: build 1 (7e4c0a968) with GNU 13.3.1 for Linux x86_64
+Fri Aug 21 2026 16:02:21 GMT+0500 (Pakistan Standard Time) cmn  common_param: common_params_print_info: verbosity = 4 (adjust with the `-lv N` CLI arg)
+Fri Aug 21 2026 16:02:21 GMT+0500 (Pakistan Standard Time) cmn  common_param: device_info:
+Fri Aug 21 2026 16:02:21 GMT+0500 (Pakistan Standard Time) cmn  common_param:   - CPU     : Intel(R) Xeon(R) Gold 6342 CPU @ 2.80GHz (515597 MiB, 515597 MiB free)
+Fri Aug 21 2026 16:02:22 GMT+0500 (Pakistan Standard Time) cmn  common_param:   - CUDA0   : NVIDIA RTX A6000 (48549 MiB, 48282 MiB free)
+Fri Aug 21 2026 16:02:22 GMT+0500 (Pakistan Standard Time) cmn  common_param: system_info: n_threads = 48 (n_threads_batch = 48) / 96 | CPU : SSE3 = 1 | SSSE3 = 1 | AVX = 1 | AVX2 = 1 | F16C = 1 | FMA = 1 | BMI2 = 1 | AVX512 = 1 | AVX512_VBMI = 1 | AVX512_VNNI = 1 | LLAMAFILE = 1 | REPACK = 1 | CUDA : ARCHS = 500,520,600,610,700,750,800,860,890,900,1000,1200 | USE_GRAPHS = 1 | 
+Fri Aug 21 2026 16:02:22 GMT+0500 (Pakistan Standard Time) srv          init: using 95 threads for HTTP server
+Fri Aug 21 2026 16:02:22 GMT+0500 (Pakistan Standard Time) srv          init: The UI is disabled
+Fri Aug 21 2026 16:02:22 GMT+0500 (Pakistan Standard Time) srv          init: Use --ui/--no-ui (or deprecated --webui/--no-webui) to enable/disable
+Fri Aug 21 2026 16:02:22 GMT+0500 (Pakistan Standard Time) srv  llama_server: -----------------
+Fri Aug 21 2026 16:02:22 GMT+0500 (Pakistan Standard Time) srv  llama_server: CORS is set to allow all origins ('*') and no API key is set
+Fri Aug 21 2026 16:02:22 GMT+0500 (Pakistan Standard Time) srv  llama_server: this can be a security risk (cross-origin attacks)
+Fri Aug 21 2026 16:02:22 GMT+0500 (Pakistan Standard Time) srv  llama_server: more info: https://github.com/ggml-org/llama.cpp/pull/25655
+Fri Aug 21 2026 16:02:22 GMT+0500 (Pakistan Standard Time) srv  llama_server: -----------------
+Fri Aug 21 2026 16:02:22 GMT+0500 (Pakistan Standard Time) srv         start: binding port with default address family
+Fri Aug 21 2026 16:02:22 GMT+0500 (Pakistan Standard Time) srv    load_model: loading model 'data/ollama-models/blobs/sha256-b33e4376e3581d11236ea53ced6b38399f6e91c0a391488486dc0827972f23f6'
+Fri Aug 21 2026 16:02:22 GMT+0500 (Pakistan Standard Time) srv    load_model: local path 'data/ollama-models/blobs/sha256-b33e4376e3581d11236ea53ced6b38399f6e91c0a391488486dc0827972f23f6'
+Fri Aug 21 2026 16:02:22 GMT+0500 (Pakistan Standard Time) cmn  common_init_: fitting params to device memory ...
+Fri Aug 21 2026 16:02:22 GMT+0500 (Pakistan Standard Time) cmn  common_init_: (for bugs during this step try to reproduce them with -fit off, or provide --verbose logs if the bug only occurs with -fit on)
+Fri Aug 21 2026 16:02:22 GMT+0500 (Pakistan Standard Time) common_params_fit_impl: getting device memory data for initial parameters:
+Fri Aug 21 2026 16:02:22 GMT+0500 (Pakistan Standard Time) time=2026-08-21T11:02:22.229Z level=INFO source=llama_server.go:1350 msg="waiting for llama-server to become available" status="llm server loading model"
+Fri Aug 21 2026 16:02:22 GMT+0500 (Pakistan Standard Time) common_memory_breakdown_print: | memory breakdown [MiB] | total    free     self   model   context   compute    unaccounted |
+Fri Aug 21 2026 16:02:22 GMT+0500 (Pakistan Standard Time) common_memory_breakdown_print: |   - CUDA0 (RTX A6000)  | 48549 = 48282 + (19172 = 16676 +    2048 +     448) +      -18905 |
+Fri Aug 21 2026 16:02:22 GMT+0500 (Pakistan Standard Time) common_memory_breakdown_print: |   - Host               |                    369 =   321 +       0 +      48                |
+Fri Aug 21 2026 16:02:22 GMT+0500 (Pakistan Standard Time) common_params_fit_impl: projected to use 19172 MiB of device memory vs. 48282 MiB of free device memory
+Fri Aug 21 2026 16:02:22 GMT+0500 (Pakistan Standard Time) common_params_fit_impl: will leave 29109 >= 1024 MiB of free device memory, no changes needed
+Fri Aug 21 2026 16:02:22 GMT+0500 (Pakistan Standard Time) common_fit_params: successfully fit params to free device memory
+Fri Aug 21 2026 16:02:22 GMT+0500 (Pakistan Standard Time) common_fit_params: fitting params to free memory took 0.23 seconds
+Fri Aug 21 2026 16:02:22 GMT+0500 (Pakistan Standard Time) llama_model_loader: loaded meta data with 34 key-value pairs and 578 tensors from data/ollama-models/blobs/sha256-b33e4376e3581d11236ea53ced6b38399f6e91c0a391488486dc0827972f23f6 (version GGUF V3 (latest))
+Fri Aug 21 2026 16:02:22 GMT+0500 (Pakistan Standard Time) llama_model_loader: Dumping metadata keys/values. Note: KV overrides do not apply in this output.
+Fri Aug 21 2026 16:02:22 GMT+0500 (Pakistan Standard Time) llama_model_loader: - kv   0:                       general.architecture str              = granite
+Fri Aug 21 2026 16:02:22 GMT+0500 (Pakistan Standard Time) llama_model_loader: - kv   1:                               general.type str              = model
+Fri Aug 21 2026 16:02:22 GMT+0500 (Pakistan Standard Time) llama_model_loader: - kv   2:                               general.name str              = Granite 4.1 30b
+Fri Aug 21 2026 16:02:22 GMT+0500 (Pakistan Standard Time) llama_model_loader: - kv   3:                           general.basename str              = granite-4.1
+Fri Aug 21 2026 16:02:22 GMT+0500 (Pakistan Standard Time) llama_model_loader: - kv   4:                         general.size_label str              = 30B
+Fri Aug 21 2026 16:02:22 GMT+0500 (Pakistan Standard Time) llama_model_loader: - kv   5:                            general.license str              = apache-2.0
+Fri Aug 21 2026 16:02:22 GMT+0500 (Pakistan Standard Time) llama_model_loader: - kv   6:                        granite.block_count u32              = 64
+Fri Aug 21 2026 16:02:22 GMT+0500 (Pakistan Standard Time) llama_model_loader: - kv   7:                     granite.context_length u32              = 131072
+Fri Aug 21 2026 16:02:22 GMT+0500 (Pakistan Standard Time) llama_model_loader: - kv   8:                   granite.embedding_length u32              = 4096
+Fri Aug 21 2026 16:02:22 GMT+0500 (Pakistan Standard Time) llama_model_loader: - kv   9:                granite.feed_forward_length u32              = 32768
+Fri Aug 21 2026 16:02:22 GMT+0500 (Pakistan Standard Time) llama_model_loader: - kv  10:               granite.attention.head_count u32              = 32
+Fri Aug 21 2026 16:02:22 GMT+0500 (Pakistan Standard Time) llama_model_loader: - kv  11:            granite.attention.head_count_kv u32              = 8
+Fri Aug 21 2026 16:02:22 GMT+0500 (Pakistan Standard Time) llama_model_loader: - kv  12:                     granite.rope.freq_base f32              = 50000000.000000
+Fri Aug 21 2026 16:02:22 GMT+0500 (Pakistan Standard Time) llama_model_loader: - kv  13:   granite.attention.layer_norm_rms_epsilon f32              = 0.000010
+Fri Aug 21 2026 16:02:22 GMT+0500 (Pakistan Standard Time) llama_model_loader: - kv  14:                         granite.vocab_size u32              = 100352
+Fri Aug 21 2026 16:02:22 GMT+0500 (Pakistan Standard Time) llama_model_loader: - kv  15:               granite.rope.dimension_count u32              = 128
+Fri Aug 21 2026 16:02:22 GMT+0500 (Pakistan Standard Time) llama_model_loader: - kv  16:                    granite.attention.scale f32              = 0.007812
+Fri Aug 21 2026 16:02:22 GMT+0500 (Pakistan Standard Time) llama_model_loader: - kv  17:                    granite.embedding_scale f32              = 12.000000
+Fri Aug 21 2026 16:02:22 GMT+0500 (Pakistan Standard Time) llama_model_loader: - kv  18:                     granite.residual_scale f32              = 0.175000
+Fri Aug 21 2026 16:02:22 GMT+0500 (Pakistan Standard Time) llama_model_loader: - kv  19:                        granite.logit_scale f32              = 16.000000
+Fri Aug 21 2026 16:02:22 GMT+0500 (Pakistan Standard Time) llama_model_loader: - kv  20:                       tokenizer.ggml.model str              = gpt2
+Fri Aug 21 2026 16:02:22 GMT+0500 (Pakistan Standard Time) llama_model_loader: - kv  21:                         tokenizer.ggml.pre str              = dbrx
+Fri Aug 21 2026 16:02:22 GMT+0500 (Pakistan Standard Time) llama_model_loader: - kv  22:                      tokenizer.ggml.tokens arr[str,100352]  = ["!", "\"", "#", "$", "%", "&", "'", ...
+Fri Aug 21 2026 16:02:22 GMT+0500 (Pakistan Standard Time) llama_model_loader: - kv  23:                  tokenizer.ggml.token_type arr[i32,100352]  = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, ...
+Fri Aug 21 2026 16:02:22 GMT+0500 (Pakistan Standard Time) llama_model_loader: - kv  24:                      tokenizer.ggml.merges arr[str,100000]  = ["Ġ Ġ", "ĠĠ ĠĠ", "i n", "Ġ t",...
+Fri Aug 21 2026 16:02:22 GMT+0500 (Pakistan Standard Time) llama_model_loader: - kv  25:                tokenizer.ggml.bos_token_id u32              = 100257
+Fri Aug 21 2026 16:02:22 GMT+0500 (Pakistan Standard Time) llama_model_loader: - kv  26:                tokenizer.ggml.eos_token_id u32              = 100257
+Fri Aug 21 2026 16:02:22 GMT+0500 (Pakistan Standard Time) llama_model_loader: - kv  27:            tokenizer.ggml.unknown_token_id u32              = 100269
+Fri Aug 21 2026 16:02:22 GMT+0500 (Pakistan Standard Time) llama_model_loader: - kv  28:            tokenizer.ggml.padding_token_id u32              = 100256
+Fri Aug 21 2026 16:02:22 GMT+0500 (Pakistan Standard Time) llama_model_loader: - kv  29:               tokenizer.ggml.add_bos_token bool             = false
+Fri Aug 21 2026 16:02:22 GMT+0500 (Pakistan Standard Time) llama_model_loader: - kv  30:                    tokenizer.chat_template str              = {%- set tools_system_message_prefix =...
+Fri Aug 21 2026 16:02:22 GMT+0500 (Pakistan Standard Time) llama_model_loader: - kv  31:            tokenizer.ggml.add_space_prefix bool             = false
+Fri Aug 21 2026 16:02:22 GMT+0500 (Pakistan Standard Time) llama_model_loader: - kv  32:               general.quantization_version u32              = 2
+Fri Aug 21 2026 16:02:22 GMT+0500 (Pakistan Standard Time) llama_model_loader: - kv  33:                          general.file_type u32              = 15
+Fri Aug 21 2026 16:02:22 GMT+0500 (Pakistan Standard Time) llama_model_loader: - type  f32:  129 tensors
+Fri Aug 21 2026 16:02:22 GMT+0500 (Pakistan Standard Time) llama_model_loader: - type q4_K:  384 tensors
+Fri Aug 21 2026 16:02:22 GMT+0500 (Pakistan Standard Time) llama_model_loader: - type q6_K:   65 tensors
+Fri Aug 21 2026 16:02:22 GMT+0500 (Pakistan Standard Time) print_info: file format = GGUF V3 (latest)
+Fri Aug 21 2026 16:02:22 GMT+0500 (Pakistan Standard Time) print_info: file type   = Q4_K - Medium
+Fri Aug 21 2026 16:02:22 GMT+0500 (Pakistan Standard Time) print_info: file size   = 16.29 GiB (4.85 BPW) 
+Fri Aug 21 2026 16:02:22 GMT+0500 (Pakistan Standard Time) llama_prepare_model_devices: using device CUDA0 (NVIDIA RTX A6000) (0000:56:00.0) - 48282 MiB free
+Fri Aug 21 2026 16:02:22 GMT+0500 (Pakistan Standard Time) load: 69 unused tokens
+Fri Aug 21 2026 16:02:22 GMT+0500 (Pakistan Standard Time) load: printing all EOG tokens:
+Fri Aug 21 2026 16:02:22 GMT+0500 (Pakistan Standard Time) load:   - 100257 ('<|end_of_text|>')
+Fri Aug 21 2026 16:02:22 GMT+0500 (Pakistan Standard Time) load:   - 100261 ('<|fim_pad|>')
+Fri Aug 21 2026 16:02:22 GMT+0500 (Pakistan Standard Time) load: special tokens cache size = 96
+Fri Aug 21 2026 16:02:22 GMT+0500 (Pakistan Standard Time) load: token to piece cache size = 0.6152 MB
+Fri Aug 21 2026 16:02:22 GMT+0500 (Pakistan Standard Time) print_info: arch                  = granite
+Fri Aug 21 2026 16:02:22 GMT+0500 (Pakistan Standard Time) print_info: vocab_only            = 0
+Fri Aug 21 2026 16:02:22 GMT+0500 (Pakistan Standard Time) print_info: no_alloc              = 0
+Fri Aug 21 2026 16:02:22 GMT+0500 (Pakistan Standard Time) print_info: n_ctx_train           = 131072
+Fri Aug 21 2026 16:02:22 GMT+0500 (Pakistan Standard Time) print_info: n_embd_inp            = 4096
+Fri Aug 21 2026 16:02:22 GMT+0500 (Pakistan Standard Time) print_info: n_embd                = 4096
+Fri Aug 21 2026 16:02:22 GMT+0500 (Pakistan Standard Time) print_info: n_embd_out            = 4096
+Fri Aug 21 2026 16:02:22 GMT+0500 (Pakistan Standard Time) print_info: n_layer               = 64
+Fri Aug 21 2026 16:02:22 GMT+0500 (Pakistan Standard Time) print_info: n_layer_all           = 64
+Fri Aug 21 2026 16:02:22 GMT+0500 (Pakistan Standard Time) print_info: n_head                = 32
+Fri Aug 21 2026 16:02:22 GMT+0500 (Pakistan Standard Time) print_info: n_head_kv             = 8
+Fri Aug 21 2026 16:02:22 GMT+0500 (Pakistan Standard Time) print_info: n_rot                 = 128
+Fri Aug 21 2026 16:02:22 GMT+0500 (Pakistan Standard Time) print_info: n_swa                 = 0
+Fri Aug 21 2026 16:02:22 GMT+0500 (Pakistan Standard Time) print_info: is_swa_any            = 0
+Fri Aug 21 2026 16:02:22 GMT+0500 (Pakistan Standard Time) print_info: n_embd_head_k         = 128
+Fri Aug 21 2026 16:02:22 GMT+0500 (Pakistan Standard Time) print_info: n_embd_head_v         = 128
+Fri Aug 21 2026 16:02:22 GMT+0500 (Pakistan Standard Time) print_info: n_gqa                 = 4
+Fri Aug 21 2026 16:02:22 GMT+0500 (Pakistan Standard Time) print_info: n_embd_k_gqa          = 1024
+Fri Aug 21 2026 16:02:22 GMT+0500 (Pakistan Standard Time) print_info: n_embd_v_gqa          = 1024
+Fri Aug 21 2026 16:02:22 GMT+0500 (Pakistan Standard Time) print_info: f_norm_eps            = 0.0e+00
+Fri Aug 21 2026 16:02:22 GMT+0500 (Pakistan Standard Time) print_info: f_norm_rms_eps        = 1.0e-05
+Fri Aug 21 2026 16:02:22 GMT+0500 (Pakistan Standard Time) print_info: f_clamp_kqv           = 0.0e+00
+Fri Aug 21 2026 16:02:22 GMT+0500 (Pakistan Standard Time) print_info: f_max_alibi_bias      = 0.0e+00
+Fri Aug 21 2026 16:02:22 GMT+0500 (Pakistan Standard Time) print_info: f_logit_scale         = 1.6e+01
+Fri Aug 21 2026 16:02:22 GMT+0500 (Pakistan Standard Time) print_info: f_attn_scale          = 7.8e-03
+Fri Aug 21 2026 16:02:22 GMT+0500 (Pakistan Standard Time) print_info: f_attn_value_scale    = 0.0000
+Fri Aug 21 2026 16:02:22 GMT+0500 (Pakistan Standard Time) print_info: n_ff                  = 32768
+Fri Aug 21 2026 16:02:22 GMT+0500 (Pakistan Standard Time) print_info: n_expert              = 0
+Fri Aug 21 2026 16:02:22 GMT+0500 (Pakistan Standard Time) print_info: n_expert_used         = 0
+Fri Aug 21 2026 16:02:22 GMT+0500 (Pakistan Standard Time) print_info: n_expert_groups       = 0
+Fri Aug 21 2026 16:02:22 GMT+0500 (Pakistan Standard Time) print_info: n_group_used          = 0
+Fri Aug 21 2026 16:02:22 GMT+0500 (Pakistan Standard Time) print_info: causal attn           = 1
+Fri Aug 21 2026 16:02:22 GMT+0500 (Pakistan Standard Time) print_info: pooling type          = -1
+Fri Aug 21 2026 16:02:22 GMT+0500 (Pakistan Standard Time) print_info: rope type             = 0
+Fri Aug 21 2026 16:02:22 GMT+0500 (Pakistan Standard Time) print_info: rope scaling          = linear
+Fri Aug 21 2026 16:02:22 GMT+0500 (Pakistan Standard Time) print_info: freq_base_train       = 50000000.0
+Fri Aug 21 2026 16:02:22 GMT+0500 (Pakistan Standard Time) print_info: freq_scale_train      = 1
+Fri Aug 21 2026 16:02:22 GMT+0500 (Pakistan Standard Time) print_info: n_ctx_orig_yarn       = 131072
+Fri Aug 21 2026 16:02:22 GMT+0500 (Pakistan Standard Time) print_info: rope_yarn_log_mul     = 0.0000
+Fri Aug 21 2026 16:02:22 GMT+0500 (Pakistan Standard Time) print_info: rope_finetuned        = yes
+Fri Aug 21 2026 16:02:22 GMT+0500 (Pakistan Standard Time) print_info: model type            = ?B
+Fri Aug 21 2026 16:02:22 GMT+0500 (Pakistan Standard Time) print_info: model params          = 28.87 B
+Fri Aug 21 2026 16:02:22 GMT+0500 (Pakistan Standard Time) print_info: general.name          = Granite 4.1 30b
+Fri Aug 21 2026 16:02:22 GMT+0500 (Pakistan Standard Time) print_info: f_embedding_scale     = 12.000000
+Fri Aug 21 2026 16:02:22 GMT+0500 (Pakistan Standard Time) print_info: f_residual_scale      = 0.175000
+Fri Aug 21 2026 16:02:22 GMT+0500 (Pakistan Standard Time) print_info: f_attention_scale     = 0.007812
+Fri Aug 21 2026 16:02:22 GMT+0500 (Pakistan Standard Time) print_info: n_ff_shexp            = 0
+Fri Aug 21 2026 16:02:22 GMT+0500 (Pakistan Standard Time) print_info: vocab type            = BPE
+Fri Aug 21 2026 16:02:22 GMT+0500 (Pakistan Standard Time) print_info: n_vocab               = 100352
+Fri Aug 21 2026 16:02:22 GMT+0500 (Pakistan Standard Time) print_info: n_merges              = 100000
+Fri Aug 21 2026 16:02:22 GMT+0500 (Pakistan Standard Time) print_info: BOS token             = 100257 '<|end_of_text|>'
+Fri Aug 21 2026 16:02:22 GMT+0500 (Pakistan Standard Time) print_info: EOS token             = 100257 '<|end_of_text|>'
+Fri Aug 21 2026 16:02:22 GMT+0500 (Pakistan Standard Time) print_info: EOT token             = 100257 '<|end_of_text|>'
+Fri Aug 21 2026 16:02:22 GMT+0500 (Pakistan Standard Time) print_info: UNK token             = 100269 '<|unk|>'
+Fri Aug 21 2026 16:02:22 GMT+0500 (Pakistan Standard Time) print_info: PAD token             = 100256 '<|pad|>'
+Fri Aug 21 2026 16:02:22 GMT+0500 (Pakistan Standard Time) print_info: LF token              = 198 'Ċ'
+Fri Aug 21 2026 16:02:22 GMT+0500 (Pakistan Standard Time) print_info: FIM PRE token         = 100258 '<|fim_prefix|>'
+Fri Aug 21 2026 16:02:22 GMT+0500 (Pakistan Standard Time) print_info: FIM SUF token         = 100260 '<|fim_suffix|>'
+Fri Aug 21 2026 16:02:22 GMT+0500 (Pakistan Standard Time) print_info: FIM MID token         = 100259 '<|fim_middle|>'
+Fri Aug 21 2026 16:02:22 GMT+0500 (Pakistan Standard Time) print_info: FIM PAD token         = 100261 '<|fim_pad|>'
+Fri Aug 21 2026 16:02:22 GMT+0500 (Pakistan Standard Time) print_info: EOG token             = 100257 '<|end_of_text|>'
+Fri Aug 21 2026 16:02:22 GMT+0500 (Pakistan Standard Time) print_info: EOG token             = 100261 '<|fim_pad|>'
+Fri Aug 21 2026 16:02:22 GMT+0500 (Pakistan Standard Time) print_info: max token length      = 256
+Fri Aug 21 2026 16:02:22 GMT+0500 (Pakistan Standard Time) load_tensors: loading model tensors, this can take a while... (load_mode = mmap)
+Fri Aug 21 2026 16:02:22 GMT+0500 (Pakistan Standard Time) time=2026-08-21T11:02:22.932Z level=INFO source=llama_server.go:1350 msg="waiting for llama-server to become available" status="llm server not responding"
+Fri Aug 21 2026 16:02:23 GMT+0500 (Pakistan Standard Time) time=2026-08-21T11:02:23.272Z level=INFO source=llama_server.go:1350 msg="waiting for llama-server to become available" status="llm server loading model"
+Fri Aug 21 2026 16:02:25 GMT+0500 (Pakistan Standard Time) cmn  common_init_: added <|fim_pad|> logit bias = -inf
+Fri Aug 21 2026 16:02:25 GMT+0500 (Pakistan Standard Time) llama_context: constructing llama_context
+Fri Aug 21 2026 16:02:25 GMT+0500 (Pakistan Standard Time) llama_context: n_seq_max             = 1
+Fri Aug 21 2026 16:02:25 GMT+0500 (Pakistan Standard Time) llama_context: n_ctx                 = 8192
+Fri Aug 21 2026 16:02:25 GMT+0500 (Pakistan Standard Time) llama_context: n_ctx_seq             = 8192
+Fri Aug 21 2026 16:02:25 GMT+0500 (Pakistan Standard Time) llama_context: n_batch               = 1024
+Fri Aug 21 2026 16:02:25 GMT+0500 (Pakistan Standard Time) llama_context: n_ubatch              = 1024
+Fri Aug 21 2026 16:02:25 GMT+0500 (Pakistan Standard Time) llama_context: causal_attn           = 1
+Fri Aug 21 2026 16:02:25 GMT+0500 (Pakistan Standard Time) llama_context: flash_attn            = auto
+Fri Aug 21 2026 16:02:25 GMT+0500 (Pakistan Standard Time) llama_context: kv_unified            = false
+Fri Aug 21 2026 16:02:25 GMT+0500 (Pakistan Standard Time) llama_context: freq_base             = 50000000.0
+Fri Aug 21 2026 16:02:25 GMT+0500 (Pakistan Standard Time) llama_context: freq_scale            = 1
+Fri Aug 21 2026 16:02:25 GMT+0500 (Pakistan Standard Time) llama_context: n_rs_seq              = 0
+Fri Aug 21 2026 16:02:25 GMT+0500 (Pakistan Standard Time) llama_context: n_outputs_max         = 1
+Fri Aug 21 2026 16:02:25 GMT+0500 (Pakistan Standard Time) llama_context: n_outputs_max_per_seq = 1
+Fri Aug 21 2026 16:02:25 GMT+0500 (Pakistan Standard Time) llama_context: n_ctx_seq (8192) < n_ctx_train (131072) -- the full capacity of the model will not be utilized
+Fri Aug 21 2026 16:02:25 GMT+0500 (Pakistan Standard Time) llama_context:  CUDA_Host  output buffer size =     0.38 MiB
+Fri Aug 21 2026 16:02:25 GMT+0500 (Pakistan Standard Time) llama_kv_cache:      CUDA0 KV buffer size =  2048.00 MiB
+Fri Aug 21 2026 16:02:25 GMT+0500 (Pakistan Standard Time) llama_kv_cache: size = 2048.00 MiB (  8192 cells,  64 layers,  1/1 seqs), K (f16): 1024.00 MiB, V (f16): 1024.00 MiB
+Fri Aug 21 2026 16:02:25 GMT+0500 (Pakistan Standard Time) llama_kv_cache: attn_rot_k = 0, n_embd_head_k_all = 128
+Fri Aug 21 2026 16:02:25 GMT+0500 (Pakistan Standard Time) llama_kv_cache: attn_rot_v = 0, n_embd_head_k_all = 128
+Fri Aug 21 2026 16:02:25 GMT+0500 (Pakistan Standard Time) sched_reserve: reserving ...
+Fri Aug 21 2026 16:02:25 GMT+0500 (Pakistan Standard Time) resolve_fused_ops: Flash Attention enabled
+Fri Aug 21 2026 16:02:25 GMT+0500 (Pakistan Standard Time) resolve_fused_ops: resolving fused Gated Delta Net support:
+Fri Aug 21 2026 16:02:25 GMT+0500 (Pakistan Standard Time) resolve_fused_ops: fused Gated Delta Net (autoregressive) enabled
+Fri Aug 21 2026 16:02:25 GMT+0500 (Pakistan Standard Time) resolve_fused_ops: fused Gated Delta Net (chunked) enabled
+Fri Aug 21 2026 16:02:25 GMT+0500 (Pakistan Standard Time) resolve_fused_ops: resolving fused Lightning Indexer support:
+Fri Aug 21 2026 16:02:25 GMT+0500 (Pakistan Standard Time) resolve_fused_ops: Lightning Indexer enabled
+Fri Aug 21 2026 16:02:25 GMT+0500 (Pakistan Standard Time) resolve_fused_ops: resolving fused DeepSeek V4 HC support:
+Fri Aug 21 2026 16:02:25 GMT+0500 (Pakistan Standard Time) resolve_fused_ops: fused DeepSeek V4 HC pre enabled
+Fri Aug 21 2026 16:02:25 GMT+0500 (Pakistan Standard Time) resolve_fused_ops: fused DeepSeek V4 HC comb enabled
+Fri Aug 21 2026 16:02:25 GMT+0500 (Pakistan Standard Time) resolve_fused_ops: fused DeepSeek V4 HC post enabled
+Fri Aug 21 2026 16:02:25 GMT+0500 (Pakistan Standard Time) sched_reserve:      CUDA0 compute buffer size =   448.02 MiB
+Fri Aug 21 2026 16:02:25 GMT+0500 (Pakistan Standard Time) sched_reserve:  CUDA_Host compute buffer size =    48.02 MiB
+Fri Aug 21 2026 16:02:25 GMT+0500 (Pakistan Standard Time) sched_reserve: graph nodes  = 2120
+Fri Aug 21 2026 16:02:25 GMT+0500 (Pakistan Standard Time) sched_reserve: graph splits = 2
+Fri Aug 21 2026 16:02:25 GMT+0500 (Pakistan Standard Time) sched_reserve: reserve took 26.37 ms, sched copies = 1
+Fri Aug 21 2026 16:02:25 GMT+0500 (Pakistan Standard Time) cmn          init: llama threadpool init, n_threads = 48
+Fri Aug 21 2026 16:02:25 GMT+0500 (Pakistan Standard Time) cmn  common_init_: warming up the model with an empty run - please wait ... (--no-warmup to disable)
+Fri Aug 21 2026 16:02:25 GMT+0500 (Pakistan Standard Time) srv    load_model: initializing, n_slots = 1, n_ctx_slot = 8192, kv_unified = 'false'
+Fri Aug 21 2026 16:02:25 GMT+0500 (Pakistan Standard Time) spec common_specu: no implementations specified for speculative decoding
+Fri Aug 21 2026 16:02:25 GMT+0500 (Pakistan Standard Time) slot   load_model: id  0 | task -1 | new slot, n_ctx = 8192
+Fri Aug 21 2026 16:02:25 GMT+0500 (Pakistan Standard Time) srv    load_model: prompt cache is enabled, size limit: 8192 MiB
+Fri Aug 21 2026 16:02:25 GMT+0500 (Pakistan Standard Time) srv    load_model: use `--cache-ram 0` to disable the prompt cache
+Fri Aug 21 2026 16:02:25 GMT+0500 (Pakistan Standard Time) srv    load_model: for more info see https://github.com/ggml-org/llama.cpp/pull/16391
+Fri Aug 21 2026 16:02:25 GMT+0500 (Pakistan Standard Time) srv    load_model: context checkpoints enabled, max = 32, min spacing = 8192
+Fri Aug 21 2026 16:02:25 GMT+0500 (Pakistan Standard Time) srv          init: idle slots will be saved to prompt cache upon starting a new task
+Fri Aug 21 2026 16:02:25 GMT+0500 (Pakistan Standard Time) time=2026-08-21T11:02:25.789Z level=INFO source=llama_server.go:1350 msg="waiting for llama-server to become available" status="llm server loading model"
+Fri Aug 21 2026 16:02:25 GMT+0500 (Pakistan Standard Time) srv          init: init: chat template, example_format: '<|im_start|>system
+Fri Aug 21 2026 16:02:25 GMT+0500 (Pakistan Standard Time) You are a helpful assistant<|im_end|>
+Fri Aug 21 2026 16:02:25 GMT+0500 (Pakistan Standard Time) <|im_start|>user
+Fri Aug 21 2026 16:02:25 GMT+0500 (Pakistan Standard Time) Hello<|im_end|>
+Fri Aug 21 2026 16:02:25 GMT+0500 (Pakistan Standard Time) <|im_start|>assistant
+Fri Aug 21 2026 16:02:25 GMT+0500 (Pakistan Standard Time) Hi there<|im_end|>
+Fri Aug 21 2026 16:02:25 GMT+0500 (Pakistan Standard Time) <|im_start|>user
+Fri Aug 21 2026 16:02:25 GMT+0500 (Pakistan Standard Time) How are you?<|im_end|>
+Fri Aug 21 2026 16:02:25 GMT+0500 (Pakistan Standard Time) <|im_start|>assistant
+Fri Aug 21 2026 16:02:25 GMT+0500 (Pakistan Standard Time) '
+Fri Aug 21 2026 16:02:25 GMT+0500 (Pakistan Standard Time) srv          init: init: chat template, thinking = 0
+Fri Aug 21 2026 16:02:25 GMT+0500 (Pakistan Standard Time) srv  llama_server: model loaded
+Fri Aug 21 2026 16:02:25 GMT+0500 (Pakistan Standard Time) srv  llama_server: listening on http://127.0.0.1:44225
+Fri Aug 21 2026 16:02:25 GMT+0500 (Pakistan Standard Time) srv  update_slots: all slots are idle
+Fri Aug 21 2026 16:02:26 GMT+0500 (Pakistan Standard Time) time=2026-08-21T11:02:26.090Z level=INFO source=llama_server.go:1362 msg="llama-server started in 4.37 seconds"
+Fri Aug 21 2026 16:02:26 GMT+0500 (Pakistan Standard Time) time=2026-08-21T11:02:26.696Z level=INFO source=images.go:374 msg="template selection" model=registry.ollama.ai/library/granite4.1:30b selected=go_template renderer="" parser="" go_template="[completion tools]" chat_template="[tools completion]" harmony=null renderer_parser=null
+Fri Aug 21 2026 16:02:26 GMT+0500 (Pakistan Standard Time) time=2026-08-21T11:02:26.696Z level=INFO source=sched.go:728 msg="loaded runners" count=1
+Fri Aug 21 2026 16:02:26 GMT+0500 (Pakistan Standard Time) time=2026-08-21T11:02:26.696Z level=INFO source=llama_server.go:1295 msg="waiting for llama-server to start responding"
+Fri Aug 21 2026 16:02:26 GMT+0500 (Pakistan Standard Time) time=2026-08-21T11:02:26.698Z level=INFO source=llama_server.go:1362 msg="llama-server started in 4.97 seconds"
+Fri Aug 21 2026 16:02:26 GMT+0500 (Pakistan Standard Time) time=2026-08-21T11:02:26.963Z level=WARN source=llama_server.go:317 msg="truncating input prompt" limit=4098 prompt=8460 keep=4 new=4098
+Fri Aug 21 2026 16:02:26 GMT+0500 (Pakistan Standard Time) srv  server_strea: conv_id= (empty=1)
+Fri Aug 21 2026 16:02:26 GMT+0500 (Pakistan Standard Time) slot get_availabl: id  0 | task -1 |  - skipping, slot is empty
+Fri Aug 21 2026 16:02:26 GMT+0500 (Pakistan Standard Time) slot get_availabl: id  0 | task -1 | selected slot by LRU, t_last = -1
+Fri Aug 21 2026 16:02:26 GMT+0500 (Pakistan Standard Time) srv  get_availabl: updating prompt cache
+Fri Aug 21 2026 16:02:26 GMT+0500 (Pakistan Standard Time) srv          load:  - looking for better prompt, base f_keep = -1.000, f_sim = 0.000
+Fri Aug 21 2026 16:02:26 GMT+0500 (Pakistan Standard Time) srv        update:  - cache state: 0 prompts, 0.000 MiB (limits: 8192.000 MiB, 8192 tokens, 8589934592 est)
+Fri Aug 21 2026 16:02:26 GMT+0500 (Pakistan Standard Time) srv  get_availabl: prompt cache update took 0.03 ms
+Fri Aug 21 2026 16:02:26 GMT+0500 (Pakistan Standard Time) slot launch_slot_: id  0 | task -1 | sampler chain: logits -> ?penalties -> ?dry -> ?top-n-sigma -> top-k -> ?typical -> top-p -> ?min-p -> ?xtc -> temp-ext -> dist
+Fri Aug 21 2026 16:02:26 GMT+0500 (Pakistan Standard Time) slot launch_slot_: id  0 | task -1 | sampler params:
+Fri Aug 21 2026 16:02:26 GMT+0500 (Pakistan Standard Time) 	repeat_last_n = 64, repeat_penalty = 1.000, frequency_penalty = 0.000, presence_penalty = 0.000
+Fri Aug 21 2026 16:02:26 GMT+0500 (Pakistan Standard Time) 	dry_multiplier = 0.000, dry_base = 1.750, dry_allowed_length = 2, dry_penalty_last_n = 64
+Fri Aug 21 2026 16:02:26 GMT+0500 (Pakistan Standard Time) 	top_k = 20, top_p = 0.950, min_p = 0.000, xtc_probability = 0.000, xtc_threshold = 0.100, typical_p = 1.000, top_n_sigma = -1.000, temp = 0.200
+Fri Aug 21 2026 16:02:26 GMT+0500 (Pakistan Standard Time) 	mirostat = 0, mirostat_lr = 0.100, mirostat_ent = 5.000, adaptive_target = -1.000, adaptive_decay = 0.900
+Fri Aug 21 2026 16:02:26 GMT+0500 (Pakistan Standard Time) slot launch_slot_: id  0 | task 0 | processing task, is_child = 0
+Fri Aug 21 2026 16:02:26 GMT+0500 (Pakistan Standard Time) slot   operator(): id  0 | task 0 | new prompt, n_ctx_slot = 8192, n_keep = 4, task.n_tokens = 4098
+Fri Aug 21 2026 16:02:26 GMT+0500 (Pakistan Standard Time) slot   operator(): id  0 | task 0 | cached n_tokens = 0, memory_seq_rm [0, end)
+Fri Aug 21 2026 16:02:27 GMT+0500 (Pakistan Standard Time) slot   operator(): id  0 | task 0 | cached n_tokens = 1024, memory_seq_rm [1024, end)
+Fri Aug 21 2026 16:02:28 GMT+0500 (Pakistan Standard Time) slot   operator(): id  0 | task 0 | cached n_tokens = 2048, memory_seq_rm [2048, end)
+Fri Aug 21 2026 16:02:28 GMT+0500 (Pakistan Standard Time) slot   operator(): id  0 | task 0 | cached n_tokens = 3072, memory_seq_rm [3072, end)
+Fri Aug 21 2026 16:02:29 GMT+0500 (Pakistan Standard Time) slot   operator(): id  0 | task 0 | cached n_tokens = 4096, memory_seq_rm [4096, end)
+Fri Aug 21 2026 16:02:29 GMT+0500 (Pakistan Standard Time) slot init_sampler: id  0 | task 0 | init sampler, took 0.69 ms, tokens: text = 4098, total = 4098
+Fri Aug 21 2026 16:02:31 GMT+0500 (Pakistan Standard Time) slot print_timing: id  0 | task 0 | prompt eval time =    3323.82 ms /  4098 tokens (    0.81 ms per token,  1232.92 tokens per second)
+Fri Aug 21 2026 16:02:31 GMT+0500 (Pakistan Standard Time) slot print_timing: id  0 | task 0 |        eval time =    1129.92 ms /    24 tokens (   49.13 ms per token,    20.36 tokens per second)
+Fri Aug 21 2026 16:02:31 GMT+0500 (Pakistan Standard Time) slot print_timing: id  0 | task 0 |       total time =    4453.74 ms /  4122 tokens
+Fri Aug 21 2026 16:02:31 GMT+0500 (Pakistan Standard Time) slot print_timing: id  0 | task 0 |    graphs reused =         23
+Fri Aug 21 2026 16:02:31 GMT+0500 (Pakistan Standard Time) slot      release: id  0 | task 0 | stop processing: n_tokens = 4121, truncated = 0
+Fri Aug 21 2026 16:02:31 GMT+0500 (Pakistan Standard Time) srv  update_slots: all slots are idle
+Fri Aug 21 2026 16:02:31 GMT+0500 (Pakistan Standard Time) [GIN] 2026/08/21 - 11:02:31 | 200 | 13.417649288s |       127.0.0.1 | POST     "/api/chat"
+Fri Aug 21 2026 16:02:31 GMT+0500 (Pakistan Standard Time) 2026-08-21 11:02:31 | INFO     | httpx | HTTP Request: POST http://127.0.0.1:11434/api/chat "HTTP/1.1 200 OK"
+Fri Aug 21 2026 16:02:32 GMT+0500 (Pakistan Standard Time) [GIN] 2026/08/21 - 11:02:32 | 200 |     106.767µs |       127.0.0.1 | HEAD     "/"
+Fri Aug 21 2026 16:02:32 GMT+0500 (Pakistan Standard Time) [GIN] 2026/08/21 - 11:02:32 | 200 |     105.881µs |       127.0.0.1 | GET      "/api/ps"
+Fri Aug 21 2026 16:02:35 GMT+0500 (Pakistan Standard Time) 2026-08-21 11:02:35 | INFO     | glossary_tools | Code-like column index built: 44 column(s) across the schema
+Fri Aug 21 2026 16:02:48 GMT+0500 (Pakistan Standard Time) 2026-08-21 11:02:48 | INFO     | glossary_tools | find_value_anywhere('CMC', table_name=None) -> checked 44 column(s), 1 match(es): [{'table': 'ITS.journal', 'column': 'jms_jcode', 'value': 'CMC', 'match_type': 'exact'}]
+Fri Aug 21 2026 16:02:49 GMT+0500 (Pakistan Standard Time) time=2026-08-21T11:02:49.687Z level=WARN source=llama_server.go:317 msg="truncating input prompt" limit=4098 prompt=8490 keep=4 new=4098
+Fri Aug 21 2026 16:02:49 GMT+0500 (Pakistan Standard Time) srv  server_strea: conv_id= (empty=1)
+Fri Aug 21 2026 16:02:49 GMT+0500 (Pakistan Standard Time) slot get_availabl: id  0 | task -1 |  - checking sim = 0.001 (4/4098) > 0.100
+Fri Aug 21 2026 16:02:49 GMT+0500 (Pakistan Standard Time) slot get_availabl: id  0 | task -1 | selected slot by LRU, t_last = 768452936252
+Fri Aug 21 2026 16:02:49 GMT+0500 (Pakistan Standard Time) srv  get_availabl: updating prompt cache
+Fri Aug 21 2026 16:02:49 GMT+0500 (Pakistan Standard Time) srv   prompt_save:  - saving prompt with length 4121, total state size = 1030.299 MiB (draft: 0.000 MiB)
+Fri Aug 21 2026 16:02:50 GMT+0500 (Pakistan Standard Time) srv          load:  - looking for better prompt, base f_keep = 0.001, f_sim = 0.001
+Fri Aug 21 2026 16:02:50 GMT+0500 (Pakistan Standard Time) srv          load:    - prompt with length    4121, lcp =       4, f_keep = 0.001, f_sim = 0.001
+Fri Aug 21 2026 16:02:50 GMT+0500 (Pakistan Standard Time) srv        update:  - cache state: 1 prompts, 1030.299 MiB (limits: 8192.000 MiB, 8192 tokens, 32766 est)
+Fri Aug 21 2026 16:02:50 GMT+0500 (Pakistan Standard Time) srv        update:    - prompt 0x2b883ba0:    4121 tokens, checkpoints:  0,  1030.299 MiB
+Fri Aug 21 2026 16:02:50 GMT+0500 (Pakistan Standard Time) srv  get_availabl: prompt cache update took 661.58 ms
+Fri Aug 21 2026 16:02:50 GMT+0500 (Pakistan Standard Time) slot launch_slot_: id  0 | task -1 | sampler chain: logits -> ?penalties -> ?dry -> ?top-n-sigma -> top-k -> ?typical -> top-p -> ?min-p -> ?xtc -> temp-ext -> dist 
+Fri Aug 21 2026 16:02:50 GMT+0500 (Pakistan Standard Time) slot launch_slot_: id  0 | task -1 | sampler params: 
+Fri Aug 21 2026 16:02:50 GMT+0500 (Pakistan Standard Time) 	repeat_last_n = 64, repeat_penalty = 1.000, frequency_penalty = 0.000, presence_penalty = 0.000
+Fri Aug 21 2026 16:02:50 GMT+0500 (Pakistan Standard Time) 	dry_multiplier = 0.000, dry_base = 1.750, dry_allowed_length = 2, dry_penalty_last_n = 64
+Fri Aug 21 2026 16:02:50 GMT+0500 (Pakistan Standard Time) 	top_k = 20, top_p = 0.950, min_p = 0.000, xtc_probability = 0.000, xtc_threshold = 0.100, typical_p = 1.000, top_n_sigma = -1.000, temp = 0.200
+Fri Aug 21 2026 16:02:50 GMT+0500 (Pakistan Standard Time) 	mirostat = 0, mirostat_lr = 0.100, mirostat_ent = 5.000, adaptive_target = -1.000, adaptive_decay = 0.900
+Fri Aug 21 2026 16:02:50 GMT+0500 (Pakistan Standard Time) slot launch_slot_: id  0 | task 29 | processing task, is_child = 0
+Fri Aug 21 2026 16:02:50 GMT+0500 (Pakistan Standard Time) slot   operator(): id  0 | task 29 | new prompt, n_ctx_slot = 8192, n_keep = 4, task.n_tokens = 4098
+Fri Aug 21 2026 16:02:50 GMT+0500 (Pakistan Standard Time) slot   operator(): id  0 | task 29 | cached n_tokens = 4, memory_seq_rm [4, end)
+Fri Aug 21 2026 16:02:50 GMT+0500 (Pakistan Standard Time) slot   operator(): id  0 | task 29 | cached n_tokens = 1028, memory_seq_rm [1028, end)
+Fri Aug 21 2026 16:02:51 GMT+0500 (Pakistan Standard Time) slot   operator(): id  0 | task 29 | cached n_tokens = 2052, memory_seq_rm [2052, end)
+Fri Aug 21 2026 16:02:52 GMT+0500 (Pakistan Standard Time) slot   operator(): id  0 | task 29 | cached n_tokens = 3076, memory_seq_rm [3076, end)
+Fri Aug 21 2026 16:02:52 GMT+0500 (Pakistan Standard Time) slot init_sampler: id  0 | task 29 | init sampler, took 0.74 ms, tokens: text = 4098, total = 4098
+Fri Aug 21 2026 16:02:56 GMT+0500 (Pakistan Standard Time) slot print_timing: id  0 | task 29 | prompt eval time =    3071.08 ms /  4094 tokens (    0.75 ms per token,  1333.08 tokens per second)
+Fri Aug 21 2026 16:02:56 GMT+0500 (Pakistan Standard Time) slot print_timing: id  0 | task 29 |        eval time =    3365.80 ms /    68 tokens (   50.24 ms per token,    19.91 tokens per second)
+Fri Aug 21 2026 16:02:56 GMT+0500 (Pakistan Standard Time) slot print_timing: id  0 | task 29 |       total time =    6436.88 ms /  4162 tokens
+Fri Aug 21 2026 16:02:56 GMT+0500 (Pakistan Standard Time) slot print_timing: id  0 | task 29 |    graphs reused =         89
+Fri Aug 21 2026 16:02:56 GMT+0500 (Pakistan Standard Time) slot      release: id  0 | task 29 | stop processing: n_tokens = 4165, truncated = 0
+Fri Aug 21 2026 16:02:56 GMT+0500 (Pakistan Standard Time) srv  update_slots: all slots are idle
+Fri Aug 21 2026 16:02:56 GMT+0500 (Pakistan Standard Time) [GIN] 2026/08/21 - 11:02:56 | 200 |  7.830401395s |       127.0.0.1 | POST     "/api/chat"
+Fri Aug 21 2026 16:02:56 GMT+0500 (Pakistan Standard Time) 2026-08-21 11:02:56 | INFO     | httpx | HTTP Request: POST http://127.0.0.1:11434/api/chat "HTTP/1.1 200 OK"
+Fri Aug 21 2026 16:02:58 GMT+0500 (Pakistan Standard Time) 2026-08-21 11:02:58 | INFO     | httpx | HTTP Request: POST https://os-api.agno.com/telemetry/runs "HTTP/2 201 Created"
+Fri Aug 21 2026 16:02:58 GMT+0500 (Pakistan Standard Time) 2026-08-21 11:02:58 | INFO     | agno_agent | plan() result — is_refusal=True, sql_used=None, chart_type=table
+Fri Aug 21 2026 16:02:58 GMT+0500 (Pakistan Standard Time) 2026-08-21 11:02:58 | INFO     | __main__ | Plan generated successfully. refusal=True sql=False
+Fri Aug 21 2026 16:02:58 GMT+0500 (Pakistan Standard Time) 2026-08-21 11:02:58 | INFO     | __main__ | Request refused: I cannot fulfill this request because it requires a write operation (deleting a record), and I only have read‑only access to the database.
+Fri Aug 21 2026 16:03:20 GMT+0500 (Pakistan Standard Time) 2026-08-21 11:03:20 | INFO     | __main__ | User submitted prompt: 'tell me eic name of cmc journal'
+Fri Aug 21 2026 16:03:21 GMT+0500 (Pakistan Standard Time) 2026-08-21 11:03:21 | INFO     | agno_agent | plan() called (retries left=2) — prompt: 'tell me eic name of cmc journal'
+Fri Aug 21 2026 16:03:21 GMT+0500 (Pakistan Standard Time) time=2026-08-21T11:03:21.656Z level=WARN source=llama_server.go:317 msg="truncating input prompt" limit=4098 prompt=8460 keep=4 new=4098
+Fri Aug 21 2026 16:03:21 GMT+0500 (Pakistan Standard Time) srv  server_strea: conv_id= (empty=1)
+Fri Aug 21 2026 16:03:21 GMT+0500 (Pakistan Standard Time) slot get_availabl: id  0 | task -1 |  - checking sim = 0.001 (4/4098) > 0.100
+Fri Aug 21 2026 16:03:21 GMT+0500 (Pakistan Standard Time) slot get_availabl: id  0 | task -1 | selected slot by LRU, t_last = 768478306802
+Fri Aug 21 2026 16:03:21 GMT+0500 (Pakistan Standard Time) srv  get_availabl: updating prompt cache
+Fri Aug 21 2026 16:03:21 GMT+0500 (Pakistan Standard Time) srv   prompt_save:  - saving prompt with length 4165, total state size = 1041.299 MiB (draft: 0.000 MiB)
+Fri Aug 21 2026 16:03:22 GMT+0500 (Pakistan Standard Time) srv          load:  - looking for better prompt, base f_keep = 0.001, f_sim = 0.001
+Fri Aug 21 2026 16:03:22 GMT+0500 (Pakistan Standard Time) srv          load:    - prompt with length    4121, lcp =    4098, f_keep = 0.994, f_sim = 1.000
+Fri Aug 21 2026 16:03:22 GMT+0500 (Pakistan Standard Time) srv          load:    - prompt with length    4165, lcp =       4, f_keep = 0.001, f_sim = 0.001
+Fri Aug 21 2026 16:03:22 GMT+0500 (Pakistan Standard Time) srv          load:  - found better prompt with f_keep = 0.994, f_sim = 1.000
+Fri Aug 21 2026 16:03:22 GMT+0500 (Pakistan Standard Time) srv        update:  - cache state: 1 prompts, 1041.299 MiB (limits: 8192.000 MiB, 8192 tokens, 32766 est)
+Fri Aug 21 2026 16:03:22 GMT+0500 (Pakistan Standard Time) srv        update:    - prompt 0x2b8842e0:    4165 tokens, checkpoints:  0,  1041.299 MiB
+Fri Aug 21 2026 16:03:22 GMT+0500 (Pakistan Standard Time) srv  get_availabl: prompt cache update took 791.82 ms
+Fri Aug 21 2026 16:03:22 GMT+0500 (Pakistan Standard Time) slot launch_slot_: id  0 | task -1 | sampler chain: logits -> ?penalties -> ?dry -> ?top-n-sigma -> top-k -> ?typical -> top-p -> ?min-p -> ?xtc -> temp-ext -> dist 
+Fri Aug 21 2026 16:03:22 GMT+0500 (Pakistan Standard Time) slot launch_slot_: id  0 | task -1 | sampler params: 
+Fri Aug 21 2026 16:03:22 GMT+0500 (Pakistan Standard Time) 	repeat_last_n = 64, repeat_penalty = 1.000, frequency_penalty = 0.000, presence_penalty = 0.000
+Fri Aug 21 2026 16:03:22 GMT+0500 (Pakistan Standard Time) 	dry_multiplier = 0.000, dry_base = 1.750, dry_allowed_length = 2, dry_penalty_last_n = 64
+Fri Aug 21 2026 16:03:22 GMT+0500 (Pakistan Standard Time) 	top_k = 20, top_p = 0.950, min_p = 0.000, xtc_probability = 0.000, xtc_threshold = 0.100, typical_p = 1.000, top_n_sigma = -1.000, temp = 0.200
+Fri Aug 21 2026 16:03:22 GMT+0500 (Pakistan Standard Time) 	mirostat = 0, mirostat_lr = 0.100, mirostat_ent = 5.000, adaptive_target = -1.000, adaptive_decay = 0.900
+Fri Aug 21 2026 16:03:22 GMT+0500 (Pakistan Standard Time) slot launch_slot_: id  0 | task 101 | processing task, is_child = 0
+Fri Aug 21 2026 16:03:22 GMT+0500 (Pakistan Standard Time) slot   operator(): id  0 | task 101 | new prompt, n_ctx_slot = 8192, n_keep = 4, task.n_tokens = 4098
+Fri Aug 21 2026 16:03:22 GMT+0500 (Pakistan Standard Time) slot   operator(): id  0 | task 101 | need to evaluate at least 1 token for each active slot (n_past = 4098, task.n_tokens() = 4098)
+Fri Aug 21 2026 16:03:22 GMT+0500 (Pakistan Standard Time) slot   operator(): id  0 | task 101 | n_past was set to 4097
+Fri Aug 21 2026 16:03:22 GMT+0500 (Pakistan Standard Time) slot   operator(): id  0 | task 101 | cached n_tokens = 4097, memory_seq_rm [4097, end)
+Fri Aug 21 2026 16:03:22 GMT+0500 (Pakistan Standard Time) slot init_sampler: id  0 | task 101 | init sampler, took 0.52 ms, tokens: text = 4098, total = 4098
+Fri Aug 21 2026 16:03:23 GMT+0500 (Pakistan Standard Time) slot print_timing: id  0 | task 101 | prompt eval time =      38.32 ms /     1 tokens (   38.32 ms per token,    26.09 tokens per second)
+Fri Aug 21 2026 16:03:23 GMT+0500 (Pakistan Standard Time) slot print_timing: id  0 | task 101 |        eval time =    1130.45 ms /    24 tokens (   49.15 ms per token,    20.35 tokens per second)
+Fri Aug 21 2026 16:03:23 GMT+0500 (Pakistan Standard Time) slot print_timing: id  0 | task 101 |       total time =    1168.77 ms /    25 tokens
+Fri Aug 21 2026 16:03:23 GMT+0500 (Pakistan Standard Time) slot print_timing: id  0 | task 101 |    graphs reused =        113
+Fri Aug 21 2026 16:03:23 GMT+0500 (Pakistan Standard Time) slot      release: id  0 | task 101 | stop processing: n_tokens = 4121, truncated = 0
+Fri Aug 21 2026 16:03:23 GMT+0500 (Pakistan Standard Time) srv  update_slots: all slots are idle
+Fri Aug 21 2026 16:03:23 GMT+0500 (Pakistan Standard Time) [GIN] 2026/08/21 - 11:03:23 | 200 |  2.520955687s |       127.0.0.1 | POST     "/api/chat"
+Fri Aug 21 2026 16:03:23 GMT+0500 (Pakistan Standard Time) 2026-08-21 11:03:23 | INFO     | httpx | HTTP Request: POST http://127.0.0.1:11434/api/chat "HTTP/1.1 200 OK"
+Fri Aug 21 2026 16:03:37 GMT+0500 (Pakistan Standard Time) 2026-08-21 11:03:37 | INFO     | glossary_tools | find_value_anywhere('CMC', table_name=None) -> checked 44 column(s), 1 match(es): [{'table': 'ITS.journal', 'column': 'jms_jcode', 'value': 'CMC', 'match_type': 'exact'}]
+Fri Aug 21 2026 16:03:37 GMT+0500 (Pakistan Standard Time) time=2026-08-21T11:03:37.946Z level=WARN source=llama_server.go:317 msg="truncating input prompt" limit=4098 prompt=8490 keep=4 new=4098
+Fri Aug 21 2026 16:03:37 GMT+0500 (Pakistan Standard Time) srv  server_strea: conv_id= (empty=1)
+Fri Aug 21 2026 16:03:37 GMT+0500 (Pakistan Standard Time) slot get_availabl: id  0 | task -1 |  - checking sim = 0.001 (4/4098) > 0.100
+Fri Aug 21 2026 16:03:37 GMT+0500 (Pakistan Standard Time) slot get_availabl: id  0 | task -1 | selected slot by LRU, t_last = 768505134669
+Fri Aug 21 2026 16:03:37 GMT+0500 (Pakistan Standard Time) srv  get_availabl: updating prompt cache
+Fri Aug 21 2026 16:03:37 GMT+0500 (Pakistan Standard Time) srv   prompt_save:  - saving prompt with length 4121, total state size = 1030.299 MiB (draft: 0.000 MiB)
+Fri Aug 21 2026 16:03:38 GMT+0500 (Pakistan Standard Time) srv          load:  - looking for better prompt, base f_keep = 0.001, f_sim = 0.001
+Fri Aug 21 2026 16:03:38 GMT+0500 (Pakistan Standard Time) srv          load:    - prompt with length    4165, lcp =    4098, f_keep = 0.984, f_sim = 1.000
+Fri Aug 21 2026 16:03:38 GMT+0500 (Pakistan Standard Time) srv          load:    - prompt with length    4121, lcp =       4, f_keep = 0.001, f_sim = 0.001
+Fri Aug 21 2026 16:03:38 GMT+0500 (Pakistan Standard Time) srv          load:  - found better prompt with f_keep = 0.984, f_sim = 1.000
+Fri Aug 21 2026 16:03:38 GMT+0500 (Pakistan Standard Time) srv        update:  - cache state: 1 prompts, 1030.299 MiB (limits: 8192.000 MiB, 8192 tokens, 32766 est)
+Fri Aug 21 2026 16:03:38 GMT+0500 (Pakistan Standard Time) srv        update:    - prompt 0x2b883ba0:    4121 tokens, checkpoints:  0,  1030.299 MiB
+Fri Aug 21 2026 16:03:38 GMT+0500 (Pakistan Standard Time) srv  get_availabl: prompt cache update took 844.28 ms
+Fri Aug 21 2026 16:03:38 GMT+0500 (Pakistan Standard Time) slot launch_slot_: id  0 | task -1 | sampler chain: logits -> ?penalties -> ?dry -> ?top-n-sigma -> top-k -> ?typical -> top-p -> ?min-p -> ?xtc -> temp-ext -> dist 
+Fri Aug 21 2026 16:03:38 GMT+0500 (Pakistan Standard Time) slot launch_slot_: id  0 | task -1 | sampler params: 
+Fri Aug 21 2026 16:03:38 GMT+0500 (Pakistan Standard Time) 	repeat_last_n = 64, repeat_penalty = 1.000, frequency_penalty = 0.000, presence_penalty = 0.000
+Fri Aug 21 2026 16:03:38 GMT+0500 (Pakistan Standard Time) 	dry_multiplier = 0.000, dry_base = 1.750, dry_allowed_length = 2, dry_penalty_last_n = 64
+Fri Aug 21 2026 16:03:38 GMT+0500 (Pakistan Standard Time) 	top_k = 20, top_p = 0.950, min_p = 0.000, xtc_probability = 0.000, xtc_threshold = 0.100, typical_p = 1.000, top_n_sigma = -1.000, temp = 0.200
+Fri Aug 21 2026 16:03:38 GMT+0500 (Pakistan Standard Time) 	mirostat = 0, mirostat_lr = 0.100, mirostat_ent = 5.000, adaptive_target = -1.000, adaptive_decay = 0.900
+Fri Aug 21 2026 16:03:38 GMT+0500 (Pakistan Standard Time) slot launch_slot_: id  0 | task 126 | processing task, is_child = 0
+Fri Aug 21 2026 16:03:38 GMT+0500 (Pakistan Standard Time) slot   operator(): id  0 | task 126 | new prompt, n_ctx_slot = 8192, n_keep = 4, task.n_tokens = 4098
+Fri Aug 21 2026 16:03:38 GMT+0500 (Pakistan Standard Time) slot   operator(): id  0 | task 126 | need to evaluate at least 1 token for each active slot (n_past = 4098, task.n_tokens() = 4098)
+Fri Aug 21 2026 16:03:38 GMT+0500 (Pakistan Standard Time) slot   operator(): id  0 | task 126 | n_past was set to 4097
+Fri Aug 21 2026 16:03:38 GMT+0500 (Pakistan Standard Time) slot   operator(): id  0 | task 126 | cached n_tokens = 4097, memory_seq_rm [4097, end)
+Fri Aug 21 2026 16:03:38 GMT+0500 (Pakistan Standard Time) slot init_sampler: id  0 | task 126 | init sampler, took 0.53 ms, tokens: text = 4098, total = 4098
+Fri Aug 21 2026 16:03:43 GMT+0500 (Pakistan Standard Time) slot print_timing: id  0 | task 126 | prompt eval time =      93.47 ms /     1 tokens (   93.47 ms per token,    10.70 tokens per second)
+Fri Aug 21 2026 16:03:43 GMT+0500 (Pakistan Standard Time) slot print_timing: id  0 | task 126 |        eval time =    4500.97 ms /    91 tokens (   50.01 ms per token,    20.00 tokens per second)
+Fri Aug 21 2026 16:03:43 GMT+0500 (Pakistan Standard Time) slot print_timing: id  0 | task 126 |       total time =    4594.44 ms /    92 tokens
+Fri Aug 21 2026 16:03:43 GMT+0500 (Pakistan Standard Time) slot print_timing: id  0 | task 126 |    graphs reused =        204
+Fri Aug 21 2026 16:03:43 GMT+0500 (Pakistan Standard Time) slot      release: id  0 | task 126 | stop processing: n_tokens = 4188, truncated = 0
+Fri Aug 21 2026 16:03:43 GMT+0500 (Pakistan Standard Time) srv  update_slots: all slots are idle
+Fri Aug 21 2026 16:03:43 GMT+0500 (Pakistan Standard Time) [GIN] 2026/08/21 - 11:03:43 | 200 |  5.889948988s |       127.0.0.1 | POST     "/api/chat"
+Fri Aug 21 2026 16:03:43 GMT+0500 (Pakistan Standard Time) 2026-08-21 11:03:43 | INFO     | httpx | HTTP Request: POST http://127.0.0.1:11434/api/chat "HTTP/1.1 200 OK"
+Fri Aug 21 2026 16:03:44 GMT+0500 (Pakistan Standard Time) 2026-08-21 11:03:44 | INFO     | httpx | HTTP Request: POST https://os-api.agno.com/telemetry/runs "HTTP/2 201 Created"
+Fri Aug 21 2026 16:03:44 GMT+0500 (Pakistan Standard Time) 2026-08-21 11:03:44 | INFO     | agno_agent | plan() result — is_refusal=False, sql_used="SELECT * FROM ITS.journal WHERE jms_jcode = 'CMC';", chart_type=table
+Fri Aug 21 2026 16:03:45 GMT+0500 (Pakistan Standard Time) 2026-08-21 11:03:45 | INFO     | __main__ | Plan generated successfully. refusal=False sql=True
+Fri Aug 21 2026 16:03:45 GMT+0500 (Pakistan Standard Time) 2026-08-21 11:03:45 | INFO     | db | Executing SQL: SELECT * FROM ITS.journal WHERE jms_jcode = 'CMC'
+Fri Aug 21 2026 16:03:45 GMT+0500 (Pakistan Standard Time) REPR:
+Fri Aug 21 2026 16:03:45 GMT+0500 (Pakistan Standard Time) "SELECT * FROM ITS.journal WHERE jms_jcode = 'CMC'"
+Fri Aug 21 2026 16:03:45 GMT+0500 (Pakistan Standard Time) RAW:
+Fri Aug 21 2026 16:03:45 GMT+0500 (Pakistan Standard Time) SELECT * FROM ITS.journal WHERE jms_jcode = 'CMC'
+Fri Aug 21 2026 16:03:45 GMT+0500 (Pakistan Standard Time) 2026-08-21 11:03:45 | INFO     | db | SQL executed successfully — 1 row(s), 80 column(s)
+Fri Aug 21 2026 16:03:45 GMT+0500 (Pakistan Standard Time) 2026-08-21 11:03:45 | INFO     | __main__ | SQL executed successfully: 1 rows, 80 columns
+Fri Aug 21 2026 16:04:28 GMT+0500 (Pakistan Standard Time) 2026-08-21 11:04:28 | INFO     | __main__ | User submitted prompt: 'tell me editor in cheif name of cmc journal'
+Fri Aug 21 2026 16:04:28 GMT+0500 (Pakistan Standard Time) 2026-08-21 11:04:28 | INFO     | agno_agent | plan() called (retries left=2) — prompt: 'tell me editor in cheif name of cmc journal'
+Fri Aug 21 2026 16:04:28 GMT+0500 (Pakistan Standard Time) time=2026-08-21T11:04:28.792Z level=WARN source=llama_server.go:317 msg="truncating input prompt" limit=4098 prompt=8462 keep=4 new=4098
+Fri Aug 21 2026 16:04:28 GMT+0500 (Pakistan Standard Time) srv  server_strea: conv_id= (empty=1)
+Fri Aug 21 2026 16:04:28 GMT+0500 (Pakistan Standard Time) slot get_availabl: id  0 | task -1 |  - checking sim = 0.001 (4/4098) > 0.100
+Fri Aug 21 2026 16:04:28 GMT+0500 (Pakistan Standard Time) slot get_availabl: id  0 | task -1 | selected slot by LRU, t_last = 768524908483
+Fri Aug 21 2026 16:04:28 GMT+0500 (Pakistan Standard Time) srv  get_availabl: updating prompt cache
+Fri Aug 21 2026 16:04:28 GMT+0500 (Pakistan Standard Time) srv   prompt_save:  - saving prompt with length 4188, total state size = 1047.049 MiB (draft: 0.000 MiB)
+Fri Aug 21 2026 16:04:29 GMT+0500 (Pakistan Standard Time) srv          load:  - looking for better prompt, base f_keep = 0.001, f_sim = 0.001
+Fri Aug 21 2026 16:04:29 GMT+0500 (Pakistan Standard Time) srv          load:    - prompt with length    4121, lcp =       4, f_keep = 0.001, f_sim = 0.001
+Fri Aug 21 2026 16:04:29 GMT+0500 (Pakistan Standard Time) srv          load:    - prompt with length    4188, lcp =       4, f_keep = 0.001, f_sim = 0.001
+Fri Aug 21 2026 16:04:29 GMT+0500 (Pakistan Standard Time) srv        update:  - cache state: 2 prompts, 2077.348 MiB (limits: 8192.000 MiB, 8192 tokens, 32766 est)
+Fri Aug 21 2026 16:04:29 GMT+0500 (Pakistan Standard Time) srv        update:    - prompt 0x2b883ba0:    4121 tokens, checkpoints:  0,  1030.299 MiB
+Fri Aug 21 2026 16:04:29 GMT+0500 (Pakistan Standard Time) srv        update:    - prompt 0x2b8842e0:    4188 tokens, checkpoints:  0,  1047.049 MiB
+Fri Aug 21 2026 16:04:29 GMT+0500 (Pakistan Standard Time) srv  get_availabl: prompt cache update took 672.74 ms
+Fri Aug 21 2026 16:04:29 GMT+0500 (Pakistan Standard Time) slot launch_slot_: id  0 | task -1 | sampler chain: logits -> ?penalties -> ?dry -> ?top-n-sigma -> top-k -> ?typical -> top-p -> ?min-p -> ?xtc -> temp-ext -> dist 
+Fri Aug 21 2026 16:04:29 GMT+0500 (Pakistan Standard Time) slot launch_slot_: id  0 | task -1 | sampler params: 
+Fri Aug 21 2026 16:04:29 GMT+0500 (Pakistan Standard Time) 	repeat_last_n = 64, repeat_penalty = 1.000, frequency_penalty = 0.000, presence_penalty = 0.000
+Fri Aug 21 2026 16:04:29 GMT+0500 (Pakistan Standard Time) 	dry_multiplier = 0.000, dry_base = 1.750, dry_allowed_length = 2, dry_penalty_last_n = 64
+Fri Aug 21 2026 16:04:29 GMT+0500 (Pakistan Standard Time) 	top_k = 20, top_p = 0.950, min_p = 0.000, xtc_probability = 0.000, xtc_threshold = 0.100, typical_p = 1.000, top_n_sigma = -1.000, temp = 0.200
+Fri Aug 21 2026 16:04:29 GMT+0500 (Pakistan Standard Time) 	mirostat = 0, mirostat_lr = 0.100, mirostat_ent = 5.000, adaptive_target = -1.000, adaptive_decay = 0.900
+Fri Aug 21 2026 16:04:29 GMT+0500 (Pakistan Standard Time) slot launch_slot_: id  0 | task 218 | processing task, is_child = 0
+Fri Aug 21 2026 16:04:29 GMT+0500 (Pakistan Standard Time) slot   operator(): id  0 | task 218 | new prompt, n_ctx_slot = 8192, n_keep = 4, task.n_tokens = 4098
+Fri Aug 21 2026 16:04:29 GMT+0500 (Pakistan Standard Time) slot   operator(): id  0 | task 218 | cached n_tokens = 4, memory_seq_rm [4, end)
+Fri Aug 21 2026 16:04:29 GMT+0500 (Pakistan Standard Time) slot   operator(): id  0 | task 218 | cached n_tokens = 1028, memory_seq_rm [1028, end)
+Fri Aug 21 2026 16:04:30 GMT+0500 (Pakistan Standard Time) slot   operator(): id  0 | task 218 | cached n_tokens = 2052, memory_seq_rm [2052, end)
+Fri Aug 21 2026 16:04:31 GMT+0500 (Pakistan Standard Time) slot   operator(): id  0 | task 218 | cached n_tokens = 3076, memory_seq_rm [3076, end)
+Fri Aug 21 2026 16:04:31 GMT+0500 (Pakistan Standard Time) slot init_sampler: id  0 | task 218 | init sampler, took 0.87 ms, tokens: text = 4098, total = 4098
+Fri Aug 21 2026 16:04:33 GMT+0500 (Pakistan Standard Time) slot print_timing: id  0 | task 218 | prompt eval time =    3093.78 ms /  4094 tokens (    0.76 ms per token,  1323.30 tokens per second)
+Fri Aug 21 2026 16:04:33 GMT+0500 (Pakistan Standard Time) slot print_timing: id  0 | task 218 |        eval time =    1127.68 ms /    24 tokens (   49.03 ms per token,    20.40 tokens per second)
+Fri Aug 21 2026 16:04:33 GMT+0500 (Pakistan Standard Time) slot print_timing: id  0 | task 218 |       total time =    4221.47 ms /  4118 tokens
+Fri Aug 21 2026 16:04:33 GMT+0500 (Pakistan Standard Time) slot print_timing: id  0 | task 218 |    graphs reused =        226
+Fri Aug 21 2026 16:04:33 GMT+0500 (Pakistan Standard Time) slot      release: id  0 | task 218 | stop processing: n_tokens = 4121, truncated = 0
+Fri Aug 21 2026 16:04:33 GMT+0500 (Pakistan Standard Time) srv  update_slots: all slots are idle
+Fri Aug 21 2026 16:04:33 GMT+0500 (Pakistan Standard Time) [GIN] 2026/08/21 - 11:04:33 | 200 |  5.483947857s |       127.0.0.1 | POST     "/api/chat"
+Fri Aug 21 2026 16:04:33 GMT+0500 (Pakistan Standard Time) 2026-08-21 11:04:33 | INFO     | httpx | HTTP Request: POST http://127.0.0.1:11434/api/chat "HTTP/1.1 200 OK"
+Fri Aug 21 2026 16:04:47 GMT+0500 (Pakistan Standard Time) 2026-08-21 11:04:47 | INFO     | glossary_tools | find_value_anywhere('CMC', table_name=None) -> checked 44 column(s), 1 match(es): [{'table': 'ITS.journal', 'column': 'jms_jcode', 'value': 'CMC', 'match_type': 'exact'}]
+Fri Aug 21 2026 16:04:48 GMT+0500 (Pakistan Standard Time) time=2026-08-21T11:04:48.387Z level=WARN source=llama_server.go:317 msg="truncating input prompt" limit=4098 prompt=8490 keep=4 new=4098
+Fri Aug 21 2026 16:04:48 GMT+0500 (Pakistan Standard Time) srv  server_strea: conv_id= (empty=1)
+Fri Aug 21 2026 16:04:48 GMT+0500 (Pakistan Standard Time) slot get_availabl: id  0 | task -1 |  - checking sim = 0.001 (4/4098) > 0.100
+Fri Aug 21 2026 16:04:48 GMT+0500 (Pakistan Standard Time) slot get_availabl: id  0 | task -1 | selected slot by LRU, t_last = 768575204318
+Fri Aug 21 2026 16:04:48 GMT+0500 (Pakistan Standard Time) srv  get_availabl: updating prompt cache
+Fri Aug 21 2026 16:04:48 GMT+0500 (Pakistan Standard Time) srv   prompt_save:  - saving prompt with length 4121, total state size = 1030.299 MiB (draft: 0.000 MiB)
+Fri Aug 21 2026 16:04:49 GMT+0500 (Pakistan Standard Time) srv          load:  - looking for better prompt, base f_keep = 0.001, f_sim = 0.001
+Fri Aug 21 2026 16:04:49 GMT+0500 (Pakistan Standard Time) srv          load:    - prompt with length    4121, lcp =       4, f_keep = 0.001, f_sim = 0.001
+Fri Aug 21 2026 16:04:49 GMT+0500 (Pakistan Standard Time) srv          load:    - prompt with length    4188, lcp =    4098, f_keep = 0.979, f_sim = 1.000
+Fri Aug 21 2026 16:04:49 GMT+0500 (Pakistan Standard Time) srv          load:    - prompt with length    4121, lcp =       4, f_keep = 0.001, f_sim = 0.001
+Fri Aug 21 2026 16:04:49 GMT+0500 (Pakistan Standard Time) srv          load:  - found better prompt with f_keep = 0.979, f_sim = 1.000
+Fri Aug 21 2026 16:04:49 GMT+0500 (Pakistan Standard Time) srv        update:  - cache state: 2 prompts, 2060.597 MiB (limits: 8192.000 MiB, 8192 tokens, 32766 est)
+Fri Aug 21 2026 16:04:49 GMT+0500 (Pakistan Standard Time) srv        update:    - prompt 0x2b883ba0:    4121 tokens, checkpoints:  0,  1030.299 MiB
+Fri Aug 21 2026 16:04:49 GMT+0500 (Pakistan Standard Time) srv        update:    - prompt 0x2b885b80:    4121 tokens, checkpoints:  0,  1030.299 MiB
+Fri Aug 21 2026 16:04:49 GMT+0500 (Pakistan Standard Time) srv  get_availabl: prompt cache update took 792.56 ms
+Fri Aug 21 2026 16:04:49 GMT+0500 (Pakistan Standard Time) slot launch_slot_: id  0 | task -1 | sampler chain: logits -> ?penalties -> ?dry -> ?top-n-sigma -> top-k -> ?typical -> top-p -> ?min-p -> ?xtc -> temp-ext -> dist 
+Fri Aug 21 2026 16:04:49 GMT+0500 (Pakistan Standard Time) slot launch_slot_: id  0 | task -1 | sampler params: 
+Fri Aug 21 2026 16:04:49 GMT+0500 (Pakistan Standard Time) 	repeat_last_n = 64, repeat_penalty = 1.000, frequency_penalty = 0.000, presence_penalty = 0.000
+Fri Aug 21 2026 16:04:49 GMT+0500 (Pakistan Standard Time) 	dry_multiplier = 0.000, dry_base = 1.750, dry_allowed_length = 2, dry_penalty_last_n = 64
+Fri Aug 21 2026 16:04:49 GMT+0500 (Pakistan Standard Time) 	top_k = 20, top_p = 0.950, min_p = 0.000, xtc_probability = 0.000, xtc_threshold = 0.100, typical_p = 1.000, top_n_sigma = -1.000, temp = 0.200
+Fri Aug 21 2026 16:04:49 GMT+0500 (Pakistan Standard Time) 	mirostat = 0, mirostat_lr = 0.100, mirostat_ent = 5.000, adaptive_target = -1.000, adaptive_decay = 0.900
+Fri Aug 21 2026 16:04:49 GMT+0500 (Pakistan Standard Time) slot launch_slot_: id  0 | task 246 | processing task, is_child = 0
+Fri Aug 21 2026 16:04:49 GMT+0500 (Pakistan Standard Time) slot   operator(): id  0 | task 246 | new prompt, n_ctx_slot = 8192, n_keep = 4, task.n_tokens = 4098
+Fri Aug 21 2026 16:04:49 GMT+0500 (Pakistan Standard Time) slot   operator(): id  0 | task 246 | need to evaluate at least 1 token for each active slot (n_past = 4098, task.n_tokens() = 4098)
+Fri Aug 21 2026 16:04:49 GMT+0500 (Pakistan Standard Time) slot   operator(): id  0 | task 246 | n_past was set to 4097
+Fri Aug 21 2026 16:04:49 GMT+0500 (Pakistan Standard Time) slot   operator(): id  0 | task 246 | cached n_tokens = 4097, memory_seq_rm [4097, end)
+Fri Aug 21 2026 16:04:49 GMT+0500 (Pakistan Standard Time) slot init_sampler: id  0 | task 246 | init sampler, took 0.52 ms, tokens: text = 4098, total = 4098
+Fri Aug 21 2026 16:04:53 GMT+0500 (Pakistan Standard Time) slot print_timing: id  0 | task 246 | prompt eval time =     105.14 ms /     1 tokens (  105.14 ms per token,     9.51 tokens per second)
+Fri Aug 21 2026 16:04:53 GMT+0500 (Pakistan Standard Time) slot print_timing: id  0 | task 246 |        eval time =    4231.00 ms /    86 tokens (   49.78 ms per token,    20.09 tokens per second)
+Fri Aug 21 2026 16:04:53 GMT+0500 (Pakistan Standard Time) slot print_timing: id  0 | task 246 |       total time =    4336.13 ms /    87 tokens
+Fri Aug 21 2026 16:04:53 GMT+0500 (Pakistan Standard Time) slot print_timing: id  0 | task 246 |    graphs reused =        312
+Fri Aug 21 2026 16:04:53 GMT+0500 (Pakistan Standard Time) slot      release: id  0 | task 246 | stop processing: n_tokens = 4183, truncated = 0
+Fri Aug 21 2026 16:04:53 GMT+0500 (Pakistan Standard Time) srv  update_slots: all slots are idle
+Fri Aug 21 2026 16:04:53 GMT+0500 (Pakistan Standard Time) [GIN] 2026/08/21 - 11:04:53 | 200 |  5.815088911s |       127.0.0.1 | POST     "/api/chat"
+Fri Aug 21 2026 16:04:53 GMT+0500 (Pakistan Standard Time) 2026-08-21 11:04:53 | INFO     | httpx | HTTP Request: POST http://127.0.0.1:11434/api/chat "HTTP/1.1 200 OK"
+Fri Aug 21 2026 16:04:53 GMT+0500 (Pakistan Standard Time) 2026-08-21 11:04:53 | INFO     | httpx | HTTP Request: POST https://os-api.agno.com/telemetry/runs "HTTP/2 201 Created"
+Fri Aug 21 2026 16:04:53 GMT+0500 (Pakistan Standard Time) 2026-08-21 11:04:53 | INFO     | agno_agent | plan() result — is_refusal=False, sql_used="SELECT * FROM ITS.journal WHERE jms_jcode = 'CMC';", chart_type=table
+Fri Aug 21 2026 16:04:54 GMT+0500 (Pakistan Standard Time) 2026-08-21 11:04:54 | INFO     | __main__ | Plan generated successfully. refusal=False sql=True
+Fri Aug 21 2026 16:04:54 GMT+0500 (Pakistan Standard Time) 2026-08-21 11:04:54 | INFO     | db | Executing SQL: SELECT * FROM ITS.journal WHERE jms_jcode = 'CMC'
+Fri Aug 21 2026 16:04:54 GMT+0500 (Pakistan Standard Time) REPR:
+Fri Aug 21 2026 16:04:54 GMT+0500 (Pakistan Standard Time) "SELECT * FROM ITS.journal WHERE jms_jcode = 'CMC'"
+Fri Aug 21 2026 16:04:54 GMT+0500 (Pakistan Standard Time) RAW:
+Fri Aug 21 2026 16:04:54 GMT+0500 (Pakistan Standard Time) SELECT * FROM ITS.journal WHERE jms_jcode = 'CMC'
+Fri Aug 21 2026 16:04:54 GMT+0500 (Pakistan Standard Time) 2026-08-21 11:04:54 | INFO     | db | SQL executed successfully — 1 row(s), 80 column(s)
+Fri Aug 21 2026 16:04:54 GMT+0500 (Pakistan Standard Time) 2026-08-21 11:04:54 | INFO     | __main__ | SQL executed successfully: 1 rows, 80 columns
+Fri Aug 21 2026 16:05:45 GMT+0500 (Pakistan Standard Time) 2026-08-21 11:05:45 | INFO     | __main__ | User submitted prompt: 'how many reginal editor have open access and subcription journal group them by journal type'
+Fri Aug 21 2026 16:05:45 GMT+0500 (Pakistan Standard Time) 2026-08-21 11:05:45 | INFO     | agno_agent | plan() called (retries left=2) — prompt: 'how many reginal editor have open access and subcription journal group them by journal type'
+Fri Aug 21 2026 16:05:45 GMT+0500 (Pakistan Standard Time) time=2026-08-21T11:05:45.820Z level=WARN source=llama_server.go:317 msg="truncating input prompt" limit=4098 prompt=8468 keep=4 new=4098
+Fri Aug 21 2026 16:05:45 GMT+0500 (Pakistan Standard Time) srv  server_strea: conv_id= (empty=1)
+Fri Aug 21 2026 16:05:45 GMT+0500 (Pakistan Standard Time) slot get_availabl: id  0 | task -1 |  - checking sim = 0.001 (4/4098) > 0.100
+Fri Aug 21 2026 16:05:45 GMT+0500 (Pakistan Standard Time) slot get_availabl: id  0 | task -1 | selected slot by LRU, t_last = 768595034928
+Fri Aug 21 2026 16:05:45 GMT+0500 (Pakistan Standard Time) srv  get_availabl: updating prompt cache
+Fri Aug 21 2026 16:05:45 GMT+0500 (Pakistan Standard Time) srv   prompt_save:  - saving prompt with length 4183, total state size = 1045.799 MiB (draft: 0.000 MiB)
+Fri Aug 21 2026 16:05:46 GMT+0500 (Pakistan Standard Time) srv          load:  - looking for better prompt, base f_keep = 0.001, f_sim = 0.001
+Fri Aug 21 2026 16:05:46 GMT+0500 (Pakistan Standard Time) srv          load:    - prompt with length    4121, lcp =       4, f_keep = 0.001, f_sim = 0.001
+Fri Aug 21 2026 16:05:46 GMT+0500 (Pakistan Standard Time) srv          load:    - prompt with length    4121, lcp =       4, f_keep = 0.001, f_sim = 0.001
+Fri Aug 21 2026 16:05:46 GMT+0500 (Pakistan Standard Time) srv          load:    - prompt with length    4183, lcp =       4, f_keep = 0.001, f_sim = 0.001
+Fri Aug 21 2026 16:05:46 GMT+0500 (Pakistan Standard Time) srv        update:  - cache state: 3 prompts, 3106.397 MiB (limits: 8192.000 MiB, 8192 tokens, 32766 est)
+Fri Aug 21 2026 16:05:46 GMT+0500 (Pakistan Standard Time) srv        update:    - prompt 0x2b883ba0:    4121 tokens, checkpoints:  0,  1030.299 MiB
+Fri Aug 21 2026 16:05:46 GMT+0500 (Pakistan Standard Time) srv        update:    - prompt 0x2b885b80:    4121 tokens, checkpoints:  0,  1030.299 MiB
+Fri Aug 21 2026 16:05:46 GMT+0500 (Pakistan Standard Time) srv        update:    - prompt 0x2b8842e0:    4183 tokens, checkpoints:  0,  1045.799 MiB
+Fri Aug 21 2026 16:05:46 GMT+0500 (Pakistan Standard Time) srv  get_availabl: prompt cache update took 706.09 ms
+Fri Aug 21 2026 16:05:46 GMT+0500 (Pakistan Standard Time) slot launch_slot_: id  0 | task -1 | sampler chain: logits -> ?penalties -> ?dry -> ?top-n-sigma -> top-k -> ?typical -> top-p -> ?min-p -> ?xtc -> temp-ext -> dist 
+Fri Aug 21 2026 16:05:46 GMT+0500 (Pakistan Standard Time) slot launch_slot_: id  0 | task -1 | sampler params: 
+Fri Aug 21 2026 16:05:46 GMT+0500 (Pakistan Standard Time) 	repeat_last_n = 64, repeat_penalty = 1.000, frequency_penalty = 0.000, presence_penalty = 0.000
+Fri Aug 21 2026 16:05:46 GMT+0500 (Pakistan Standard Time) 	dry_multiplier = 0.000, dry_base = 1.750, dry_allowed_length = 2, dry_penalty_last_n = 64
+Fri Aug 21 2026 16:05:46 GMT+0500 (Pakistan Standard Time) 	top_k = 20, top_p = 0.950, min_p = 0.000, xtc_probability = 0.000, xtc_threshold = 0.100, typical_p = 1.000, top_n_sigma = -1.000, temp = 0.200
+Fri Aug 21 2026 16:05:46 GMT+0500 (Pakistan Standard Time) 	mirostat = 0, mirostat_lr = 0.100, mirostat_ent = 5.000, adaptive_target = -1.000, adaptive_decay = 0.900
+Fri Aug 21 2026 16:05:46 GMT+0500 (Pakistan Standard Time) slot launch_slot_: id  0 | task 333 | processing task, is_child = 0
+Fri Aug 21 2026 16:05:46 GMT+0500 (Pakistan Standard Time) slot   operator(): id  0 | task 333 | new prompt, n_ctx_slot = 8192, n_keep = 4, task.n_tokens = 4098
+Fri Aug 21 2026 16:05:46 GMT+0500 (Pakistan Standard Time) slot   operator(): id  0 | task 333 | cached n_tokens = 4, memory_seq_rm [4, end)
+Fri Aug 21 2026 16:05:46 GMT+0500 (Pakistan Standard Time) slot   operator(): id  0 | task 333 | cached n_tokens = 1028, memory_seq_rm [1028, end)
+Fri Aug 21 2026 16:05:47 GMT+0500 (Pakistan Standard Time) slot   operator(): id  0 | task 333 | cached n_tokens = 2052, memory_seq_rm [2052, end)
+Fri Aug 21 2026 16:05:48 GMT+0500 (Pakistan Standard Time) slot   operator(): id  0 | task 333 | cached n_tokens = 3076, memory_seq_rm [3076, end)
+Fri Aug 21 2026 16:05:48 GMT+0500 (Pakistan Standard Time) slot init_sampler: id  0 | task 333 | init sampler, took 0.78 ms, tokens: text = 4098, total = 4098
+Fri Aug 21 2026 16:05:50 GMT+0500 (Pakistan Standard Time) slot print_timing: id  0 | task 333 | prompt eval time =    3000.24 ms /  4094 tokens (    0.73 ms per token,  1364.56 tokens per second)
+Fri Aug 21 2026 16:05:50 GMT+0500 (Pakistan Standard Time) slot print_timing: id  0 | task 333 |        eval time =     760.09 ms /    16 tokens (   50.67 ms per token,    19.73 tokens per second)
+Fri Aug 21 2026 16:05:50 GMT+0500 (Pakistan Standard Time) slot print_timing: id  0 | task 333 |       total time =    3760.33 ms /  4110 tokens
+Fri Aug 21 2026 16:05:50 GMT+0500 (Pakistan Standard Time) slot print_timing: id  0 | task 333 |    graphs reused =        326
+Fri Aug 21 2026 16:05:50 GMT+0500 (Pakistan Standard Time) slot      release: id  0 | task 333 | stop processing: n_tokens = 4113, truncated = 0
+Fri Aug 21 2026 16:05:50 GMT+0500 (Pakistan Standard Time) srv  update_slots: all slots are idle
+Fri Aug 21 2026 16:05:50 GMT+0500 (Pakistan Standard Time) [GIN] 2026/08/21 - 11:05:50 | 200 |  5.100419881s |       127.0.0.1 | POST     "/api/chat"
+Fri Aug 21 2026 16:05:50 GMT+0500 (Pakistan Standard Time) 2026-08-21 11:05:50 | INFO     | httpx | HTTP Request: POST http://127.0.0.1:11434/api/chat "HTTP/1.1 200 OK"
+Fri Aug 21 2026 16:05:52 GMT+0500 (Pakistan Standard Time) time=2026-08-21T11:05:52.848Z level=WARN source=llama_server.go:317 msg="truncating input prompt" limit=4098 prompt=8474 keep=4 new=4098
+Fri Aug 21 2026 16:05:52 GMT+0500 (Pakistan Standard Time) srv  server_strea: conv_id= (empty=1)
+Fri Aug 21 2026 16:05:52 GMT+0500 (Pakistan Standard Time) slot get_availabl: id  0 | task -1 |  - checking sim = 0.001 (4/4098) > 0.100
+Fri Aug 21 2026 16:05:52 GMT+0500 (Pakistan Standard Time) slot get_availabl: id  0 | task -1 | selected slot by LRU, t_last = 768651804567
+Fri Aug 21 2026 16:05:52 GMT+0500 (Pakistan Standard Time) srv  get_availabl: updating prompt cache
+Fri Aug 21 2026 16:05:52 GMT+0500 (Pakistan Standard Time) srv   prompt_save:  - saving prompt with length 4113, total state size = 1028.299 MiB (draft: 0.000 MiB)
+Fri Aug 21 2026 16:05:53 GMT+0500 (Pakistan Standard Time) srv          load:  - looking for better prompt, base f_keep = 0.001, f_sim = 0.001
+Fri Aug 21 2026 16:05:53 GMT+0500 (Pakistan Standard Time) srv          load:    - prompt with length    4121, lcp =       4, f_keep = 0.001, f_sim = 0.001
+Fri Aug 21 2026 16:05:53 GMT+0500 (Pakistan Standard Time) srv          load:    - prompt with length    4121, lcp =       4, f_keep = 0.001, f_sim = 0.001
+Fri Aug 21 2026 16:05:53 GMT+0500 (Pakistan Standard Time) srv          load:    - prompt with length    4183, lcp =       4, f_keep = 0.001, f_sim = 0.001
+Fri Aug 21 2026 16:05:53 GMT+0500 (Pakistan Standard Time) srv          load:    - prompt with length    4113, lcp =       4, f_keep = 0.001, f_sim = 0.001
+Fri Aug 21 2026 16:05:53 GMT+0500 (Pakistan Standard Time) srv        update:  - cache state: 4 prompts, 4134.695 MiB (limits: 8192.000 MiB, 8192 tokens, 32766 est)
+Fri Aug 21 2026 16:05:53 GMT+0500 (Pakistan Standard Time) srv        update:    - prompt 0x2b883ba0:    4121 tokens, checkpoints:  0,  1030.299 MiB
+Fri Aug 21 2026 16:05:53 GMT+0500 (Pakistan Standard Time) srv        update:    - prompt 0x2b885b80:    4121 tokens, checkpoints:  0,  1030.299 MiB
+Fri Aug 21 2026 16:05:53 GMT+0500 (Pakistan Standard Time) srv        update:    - prompt 0x2b8842e0:    4183 tokens, checkpoints:  0,  1045.799 MiB
+Fri Aug 21 2026 16:05:53 GMT+0500 (Pakistan Standard Time) srv        update:    - prompt 0x23d4aa30:    4113 tokens, checkpoints:  0,  1028.299 MiB
+Fri Aug 21 2026 16:05:53 GMT+0500 (Pakistan Standard Time) srv  get_availabl: prompt cache update took 688.24 ms
+Fri Aug 21 2026 16:05:53 GMT+0500 (Pakistan Standard Time) slot launch_slot_: id  0 | task -1 | sampler chain: logits -> ?penalties -> ?dry -> ?top-n-sigma -> top-k -> ?typical -> top-p -> ?min-p -> ?xtc -> temp-ext -> dist 
+Fri Aug 21 2026 16:05:53 GMT+0500 (Pakistan Standard Time) slot launch_slot_: id  0 | task -1 | sampler params: 
+Fri Aug 21 2026 16:05:53 GMT+0500 (Pakistan Standard Time) 	repeat_last_n = 64, repeat_penalty = 1.000, frequency_penalty = 0.000, presence_penalty = 0.000
+Fri Aug 21 2026 16:05:53 GMT+0500 (Pakistan Standard Time) 	dry_multiplier = 0.000, dry_base = 1.750, dry_allowed_length = 2, dry_penalty_last_n = 64
+Fri Aug 21 2026 16:05:53 GMT+0500 (Pakistan Standard Time) 	top_k = 20, top_p = 0.950, min_p = 0.000, xtc_probability = 0.000, xtc_threshold = 0.100, typical_p = 1.000, top_n_sigma = -1.000, temp = 0.200
+Fri Aug 21 2026 16:05:53 GMT+0500 (Pakistan Standard Time) 	mirostat = 0, mirostat_lr = 0.100, mirostat_ent = 5.000, adaptive_target = -1.000, adaptive_decay = 0.900
+Fri Aug 21 2026 16:05:53 GMT+0500 (Pakistan Standard Time) slot launch_slot_: id  0 | task 353 | processing task, is_child = 0
+Fri Aug 21 2026 16:05:53 GMT+0500 (Pakistan Standard Time) slot   operator(): id  0 | task 353 | new prompt, n_ctx_slot = 8192, n_keep = 4, task.n_tokens = 4098
+Fri Aug 21 2026 16:05:53 GMT+0500 (Pakistan Standard Time) slot   operator(): id  0 | task 353 | cached n_tokens = 4, memory_seq_rm [4, end)
+Fri Aug 21 2026 16:05:53 GMT+0500 (Pakistan Standard Time) slot   operator(): id  0 | task 353 | cached n_tokens = 1028, memory_seq_rm [1028, end)
+Fri Aug 21 2026 16:05:54 GMT+0500 (Pakistan Standard Time) slot   operator(): id  0 | task 353 | cached n_tokens = 2052, memory_seq_rm [2052, end)
+Fri Aug 21 2026 16:05:55 GMT+0500 (Pakistan Standard Time) slot   operator(): id  0 | task 353 | cached n_tokens = 3076, memory_seq_rm [3076, end)
+Fri Aug 21 2026 16:05:55 GMT+0500 (Pakistan Standard Time) slot init_sampler: id  0 | task 353 | init sampler, took 0.58 ms, tokens: text = 4098, total = 4098
+Fri Aug 21 2026 16:05:59 GMT+0500 (Pakistan Standard Time) slot print_timing: id  0 | task 353 | prompt eval time =    3121.62 ms /  4094 tokens (    0.76 ms per token,  1311.50 tokens per second)
+Fri Aug 21 2026 16:05:59 GMT+0500 (Pakistan Standard Time) slot print_timing: id  0 | task 353 |        eval time =    2656.72 ms /    55 tokens (   49.20 ms per token,    20.33 tokens per second)
+Fri Aug 21 2026 16:05:59 GMT+0500 (Pakistan Standard Time) slot print_timing: id  0 | task 353 |       total time =    5778.34 ms /  4149 tokens
+Fri Aug 21 2026 16:05:59 GMT+0500 (Pakistan Standard Time) slot print_timing: id  0 | task 353 |    graphs reused =        379
+Fri Aug 21 2026 16:05:59 GMT+0500 (Pakistan Standard Time) slot      release: id  0 | task 353 | stop processing: n_tokens = 4152, truncated = 0
+Fri Aug 21 2026 16:05:59 GMT+0500 (Pakistan Standard Time) srv  update_slots: all slots are idle
+Fri Aug 21 2026 16:05:59 GMT+0500 (Pakistan Standard Time) [GIN] 2026/08/21 - 11:05:59 | 200 |  8.529701656s |       127.0.0.1 | POST     "/api/chat"
+Fri Aug 21 2026 16:05:59 GMT+0500 (Pakistan Standard Time) 2026-08-21 11:05:59 | INFO     | httpx | HTTP Request: POST http://127.0.0.1:11434/api/chat "HTTP/1.1 200 OK"
+Fri Aug 21 2026 16:05:59 GMT+0500 (Pakistan Standard Time) 2026-08-21 11:05:59 | INFO     | httpx | HTTP Request: POST https://os-api.agno.com/telemetry/runs "HTTP/2 201 Created"
+Fri Aug 21 2026 16:05:59 GMT+0500 (Pakistan Standard Time) 2026-08-21 11:05:59 | INFO     | agno_agent | plan() result — is_refusal=True, sql_used=None, chart_type=table
+Fri Aug 21 2026 16:05:59 GMT+0500 (Pakistan Standard Time) 2026-08-21 11:05:59 | INFO     | __main__ | Plan generated successfully. refusal=True sql=False
+Fri Aug 21 2026 16:05:59 GMT+0500 (Pakistan Standard Time) 2026-08-21 11:05:59 | INFO     | __main__ | Request refused: I cannot fulfill this request because no specific question or data retrieval task was provided.
+Fri Aug 21 2026 16:06:27 GMT+0500 (Pakistan Standard Time) 2026-08-21 11:06:27 | INFO     | __main__ | User submitted prompt: 'how many reginal editor have open access and subcription journal group them by journal type'
+Fri Aug 21 2026 16:06:27 GMT+0500 (Pakistan Standard Time) 2026-08-21 11:06:27 | INFO     | agno_agent | plan() called (retries left=2) — prompt: 'how many reginal editor have open access and subcription journal group them by journal type'
+Fri Aug 21 2026 16:06:27 GMT+0500 (Pakistan Standard Time) time=2026-08-21T11:06:27.967Z level=WARN source=llama_server.go:317 msg="truncating input prompt" limit=4098 prompt=8468 keep=4 new=4098
+Fri Aug 21 2026 16:06:27 GMT+0500 (Pakistan Standard Time) srv  server_strea: conv_id= (empty=1)
+Fri Aug 21 2026 16:06:27 GMT+0500 (Pakistan Standard Time) slot get_availabl: id  0 | task -1 |  - checking sim = 0.001 (4/4098) > 0.100
+Fri Aug 21 2026 16:06:27 GMT+0500 (Pakistan Standard Time) slot get_availabl: id  0 | task -1 | selected slot by LRU, t_last = 768660835271
+Fri Aug 21 2026 16:06:27 GMT+0500 (Pakistan Standard Time) srv  get_availabl: updating prompt cache
+Fri Aug 21 2026 16:06:27 GMT+0500 (Pakistan Standard Time) srv   prompt_save:  - saving prompt with length 4152, total state size = 1038.049 MiB (draft: 0.000 MiB)
+Fri Aug 21 2026 16:06:28 GMT+0500 (Pakistan Standard Time) srv          load:  - looking for better prompt, base f_keep = 0.001, f_sim = 0.001
+Fri Aug 21 2026 16:06:28 GMT+0500 (Pakistan Standard Time) srv          load:    - prompt with length    4121, lcp =       4, f_keep = 0.001, f_sim = 0.001
+Fri Aug 21 2026 16:06:28 GMT+0500 (Pakistan Standard Time) srv          load:    - prompt with length    4121, lcp =       4, f_keep = 0.001, f_sim = 0.001
+Fri Aug 21 2026 16:06:28 GMT+0500 (Pakistan Standard Time) srv          load:    - prompt with length    4183, lcp =       4, f_keep = 0.001, f_sim = 0.001
+Fri Aug 21 2026 16:06:28 GMT+0500 (Pakistan Standard Time) srv          load:    - prompt with length    4113, lcp =    4098, f_keep = 0.996, f_sim = 1.000
+Fri Aug 21 2026 16:06:28 GMT+0500 (Pakistan Standard Time) srv          load:    - prompt with length    4152, lcp =       4, f_keep = 0.001, f_sim = 0.001
+Fri Aug 21 2026 16:06:28 GMT+0500 (Pakistan Standard Time) srv          load:  - found better prompt with f_keep = 0.996, f_sim = 1.000
+Fri Aug 21 2026 16:06:28 GMT+0500 (Pakistan Standard Time) srv        update:  - cache state: 4 prompts, 4144.446 MiB (limits: 8192.000 MiB, 8192 tokens, 32766 est)
+Fri Aug 21 2026 16:06:28 GMT+0500 (Pakistan Standard Time) srv        update:    - prompt 0x2b883ba0:    4121 tokens, checkpoints:  0,  1030.299 MiB
+Fri Aug 21 2026 16:06:28 GMT+0500 (Pakistan Standard Time) srv        update:    - prompt 0x2b885b80:    4121 tokens, checkpoints:  0,  1030.299 MiB
+Fri Aug 21 2026 16:06:28 GMT+0500 (Pakistan Standard Time) srv        update:    - prompt 0x2b8842e0:    4183 tokens, checkpoints:  0,  1045.799 MiB
+Fri Aug 21 2026 16:06:28 GMT+0500 (Pakistan Standard Time) srv        update:    - prompt 0x2b882050:    4152 tokens, checkpoints:  0,  1038.049 MiB
+Fri Aug 21 2026 16:06:28 GMT+0500 (Pakistan Standard Time) srv  get_availabl: prompt cache update took 873.14 ms
+Fri Aug 21 2026 16:06:28 GMT+0500 (Pakistan Standard Time) slot launch_slot_: id  0 | task -1 | sampler chain: logits -> ?penalties -> ?dry -> ?top-n-sigma -> top-k -> ?typical -> top-p -> ?min-p -> ?xtc -> temp-ext -> dist 
+Fri Aug 21 2026 16:06:28 GMT+0500 (Pakistan Standard Time) slot launch_slot_: id  0 | task -1 | sampler params: 
+Fri Aug 21 2026 16:06:28 GMT+0500 (Pakistan Standard Time) 	repeat_last_n = 64, repeat_penalty = 1.000, frequency_penalty = 0.000, presence_penalty = 0.000
+Fri Aug 21 2026 16:06:28 GMT+0500 (Pakistan Standard Time) 	dry_multiplier = 0.000, dry_base = 1.750, dry_allowed_length = 2, dry_penalty_last_n = 64
+Fri Aug 21 2026 16:06:28 GMT+0500 (Pakistan Standard Time) 	top_k = 20, top_p = 0.950, min_p = 0.000, xtc_probability = 0.000, xtc_threshold = 0.100, typical_p = 1.000, top_n_sigma = -1.000, temp = 0.200
+Fri Aug 21 2026 16:06:28 GMT+0500 (Pakistan Standard Time) 	mirostat = 0, mirostat_lr = 0.100, mirostat_ent = 5.000, adaptive_target = -1.000, adaptive_decay = 0.900
+Fri Aug 21 2026 16:06:28 GMT+0500 (Pakistan Standard Time) slot launch_slot_: id  0 | task 412 | processing task, is_child = 0
+Fri Aug 21 2026 16:06:28 GMT+0500 (Pakistan Standard Time) slot   operator(): id  0 | task 412 | new prompt, n_ctx_slot = 8192, n_keep = 4, task.n_tokens = 4098
+Fri Aug 21 2026 16:06:28 GMT+0500 (Pakistan Standard Time) slot   operator(): id  0 | task 412 | need to evaluate at least 1 token for each active slot (n_past = 4098, task.n_tokens() = 4098)
+Fri Aug 21 2026 16:06:28 GMT+0500 (Pakistan Standard Time) slot   operator(): id  0 | task 412 | n_past was set to 4097
+Fri Aug 21 2026 16:06:28 GMT+0500 (Pakistan Standard Time) slot   operator(): id  0 | task 412 | cached n_tokens = 4097, memory_seq_rm [4097, end)
+Fri Aug 21 2026 16:06:28 GMT+0500 (Pakistan Standard Time) slot init_sampler: id  0 | task 412 | init sampler, took 0.51 ms, tokens: text = 4098, total = 4098
+Fri Aug 21 2026 16:06:29 GMT+0500 (Pakistan Standard Time) slot print_timing: id  0 | task 412 | prompt eval time =      44.26 ms /     1 tokens (   44.26 ms per token,    22.59 tokens per second)
+Fri Aug 21 2026 16:06:29 GMT+0500 (Pakistan Standard Time) slot print_timing: id  0 | task 412 |        eval time =     730.95 ms /    16 tokens (   48.73 ms per token,    20.52 tokens per second)
+Fri Aug 21 2026 16:06:29 GMT+0500 (Pakistan Standard Time) slot print_timing: id  0 | task 412 |       total time =     775.22 ms /    17 tokens
+Fri Aug 21 2026 16:06:29 GMT+0500 (Pakistan Standard Time) slot print_timing: id  0 | task 412 |    graphs reused =        395
+Fri Aug 21 2026 16:06:29 GMT+0500 (Pakistan Standard Time) slot      release: id  0 | task 412 | stop processing: n_tokens = 4113, truncated = 0
+Fri Aug 21 2026 16:06:29 GMT+0500 (Pakistan Standard Time) srv  update_slots: all slots are idle
+Fri Aug 21 2026 16:06:29 GMT+0500 (Pakistan Standard Time) [GIN] 2026/08/21 - 11:06:29 | 200 |  2.200454572s |       127.0.0.1 | POST     "/api/chat"
+Fri Aug 21 2026 16:06:29 GMT+0500 (Pakistan Standard Time) 2026-08-21 11:06:29 | INFO     | httpx | HTTP Request: POST http://127.0.0.1:11434/api/chat "HTTP/1.1 200 OK"
+Fri Aug 21 2026 16:06:30 GMT+0500 (Pakistan Standard Time) time=2026-08-21T11:06:30.799Z level=WARN source=llama_server.go:317 msg="truncating input prompt" limit=4098 prompt=8474 keep=4 new=4098
+Fri Aug 21 2026 16:06:30 GMT+0500 (Pakistan Standard Time) srv  server_strea: conv_id= (empty=1)
+Fri Aug 21 2026 16:06:30 GMT+0500 (Pakistan Standard Time) slot get_availabl: id  0 | task -1 |  - checking sim = 0.001 (4/4098) > 0.100
+Fri Aug 21 2026 16:06:30 GMT+0500 (Pakistan Standard Time) slot get_availabl: id  0 | task -1 | selected slot by LRU, t_last = 768691135477
+Fri Aug 21 2026 16:06:30 GMT+0500 (Pakistan Standard Time) srv  get_availabl: updating prompt cache
+Fri Aug 21 2026 16:06:30 GMT+0500 (Pakistan Standard Time) srv   prompt_save:  - saving prompt with length 4113, total state size = 1028.299 MiB (draft: 0.000 MiB)
+Fri Aug 21 2026 16:06:31 GMT+0500 (Pakistan Standard Time) srv          load:  - looking for better prompt, base f_keep = 0.001, f_sim = 0.001
+Fri Aug 21 2026 16:06:31 GMT+0500 (Pakistan Standard Time) srv          load:    - prompt with length    4121, lcp =       4, f_keep = 0.001, f_sim = 0.001
+Fri Aug 21 2026 16:06:31 GMT+0500 (Pakistan Standard Time) srv          load:    - prompt with length    4121, lcp =       4, f_keep = 0.001, f_sim = 0.001
+Fri Aug 21 2026 16:06:31 GMT+0500 (Pakistan Standard Time) srv          load:    - prompt with length    4183, lcp =       4, f_keep = 0.001, f_sim = 0.001
+Fri Aug 21 2026 16:06:31 GMT+0500 (Pakistan Standard Time) srv          load:    - prompt with length    4152, lcp =    4098, f_keep = 0.987, f_sim = 1.000
+Fri Aug 21 2026 16:06:31 GMT+0500 (Pakistan Standard Time) srv          load:    - prompt with length    4113, lcp =       4, f_keep = 0.001, f_sim = 0.001
+Fri Aug 21 2026 16:06:31 GMT+0500 (Pakistan Standard Time) srv          load:  - found better prompt with f_keep = 0.987, f_sim = 1.000
+Fri Aug 21 2026 16:06:31 GMT+0500 (Pakistan Standard Time) srv        update:  - cache state: 4 prompts, 4134.695 MiB (limits: 8192.000 MiB, 8192 tokens, 32766 est)
+Fri Aug 21 2026 16:06:31 GMT+0500 (Pakistan Standard Time) srv        update:    - prompt 0x2b883ba0:    4121 tokens, checkpoints:  0,  1030.299 MiB
+Fri Aug 21 2026 16:06:31 GMT+0500 (Pakistan Standard Time) srv        update:    - prompt 0x2b885b80:    4121 tokens, checkpoints:  0,  1030.299 MiB
+Fri Aug 21 2026 16:06:31 GMT+0500 (Pakistan Standard Time) srv        update:    - prompt 0x2b8842e0:    4183 tokens, checkpoints:  0,  1045.799 MiB
+Fri Aug 21 2026 16:06:31 GMT+0500 (Pakistan Standard Time) srv        update:    - prompt 0x23d4aa30:    4113 tokens, checkpoints:  0,  1028.299 MiB
+Fri Aug 21 2026 16:06:31 GMT+0500 (Pakistan Standard Time) srv  get_availabl: prompt cache update took 866.93 ms
+Fri Aug 21 2026 16:06:31 GMT+0500 (Pakistan Standard Time) slot launch_slot_: id  0 | task -1 | sampler chain: logits -> ?penalties -> ?dry -> ?top-n-sigma -> top-k -> ?typical -> top-p -> ?min-p -> ?xtc -> temp-ext -> dist
+Fri Aug 21 2026 16:06:31 GMT+0500 (Pakistan Standard Time) slot launch_slot_: id  0 | task -1 | sampler params:
+Fri Aug 21 2026 16:06:31 GMT+0500 (Pakistan Standard Time) 	repeat_last_n = 64, repeat_penalty = 1.000, frequency_penalty = 0.000, presence_penalty = 0.000
+Fri Aug 21 2026 16:06:31 GMT+0500 (Pakistan Standard Time) 	dry_multiplier = 0.000, dry_base = 1.750, dry_allowed_length = 2, dry_penalty_last_n = 64
+Fri Aug 21 2026 16:06:31 GMT+0500 (Pakistan Standard Time) 	top_k = 20, top_p = 0.950, min_p = 0.000, xtc_probability = 0.000, xtc_threshold = 0.100, typical_p = 1.000, top_n_sigma = -1.000, temp = 0.200
+Fri Aug 21 2026 16:06:31 GMT+0500 (Pakistan Standard Time) 	mirostat = 0, mirostat_lr = 0.100, mirostat_ent = 5.000, adaptive_target = -1.000, adaptive_decay = 0.900
+Fri Aug 21 2026 16:06:31 GMT+0500 (Pakistan Standard Time) slot launch_slot_: id  0 | task 429 | processing task, is_child = 0
+Fri Aug 21 2026 16:06:31 GMT+0500 (Pakistan Standard Time) slot   operator(): id  0 | task 429 | new prompt, n_ctx_slot = 8192, n_keep = 4, task.n_tokens = 4098
+Fri Aug 21 2026 16:06:31 GMT+0500 (Pakistan Standard Time) slot   operator(): id  0 | task 429 | need to evaluate at least 1 token for each active slot (n_past = 4098, task.n_tokens() = 4098)
+Fri Aug 21 2026 16:06:31 GMT+0500 (Pakistan Standard Time) slot   operator(): id  0 | task 429 | n_past was set to 4097
+Fri Aug 21 2026 16:06:31 GMT+0500 (Pakistan Standard Time) slot   operator(): id  0 | task 429 | cached n_tokens = 4097, memory_seq_rm [4097, end)
+Fri Aug 21 2026 16:06:31 GMT+0500 (Pakistan Standard Time) slot init_sampler: id  0 | task 429 | init sampler, took 0.52 ms, tokens: text = 4098, total = 4098
+Fri Aug 21 2026 16:06:35 GMT+0500 (Pakistan Standard Time) slot print_timing: id  0 | task 429 | prompt eval time =      31.30 ms /     1 tokens (   31.30 ms per token,    31.94 tokens per second)
+Fri Aug 21 2026 16:06:35 GMT+0500 (Pakistan Standard Time) slot print_timing: id  0 | task 429 |        eval time =    4118.77 ms /    84 tokens (   49.62 ms per token,    20.15 tokens per second)
+Fri Aug 21 2026 16:06:35 GMT+0500 (Pakistan Standard Time) slot print_timing: id  0 | task 429 |       total time =    4150.07 ms /    85 tokens
+Fri Aug 21 2026 16:06:35 GMT+0500 (Pakistan Standard Time) slot print_timing: id  0 | task 429 |    graphs reused =        479
+Fri Aug 21 2026 16:06:35 GMT+0500 (Pakistan Standard Time) slot      release: id  0 | task 429 | stop processing: n_tokens = 4181, truncated = 0
+Fri Aug 21 2026 16:06:35 GMT+0500 (Pakistan Standard Time) srv  update_slots: all slots are idle
+Fri Aug 21 2026 16:06:35 GMT+0500 (Pakistan Standard Time) [GIN] 2026/08/21 - 11:06:35 | 200 |  5.724913196s |       127.0.0.1 | POST     "/api/chat"
+Fri Aug 21 2026 16:06:35 GMT+0500 (Pakistan Standard Time) 2026-08-21 11:06:35 | INFO     | httpx | HTTP Request: POST http://127.0.0.1:11434/api/chat "HTTP/1.1 200 OK"
+Fri Aug 21 2026 16:06:36 GMT+0500 (Pakistan Standard Time) 2026-08-21 11:06:36 | INFO     | httpx | HTTP Request: POST https://os-api.agno.com/telemetry/runs "HTTP/2 201 Created"
+Fri Aug 21 2026 16:06:36 GMT+0500 (Pakistan Standard Time) 2026-08-21 11:06:36 | INFO     | agno_agent | plan() result — is_refusal=True, sql_used=None, chart_type=table
+Fri Aug 21 2026 16:06:36 GMT+0500 (Pakistan Standard Time) 2026-08-21 11:06:36 | INFO     | __main__ | Plan generated successfully. refusal=True sql=False
+Fri Aug 21 2026 16:06:36 GMT+0500 (Pakistan Standard Time) 2026-08-21 11:06:36 | INFO     | __main__ | Request refused: I cannot fulfill this request because you have not provided a specific question or data‑retrieval task. The available tools only allow read‑only SELECT queries; without a concrete query to answer, there is nothing to generate.
+Fri Aug 21 2026 16:08:06 GMT+0500 (Pakistan Standard Time) 2026-08-21 11:08:06 | INFO     | __main__ | User submitted prompt: 'tell me editor who belong to ccb journal'
+Fri Aug 21 2026 16:08:06 GMT+0500 (Pakistan Standard Time) 2026-08-21 11:08:06 | INFO     | agno_agent | plan() called (retries left=2) — prompt: 'tell me editor who belong to ccb journal'
+Fri Aug 21 2026 16:08:07 GMT+0500 (Pakistan Standard Time) time=2026-08-21T11:08:07.495Z level=WARN source=llama_server.go:317 msg="truncating input prompt" limit=4098 prompt=8460 keep=4 new=4098
+Fri Aug 21 2026 16:08:07 GMT+0500 (Pakistan Standard Time) srv  server_strea: conv_id= (empty=1)
+Fri Aug 21 2026 16:08:07 GMT+0500 (Pakistan Standard Time) slot get_availabl: id  0 | task -1 |  - checking sim = 0.001 (4/4098) > 0.100
+Fri Aug 21 2026 16:08:07 GMT+0500 (Pakistan Standard Time) slot get_availabl: id  0 | task -1 | selected slot by LRU, t_last = 768697335108
+Fri Aug 21 2026 16:08:07 GMT+0500 (Pakistan Standard Time) srv  get_availabl: updating prompt cache
+Fri Aug 21 2026 16:08:07 GMT+0500 (Pakistan Standard Time) srv   prompt_save:  - saving prompt with length 4181, total state size = 1045.299 MiB (draft: 0.000 MiB)
+Fri Aug 21 2026 16:08:08 GMT+0500 (Pakistan Standard Time) srv          load:  - looking for better prompt, base f_keep = 0.001, f_sim = 0.001
+Fri Aug 21 2026 16:08:08 GMT+0500 (Pakistan Standard Time) srv          load:    - prompt with length    4121, lcp =    4086, f_keep = 0.992, f_sim = 0.997
+Fri Aug 21 2026 16:08:08 GMT+0500 (Pakistan Standard Time) srv          load:    - prompt with length    4121, lcp =       4, f_keep = 0.001, f_sim = 0.001
+Fri Aug 21 2026 16:08:08 GMT+0500 (Pakistan Standard Time) srv          load:    - prompt with length    4183, lcp =       4, f_keep = 0.001, f_sim = 0.001
+Fri Aug 21 2026 16:08:08 GMT+0500 (Pakistan Standard Time) srv          load:    - prompt with length    4113, lcp =       4, f_keep = 0.001, f_sim = 0.001
+Fri Aug 21 2026 16:08:08 GMT+0500 (Pakistan Standard Time) srv          load:    - prompt with length    4181, lcp =       4, f_keep = 0.001, f_sim = 0.001
+Fri Aug 21 2026 16:08:08 GMT+0500 (Pakistan Standard Time) srv          load:  - found better prompt with f_keep = 0.992, f_sim = 0.997
+Fri Aug 21 2026 16:08:08 GMT+0500 (Pakistan Standard Time) srv        update:  - cache state: 4 prompts, 4149.696 MiB (limits: 8192.000 MiB, 8192 tokens, 32766 est)
+Fri Aug 21 2026 16:08:08 GMT+0500 (Pakistan Standard Time) srv        update:    - prompt 0x2b885b80:    4121 tokens, checkpoints:  0,  1030.299 MiB
+Fri Aug 21 2026 16:08:08 GMT+0500 (Pakistan Standard Time) srv        update:    - prompt 0x2b8842e0:    4183 tokens, checkpoints:  0,  1045.799 MiB
+Fri Aug 21 2026 16:08:08 GMT+0500 (Pakistan Standard Time) srv        update:    - prompt 0x23d4aa30:    4113 tokens, checkpoints:  0,  1028.299 MiB
+Fri Aug 21 2026 16:08:08 GMT+0500 (Pakistan Standard Time) srv        update:    - prompt 0x2b87fbf0:    4181 tokens, checkpoints:  0,  1045.299 MiB
+Fri Aug 21 2026 16:08:08 GMT+0500 (Pakistan Standard Time) srv  get_availabl: prompt cache update took 899.57 ms
+Fri Aug 21 2026 16:08:08 GMT+0500 (Pakistan Standard Time) slot launch_slot_: id  0 | task -1 | sampler chain: logits -> ?penalties -> ?dry -> ?top-n-sigma -> top-k -> ?typical -> top-p -> ?min-p -> ?xtc -> temp-ext -> dist 
+Fri Aug 21 2026 16:08:08 GMT+0500 (Pakistan Standard Time) slot launch_slot_: id  0 | task -1 | sampler params: 
+Fri Aug 21 2026 16:08:08 GMT+0500 (Pakistan Standard Time) 	repeat_last_n = 64, repeat_penalty = 1.000, frequency_penalty = 0.000, presence_penalty = 0.000
+Fri Aug 21 2026 16:08:08 GMT+0500 (Pakistan Standard Time) 	dry_multiplier = 0.000, dry_base = 1.750, dry_allowed_length = 2, dry_penalty_last_n = 64
+Fri Aug 21 2026 16:08:08 GMT+0500 (Pakistan Standard Time) 	top_k = 20, top_p = 0.950, min_p = 0.000, xtc_probability = 0.000, xtc_threshold = 0.100, typical_p = 1.000, top_n_sigma = -1.000, temp = 0.200
+Fri Aug 21 2026 16:08:08 GMT+0500 (Pakistan Standard Time) 	mirostat = 0, mirostat_lr = 0.100, mirostat_ent = 5.000, adaptive_target = -1.000, adaptive_decay = 0.900
+Fri Aug 21 2026 16:08:08 GMT+0500 (Pakistan Standard Time) slot launch_slot_: id  0 | task 514 | processing task, is_child = 0
+Fri Aug 21 2026 16:08:08 GMT+0500 (Pakistan Standard Time) slot   operator(): id  0 | task 514 | new prompt, n_ctx_slot = 8192, n_keep = 4, task.n_tokens = 4098
+Fri Aug 21 2026 16:08:08 GMT+0500 (Pakistan Standard Time) slot   operator(): id  0 | task 514 | cached n_tokens = 4086, memory_seq_rm [4086, end)
+Fri Aug 21 2026 16:08:08 GMT+0500 (Pakistan Standard Time) slot init_sampler: id  0 | task 514 | init sampler, took 0.52 ms, tokens: text = 4098, total = 4098
+Fri Aug 21 2026 16:08:09 GMT+0500 (Pakistan Standard Time) slot print_timing: id  0 | task 514 | prompt eval time =      99.85 ms /    12 tokens (    8.32 ms per token,   120.18 tokens per second)
+Fri Aug 21 2026 16:08:09 GMT+0500 (Pakistan Standard Time) slot print_timing: id  0 | task 514 |        eval time =     720.39 ms /    16 tokens (   48.03 ms per token,    20.82 tokens per second)
+Fri Aug 21 2026 16:08:09 GMT+0500 (Pakistan Standard Time) slot print_timing: id  0 | task 514 |       total time =     820.25 ms /    28 tokens
+Fri Aug 21 2026 16:08:09 GMT+0500 (Pakistan Standard Time) slot print_timing: id  0 | task 514 |    graphs reused =        493
+Fri Aug 21 2026 16:08:09 GMT+0500 (Pakistan Standard Time) slot      release: id  0 | task 514 | stop processing: n_tokens = 4113, truncated = 0
+Fri Aug 21 2026 16:08:09 GMT+0500 (Pakistan Standard Time) srv  update_slots: all slots are idle
+Fri Aug 21 2026 16:08:09 GMT+0500 (Pakistan Standard Time) [GIN] 2026/08/21 - 11:08:09 | 200 |  2.358995098s |       127.0.0.1 | POST     "/api/chat"
+Fri Aug 21 2026 16:08:09 GMT+0500 (Pakistan Standard Time) 2026-08-21 11:08:09 | INFO     | httpx | HTTP Request: POST http://127.0.0.1:11434/api/chat "HTTP/1.1 200 OK"
+Fri Aug 21 2026 16:08:10 GMT+0500 (Pakistan Standard Time) time=2026-08-21T11:08:10.407Z level=WARN source=llama_server.go:317 msg="truncating input prompt" limit=4098 prompt=8474 keep=4 new=4098
+Fri Aug 21 2026 16:08:10 GMT+0500 (Pakistan Standard Time) srv  server_strea: conv_id= (empty=1)
+Fri Aug 21 2026 16:08:10 GMT+0500 (Pakistan Standard Time) slot get_availabl: id  0 | task -1 |  - checking sim = 0.001 (4/4098) > 0.100
+Fri Aug 21 2026 16:08:10 GMT+0500 (Pakistan Standard Time) slot get_availabl: id  0 | task -1 | selected slot by LRU, t_last = 768790734752
+Fri Aug 21 2026 16:08:10 GMT+0500 (Pakistan Standard Time) srv  get_availabl: updating prompt cache
+Fri Aug 21 2026 16:08:10 GMT+0500 (Pakistan Standard Time) srv   prompt_save:  - saving prompt with length 4113, total state size = 1028.299 MiB (draft: 0.000 MiB)
+Fri Aug 21 2026 16:08:11 GMT+0500 (Pakistan Standard Time) srv          load:  - looking for better prompt, base f_keep = 0.001, f_sim = 0.001
+Fri Aug 21 2026 16:08:11 GMT+0500 (Pakistan Standard Time) srv          load:    - prompt with length    4121, lcp =       4, f_keep = 0.001, f_sim = 0.001
+Fri Aug 21 2026 16:08:11 GMT+0500 (Pakistan Standard Time) srv          load:    - prompt with length    4183, lcp =       4, f_keep = 0.001, f_sim = 0.001
+Fri Aug 21 2026 16:08:11 GMT+0500 (Pakistan Standard Time) srv          load:    - prompt with length    4113, lcp =       4, f_keep = 0.001, f_sim = 0.001
+Fri Aug 21 2026 16:08:11 GMT+0500 (Pakistan Standard Time) srv          load:    - prompt with length    4181, lcp =    4098, f_keep = 0.980, f_sim = 1.000
+Fri Aug 21 2026 16:08:11 GMT+0500 (Pakistan Standard Time) srv          load:    - prompt with length    4113, lcp =       4, f_keep = 0.001, f_sim = 0.001
+Fri Aug 21 2026 16:08:11 GMT+0500 (Pakistan Standard Time) srv          load:  - found better prompt with f_keep = 0.980, f_sim = 1.000
+Fri Aug 21 2026 16:08:11 GMT+0500 (Pakistan Standard Time) srv        update:  - cache state: 4 prompts, 4132.695 MiB (limits: 8192.000 MiB, 8192 tokens, 32766 est)
+Fri Aug 21 2026 16:08:11 GMT+0500 (Pakistan Standard Time) srv        update:    - prompt 0x2b885b80:    4121 tokens, checkpoints:  0,  1030.299 MiB
+Fri Aug 21 2026 16:08:11 GMT+0500 (Pakistan Standard Time) srv        update:    - prompt 0x2b8842e0:    4183 tokens, checkpoints:  0,  1045.799 MiB
+Fri Aug 21 2026 16:08:11 GMT+0500 (Pakistan Standard Time) srv        update:    - prompt 0x23d4aa30:    4113 tokens, checkpoints:  0,  1028.299 MiB
+Fri Aug 21 2026 16:08:11 GMT+0500 (Pakistan Standard Time) srv        update:    - prompt 0x2b883ba0:    4113 tokens, checkpoints:  0,  1028.299 MiB
+Fri Aug 21 2026 16:08:11 GMT+0500 (Pakistan Standard Time) srv  get_availabl: prompt cache update took 855.47 ms
+Fri Aug 21 2026 16:08:11 GMT+0500 (Pakistan Standard Time) slot launch_slot_: id  0 | task -1 | sampler chain: logits -> ?penalties -> ?dry -> ?top-n-sigma -> top-k -> ?typical -> top-p -> ?min-p -> ?xtc -> temp-ext -> dist 
+Fri Aug 21 2026 16:08:11 GMT+0500 (Pakistan Standard Time) slot launch_slot_: id  0 | task -1 | sampler params: 
+Fri Aug 21 2026 16:08:11 GMT+0500 (Pakistan Standard Time) 	repeat_last_n = 64, repeat_penalty = 1.000, frequency_penalty = 0.000, presence_penalty = 0.000
+Fri Aug 21 2026 16:08:11 GMT+0500 (Pakistan Standard Time) 	dry_multiplier = 0.000, dry_base = 1.750, dry_allowed_length = 2, dry_penalty_last_n = 64
+Fri Aug 21 2026 16:08:11 GMT+0500 (Pakistan Standard Time) 	top_k = 20, top_p = 0.950, min_p = 0.000, xtc_probability = 0.000, xtc_threshold = 0.100, typical_p = 1.000, top_n_sigma = -1.000, temp = 0.200
+Fri Aug 21 2026 16:08:11 GMT+0500 (Pakistan Standard Time) 	mirostat = 0, mirostat_lr = 0.100, mirostat_ent = 5.000, adaptive_target = -1.000, adaptive_decay = 0.900
+Fri Aug 21 2026 16:08:11 GMT+0500 (Pakistan Standard Time) slot launch_slot_: id  0 | task 531 | processing task, is_child = 0
+Fri Aug 21 2026 16:08:11 GMT+0500 (Pakistan Standard Time) slot   operator(): id  0 | task 531 | new prompt, n_ctx_slot = 8192, n_keep = 4, task.n_tokens = 4098
+Fri Aug 21 2026 16:08:11 GMT+0500 (Pakistan Standard Time) slot   operator(): id  0 | task 531 | need to evaluate at least 1 token for each active slot (n_past = 4098, task.n_tokens() = 4098)
+Fri Aug 21 2026 16:08:11 GMT+0500 (Pakistan Standard Time) slot   operator(): id  0 | task 531 | n_past was set to 4097
+Fri Aug 21 2026 16:08:11 GMT+0500 (Pakistan Standard Time) slot   operator(): id  0 | task 531 | cached n_tokens = 4097, memory_seq_rm [4097, end)
+Fri Aug 21 2026 16:08:11 GMT+0500 (Pakistan Standard Time) slot init_sampler: id  0 | task 531 | init sampler, took 0.52 ms, tokens: text = 4098, total = 4098
+Fri Aug 21 2026 16:08:15 GMT+0500 (Pakistan Standard Time) slot print_timing: id  0 | task 531 | prompt eval time =      31.16 ms /     1 tokens (   31.16 ms per token,    32.09 tokens per second)
+Fri Aug 21 2026 16:08:15 GMT+0500 (Pakistan Standard Time) slot print_timing: id  0 | task 531 |        eval time =    4092.36 ms /    83 tokens (   49.91 ms per token,    20.04 tokens per second)
+Fri Aug 21 2026 16:08:15 GMT+0500 (Pakistan Standard Time) slot print_timing: id  0 | task 531 |       total time =    4123.52 ms /    84 tokens
+Fri Aug 21 2026 16:08:15 GMT+0500 (Pakistan Standard Time) slot print_timing: id  0 | task 531 |    graphs reused =        576
+Fri Aug 21 2026 16:08:15 GMT+0500 (Pakistan Standard Time) slot      release: id  0 | task 531 | stop processing: n_tokens = 4180, truncated = 0
+Fri Aug 21 2026 16:08:15 GMT+0500 (Pakistan Standard Time) srv  update_slots: all slots are idle
+Fri Aug 21 2026 16:08:15 GMT+0500 (Pakistan Standard Time) [GIN] 2026/08/21 - 11:08:15 | 200 |  5.695875233s |       127.0.0.1 | POST     "/api/chat"
+Fri Aug 21 2026 16:08:15 GMT+0500 (Pakistan Standard Time) 2026-08-21 11:08:15 | INFO     | httpx | HTTP Request: POST http://127.0.0.1:11434/api/chat "HTTP/1.1 200 OK"
+Fri Aug 21 2026 16:08:16 GMT+0500 (Pakistan Standard Time) 2026-08-21 11:08:16 | INFO     | httpx | HTTP Request: POST https://os-api.agno.com/telemetry/runs "HTTP/2 201 Created"

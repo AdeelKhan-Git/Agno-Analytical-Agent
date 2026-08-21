@@ -13,6 +13,7 @@ from glossary_tools import GlossaryTools
 from db import ENGINE, GEMINI_API_KEY, OPENAI_API_KEY
 import pandas as pd
 from instructions import INSTRUCTIONS
+from schema_knowledge import build_knowledge
 
 logger = logging.getLogger(__name__)
 
@@ -102,6 +103,8 @@ def build_agent():
             PandasTools(),
             GlossaryTools(),
         ],
+        knowledge=build_knowledge(),
+        search_knowledge=True,
         description=( 
             "You are a data analyst agent with direct access to a SQL database via your tools.\n"
              ),
@@ -187,6 +190,91 @@ def _validate_literals(sql: str):
                     f"if the user's wording matches one of them exactly, or by including ALL "
                     f"relevant values with IN (...) — do not refuse the question over this."
                 )
+    return problems
+
+
+# ============================================================================
+# SECTION: dead/empty-column validator — catches the model selecting a
+# column that is real (not hallucinated) but effectively always NULL in
+# production, so the query "succeeds" while silently returning nothing
+# useful. General on purpose: works for ANY table/column, computed live
+# from actual data, not a hardcoded list of known-dead columns.
+# ============================================================================
+_DEAD_COLUMN_NULL_RATIO_THRESHOLD = 0.98  # >=98% NULL across the sample counts as dead
+_DEAD_COLUMN_SAMPLE_ROWS = 500
+
+
+def _extract_select_columns(sql: str) -> list[tuple[str, str]]:
+    """Returns (table_hint_or_None, column_name) pairs for columns that
+    appear in the SELECT list specifically — not WHERE/JOIN/GROUP BY,
+    since a dead column being FILTERED on (e.g. checking it's non-null)
+    is a different, less risky pattern than a dead column being the
+    actual thing returned to the user."""
+    match = re.search(r"SELECT\s+(.*?)\s+FROM\s+", sql, flags=re.IGNORECASE | re.DOTALL)
+    if not match:
+        return []
+    select_list = match.group(1)
+    if select_list.strip() == "*":
+        return []
+
+    columns = []
+    for raw in select_list.split(","):
+        raw = raw.strip()
+        # strip aggregate wrappers like COUNT(x), SUM(x) — those aren't
+        # "selecting the raw column value" the way a bare column ref is
+        if re.match(r"^\w+\s*\(", raw):
+            continue
+        # drop an "AS alias" suffix
+        raw = re.split(r"\s+AS\s+", raw, flags=re.IGNORECASE)[0].strip()
+        m = re.match(r"^(?:(\w+)\.)?(\w+)$", raw)
+        if m:
+            table_hint, col = m.groups()
+            columns.append((table_hint, col))
+    return columns
+
+
+def _validate_selected_columns_not_dead(sql: str) -> list:
+    table = _extract_main_table(sql)
+    if not table:
+        return []
+
+    select_cols = _extract_select_columns(sql)
+    if not select_cols:
+        return []
+
+    problems = []
+    for _table_hint, column in select_cols:
+        try:
+            query = (
+                f"SELECT "
+                f"SUM(CASE WHEN {column} IS NULL OR {column} = '' THEN 1 ELSE 0 END) AS null_count, "
+                f"COUNT(*) AS total_count "
+                f"FROM (SELECT {column} FROM {table} LIMIT {_DEAD_COLUMN_SAMPLE_ROWS}) AS sample"
+            )
+            df = pd.read_sql_query(query, ENGINE)
+            null_count = int(df["null_count"].iloc[0] or 0)
+            total_count = int(df["total_count"].iloc[0] or 0)
+        except Exception as e:
+            logger.debug("_validate_selected_columns_not_dead could not sample %s.%s: %s", table, column, e)
+            continue
+
+        if total_count == 0:
+            continue
+        null_ratio = null_count / total_count
+        if null_ratio >= _DEAD_COLUMN_NULL_RATIO_THRESHOLD:
+            logger.warning(
+                "DEAD COLUMN selected: %s.%s is %.0f%% NULL/empty across a %d-row sample",
+                table, column, null_ratio * 100, total_count,
+            )
+            problems.append(
+                f"DEAD COLUMN: '{column}' on {table} is {null_ratio * 100:.0f}% NULL/empty "
+                f"across a real sample of {total_count} rows — selecting it will not return "
+                f"a useful answer even though the column exists and the query runs "
+                f"successfully. Call get_column_description('{table}', '{column}') and/or "
+                f"get_table_description('{table}') to find where this data actually lives "
+                f"(often a different, similarly-named column, or a join to another table) "
+                f"before finalizing your SQL."
+            )
     return problems
 
 
@@ -287,6 +375,7 @@ def plan(user_prompt: str, _max_retries: int = 2):
 
     if result.sql_used and not result.is_refusal and _max_retries > 0:
         problems = _validate_literals(result.sql_used)
+        problems += _validate_selected_columns_not_dead(result.sql_used)
         # problems += _validate_glossary_coverage(result.sql_used, user_prompt)
         if problems:
             logger.warning(
