@@ -1,6 +1,3 @@
-#!/bin/bash
-set -e
-
 ############################################################
 # Start Ollama
 ############################################################
@@ -24,6 +21,9 @@ echo "Ollama is ready."
 ############################################################
 # Pull model if not already present
 ############################################################
+# This MUST match the default OLLAMA_MODEL agno_agent.py reads — if the two
+# ever drift apart, this pulls one model while the app tries to load a
+# different one that was never downloaded, and the first real query fails.
 
 MODEL="${OLLAMA_MODEL:-qwen3.6:27b}"
 
@@ -35,37 +35,19 @@ else
 fi
 
 ############################################################
-# Start Tailscale (optional)
+# Warm the model — load it into memory now, not on the first
+# user query. Without this, whoever asks the first question
+# pays the full model-load latency (can be 30s-2min+ for a
+# 27B+ model), which looks like the app hanging or broken.
 ############################################################
 
-if [ -n "$TAILSCALE_AUTHKEY" ]; then
+echo "======================================"
+echo "Warming up $MODEL..."
+echo "======================================"
 
-    echo "======================================"
-    echo "Starting Tailscale..."
-    echo "======================================"
-
-    tailscaled \
-        --tun=userspace-networking \
-        --state=/tmp/tailscaled.state &
-
-    TAILSCALE_PID=$!
-
-    sleep 5
-
-    tailscale up \
-        --authkey="$TAILSCALE_AUTHKEY" \
-        --hostname=runpod-agent \
-        --accept-routes
-
-    echo "Connected to Tailnet."
-
-    echo "Tailscale IPs:"
-    tailscale ip
-
-else
-
-    echo "TAILSCALE_AUTHKEY not provided."
-fi
+curl -s http://127.0.0.1:11434/api/generate -d "{\"model\": \"$MODEL\", \"prompt\": \"hi\", \"stream\": false}" >/dev/null 2>&1 \
+    && echo "Model warmed and resident in memory." \
+    || echo "Warm-up call failed — continuing anyway, first user query will load the model instead."
 
 ############################################################
 # Start Streamlit
@@ -75,4 +57,8 @@ echo "======================================"
 echo "Starting Streamlit..."
 echo "======================================"
 
-exec streamlit run app.py
+exec streamlit run app.py \
+    --server.address=0.0.0.0 \
+    --server.port=8501 \
+    --server.enableCORS=false \
+    --server.enableXsrfProtection=false

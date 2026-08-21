@@ -1,8 +1,19 @@
 import logging
+import json
+import os
 from sqlalchemy import inspect
-from db import DB_URL,ENGINE
+from db import DB_URL, ENGINE
 
 logger = logging.getLogger(__name__)
+
+_GLOSSARY_PATH = os.path.join(os.path.dirname(__file__), "column_glossary.json")
+
+
+def _load_glossary() -> dict:
+    if not os.path.exists(_GLOSSARY_PATH):
+        return {}
+    with open(_GLOSSARY_PATH) as f:
+        return json.load(f)
 
 _DIALECT_HINTS = {
     "mssql": "This database is Microsoft SQL Server — use T-SQL syntax "
@@ -25,6 +36,7 @@ def _dialect_hint(db_url: str) -> str:
 
 def discover_schema(engine: str):
     inspector = inspect(engine)
+    glossary = _load_glossary()
     lines = []
     try:
         schema_names = inspector.get_schema_names()
@@ -41,7 +53,23 @@ def discover_schema(engine: str):
         for table_name in table_names:
             qualified = f"{schema}.{table_name}" if schema else table_name
             columns = inspector.get_columns(table_name, schema=schema)
-            col_desc = ", ".join(f"{c['name']} ({c['type']})" for c in columns)
+
+            col_parts = []
+            for c in columns:
+                part = f"{c['name']} ({c['type']})"
+                # Inline small closed-set code maps directly here — this is
+                # cheap (a handful of tokens per coded column) and stable, so
+                # it doesn't need a get_column_codes tool round-trip on every
+                # query. Only genuinely dynamic/high-cardinality lookups and
+                # full narrative descriptions stay tool-based (see
+                # glossary_tools.py) to keep this block from growing
+                # unbounded as more tables/columns get documented.
+                mapping = glossary.get(f"{qualified}.{c['name']}")
+                if mapping:
+                    codes = ", ".join(f"{k}={v}" for k, v in mapping.items())
+                    part += f" [codes: {codes}]"
+                col_parts.append(part)
+            col_desc = ", ".join(col_parts)
 
             pk = inspector.get_pk_constraint(table_name, schema=schema)
             pk_cols = pk.get("constrained_columns") or []
@@ -143,6 +171,29 @@ INSTRUCTIONS = [
             "is the tool for that.\n"
             "  4. If neither gives you enough confidence to know what a value means, say so "
             "explicitly in your explanation instead of guessing.",
+
+            # ================================================================
+            # SECTION: get_column_description — full business context, for
+            # columns whose PURPOSE (not just coded values) is unclear
+            # ================================================================
+            "get_column_codes and get_column_description answer DIFFERENT questions. "
+            "get_column_codes tells you what a SHORT CODE VALUE means (e.g. 'S' -> "
+            "'Subscription') — use it when you already know which column to filter on and "
+            "need to decode its values. get_column_description tells you the column's overall "
+            "PURPOSE and whether it's safe to use at all — call it whenever a column's name "
+            "sounds like it should hold something (e.g. a name, a status, a detail field) but "
+            "you are not certain it is actually populated, current, or the right column for that "
+            "concept, especially for: any column whose name includes 'old', 'legacy', 'dummy', "
+            "or a near-duplicate of another column's name (there may be two columns that sound "
+            "like they mean the same thing, where only one is actually populated/current); any "
+            "column you have not used before in this conversation; and any column that turns out "
+            "to return NULL/empty when you check it — a plausibly-named but always-empty column "
+            "means the real answer lives somewhere else (a different column or a join to another "
+            "table) and get_column_description usually says exactly where.",
+            "If get_column_description says a column is empty/unused or superseded by another "
+            "column, or that the real data lives via a join to a different table, follow that "
+            "guidance rather than continuing to use the original column — and do not report the "
+            "empty/NULL value back to the user as if it were the real answer.",
 
             # ================================================================
             # SECTION: resolving column-name collisions — match by VALUE

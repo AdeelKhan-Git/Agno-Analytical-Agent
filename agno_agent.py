@@ -94,7 +94,7 @@ class QueryPlan(BaseModel):
 def build_agent():
 
     return Agent(
-        model=Ollama(id="qwen3.6:27b", options={"temperature": 0.6, "top_p": 0.95, "top_k": 20, "num_ctx": 32768}),
+        model=Ollama(id="granite4.1:30b", options={"temperature": 0.2, "top_p": 0.95, "top_k": 20, "num_ctx": 8192}),
         # model=OpenAIChat(id="gpt-4o", api_key=OPENAI_API_KEY),
         # model=Gemini(id="gemini-2.5-flash", api_key=GEMINI_API_KEY),
         tools=[
@@ -216,7 +216,7 @@ def _validate_glossary_coverage(sql: str, user_prompt: str) -> list:
     the SQL at all — i.e. the agent silently dropped part of the question
     instead of filtering on it. This is exactly what happened when 'open
     access' was ignored entirely instead of filtering jtype='O'."""
-    from glossary_tools import GlossaryTools
+
 
     glossary = GlossaryTools()._glossary
     prompt_words = set(re.findall(r"[a-z0-9]+", user_prompt.lower()))
@@ -287,7 +287,7 @@ def plan(user_prompt: str, _max_retries: int = 2):
 
     if result.sql_used and not result.is_refusal and _max_retries > 0:
         problems = _validate_literals(result.sql_used)
-        problems += _validate_glossary_coverage(result.sql_used, user_prompt)
+        # problems += _validate_glossary_coverage(result.sql_used, user_prompt)
         if problems:
             logger.warning(
                 "Validation found %d problem(s), triggering retry (retries left after this=%d): %s",

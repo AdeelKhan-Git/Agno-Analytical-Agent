@@ -10,26 +10,29 @@ from rapidfuzz import fuzz
 logger = logging.getLogger(__name__)
 
 GLOSSARY_PATH = os.path.join(os.path.dirname(__file__), "column_glossary.json")
+DESCRIPTIONS_PATH = os.path.join(os.path.dirname(__file__), "column_descriptions.json")
 
 
 class GlossaryTools(Toolkit):
 
     def __init__(self):
         super().__init__(name="glossary_tools")
-        self._glossary = self._load()
+        self._glossary = self._load(GLOSSARY_PATH)
+        self._descriptions = self._load(DESCRIPTIONS_PATH)
         self.register(self.get_column_codes)
         self.register(self.get_sample_values)
         self.register(self.list_documented_columns)
         self.register(self.resolve_filter_value)
+        self.register(self.get_column_description)
 
     # ------------------------------------------------------------------ #
     # internal helpers
     # ------------------------------------------------------------------ #
 
-    def _load(self) -> dict:
-        if not os.path.exists(GLOSSARY_PATH):
+    def _load(self, path: str) -> dict:
+        if not os.path.exists(path):
             return {}
-        with open(GLOSSARY_PATH, "r") as f:
+        with open(path, "r") as f:
             return json.load(f)
 
     def _lookup_key(self, table_name: str, column_name: str):
@@ -48,6 +51,18 @@ class GlossaryTools(Toolkit):
                 return glossary_key, mapping
 
         return exact_key, None
+
+    def _lookup_description(self, table_name: str, column_name: str):
+        # column_descriptions.json is shaped {"ITS.journal": {"jtype": "..."}},
+        # one level shallower than column_glossary.json's flat "table.col" keys.
+        if table_name in self._descriptions and column_name in self._descriptions[table_name]:
+            return self._descriptions[table_name][column_name]
+
+        bare_table = table_name.split(".")[-1]
+        for desc_table, cols in self._descriptions.items():
+            if desc_table.split(".")[-1].lower() == bare_table.lower() and column_name in cols:
+                return cols[column_name]
+        return None
 
     # ------------------------------------------------------------------ #
     # tools exposed to the agent
@@ -88,6 +103,26 @@ class GlossaryTools(Toolkit):
     def list_documented_columns(self):
         logger.info("list_documented_columns() -> %d documented column(s)", len(self._glossary))
         return json.dumps(list(self._glossary.keys()))
+
+    def get_column_description(self, table_name: str, column_name: str):
+        """Full business-context paragraph for a column — WHY it exists, whether
+        it's dead/unused, which column to prefer if it's a legacy duplicate, and
+        join guidance. This is the detailed counterpart to get_column_codes
+        (which only gives a short code->meaning map for closed-set values).
+        Call this before relying on any column whose purpose isn't obvious from
+        its name alone, and always before assuming a plausibly-named column
+        (e.g. one that sounds like it should hold a person's name or a status)
+        actually holds real, populated data."""
+        description = self._lookup_description(table_name, column_name)
+        if not description:
+            logger.info("get_column_description(%s, %s) -> no documented description", table_name, column_name)
+            return (
+                f"No documented business description for {table_name}.{column_name}. "
+                f"Use get_sample_values to inspect actual stored values before assuming "
+                f"its meaning from the column name alone."
+            )
+        logger.info("get_column_description(%s, %s) -> found", table_name, column_name)
+        return description
 
 
     def resolve_filter_value(self,table_name: str,column_name: str,user_value: str):

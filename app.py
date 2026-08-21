@@ -423,52 +423,229 @@ prompt = st.chat_input("Ask anything about your data...")
 # ============================================================================
 if prompt:
     logger.info("User submitted prompt: %r", prompt)
+
+    # ------------------------------------------------------------------------
+    # Initialize state
+    # ------------------------------------------------------------------------
     df = pd.DataFrame()
+    qp = None
+    query_error = None
 
+    # ------------------------------------------------------------------------
+    # Create loading overlay
+    # ------------------------------------------------------------------------
     loader_placeholder = st.empty()
-    loader_placeholder.markdown("""
-    <div class="loading-overlay">
-        <div class="loading-box">
-            <div class="loading-spinner"></div>
-            <div class="loading-text">Analyzing your question...</div>
+
+    loader_placeholder.markdown(
+        """
+        <div class="loading-overlay">
+            <div class="loading-box">
+                <div class="loading-spinner"></div>
+                <div class="loading-text">
+                    Analyzing your question...
+                </div>
+            </div>
         </div>
-    </div>
-    """, unsafe_allow_html=True)
+        """,
+        unsafe_allow_html=True,
+    )
 
-    with st.status("🤖 AI is thinking...", expanded=True) as s:
-        st.write("Planning...")
-        qp = plan(prompt)
-        if qp.is_refusal:
-            logger.info("Request refused: %s", qp.explanation)
-            s.update(label="Cannot fulfill this request", state="error")
-            df = pd.DataFrame()  # no query was run — nothing to cache/display
-        else:
-            st.write("Executing SQL...")
-            if qp.is_refusal or not qp.sql_used:
-                logger.info("No SQL produced — showing explanation only: %s", qp.explanation)
-                st.warning(qp.explanation)
-            else:
-                try:
-                    df = run_sql(qp.sql_used)
-                except Exception:
-                    logger.exception("run_sql failed for query produced by plan(): %s", qp.sql_used)
-                    raise
-                logger.info("Query returned %d row(s), %d column(s)", len(df), len(df.columns))
-            s.update(label="Done", state="complete")
+    try:
+        # ====================================================================
+        # AI PROCESSING
+        # ====================================================================
+        with st.status("🤖 AI is thinking...", expanded=True) as status:
 
-    loader_placeholder.empty()
+            # ----------------------------------------------------------------
+            # STEP 1: PLAN
+            # ----------------------------------------------------------------
+            try:
+                st.write("🔍 Understanding your question...")
 
-    st.session_state.plan = qp
-    st.session_state.df = df
-    st.session_state.current_prompt = prompt  # full text, for the main-page display
-    st.session_state.history.append({
-        "prompt": prompt,
-        "chart_type": qp.chart_type if not qp.is_refusal else "refused",
-        "rows": len(df),
-        "query_plan": qp,   # cached — clicking history restores this directly
-        "dataframe": df,    # cached — no re-query needed
-        "time": datetime.now().strftime("%H:%M"),
-    })
+                qp = plan(prompt)
+
+                logger.info(
+                    "Plan generated successfully. refusal=%s sql=%s",
+                    qp.is_refusal,
+                    bool(qp.sql_used),
+                )
+
+            except Exception as e:
+                query_error = e
+
+                logger.exception(
+                    "Planning failed for prompt: %r",
+                    prompt,
+                )
+
+                status.update(
+                    label="❌ Failed while generating the query plan",
+                    state="error",
+                )
+
+                # Stop processing this request, but DON'T raise.
+                qp = None
+
+            # ----------------------------------------------------------------
+            # STEP 2: PROCESS PLAN
+            # ----------------------------------------------------------------
+            if qp is not None and query_error is None:
+
+                # ============================================================
+                # REFUSAL
+                # ============================================================
+                if qp.is_refusal:
+                    logger.info(
+                        "Request refused: %s",
+                        qp.explanation,
+                    )
+
+                    status.update(
+                        label="Request cannot be fulfilled",
+                        state="error",
+                    )
+
+                    df = pd.DataFrame()
+
+                # ============================================================
+                # NO SQL
+                # ============================================================
+                elif not qp.sql_used:
+                    logger.info(
+                        "No SQL generated. Explanation: %s",
+                        qp.explanation,
+                    )
+
+                    status.update(
+                        label="Completed",
+                        state="complete",
+                    )
+
+                    df = pd.DataFrame()
+
+                # ============================================================
+                # SQL GENERATED
+                # ============================================================
+                else:
+
+                    st.write("⚙️ Executing SQL...")
+
+                    try:
+                        # ----------------------------------------------------
+                        # Execute SQL
+                        # ----------------------------------------------------
+                        df = run_sql(qp.sql_used)
+
+                        logger.info(
+                            "SQL executed successfully: %d rows, %d columns",
+                            len(df),
+                            len(df.columns),
+                        )
+
+                        status.update(
+                            label="✅ Query completed",
+                            state="complete",
+                        )
+
+                    except Exception as e:
+                        query_error = e
+
+                        logger.exception(
+                            "SQL execution failed.\nSQL: %s",
+                            qp.sql_used,
+                        )
+
+                        status.update(
+                            label="❌ SQL execution failed",
+                            state="error",
+                        )
+
+                        # IMPORTANT:
+                        # Do NOT `raise` here.
+                        #
+                        # Raising the exception would terminate execution
+                        # before the loader cleanup code.
+                        df = pd.DataFrame()
+
+    except Exception as e:
+        # ====================================================================
+        # UNEXPECTED ERROR
+        # ====================================================================
+        query_error = e
+
+        logger.exception(
+            "Unexpected error while processing prompt: %r",
+            prompt,
+        )
+
+    finally:
+        # ====================================================================
+        # CRITICAL LOADER CLEANUP
+        #
+        # This ALWAYS executes:
+        #   - success
+        #   - SQL error
+        #   - LLM error
+        #   - retrieval error
+        #   - unexpected exception
+        # ====================================================================
+        try:
+            loader_placeholder.empty()
+        except Exception:
+            logger.exception("Failed to remove loading overlay")
+
+    # =========================================================================
+    # HANDLE ERROR AFTER LOADER HAS BEEN REMOVED
+    # =========================================================================
+    if query_error is not None:
+
+        st.error(
+            "❌ Something went wrong while processing your request."
+        )
+
+        # ------------------------------------------------------------
+        # Show technical error details in an expandable section.
+        # This is useful during development but doesn't clutter the UI.
+        # ------------------------------------------------------------
+        with st.expander("🔍 Error details", expanded=False):
+            st.exception(query_error)
+
+        # ------------------------------------------------------------
+        # Clear failed query state
+        # ------------------------------------------------------------
+        st.session_state.plan = None
+        st.session_state.df = None
+        st.session_state.current_prompt = None
+
+    # =========================================================================
+    # SUCCESS / REFUSAL / EXPLANATION RESULT
+    # =========================================================================
+    elif qp is not None:
+
+        # ---------------------------------------------------------------------
+        # Save current result
+        # ---------------------------------------------------------------------
+        st.session_state.plan = qp
+        st.session_state.df = df
+        st.session_state.current_prompt = prompt
+
+        # ---------------------------------------------------------------------
+        # Add to history
+        # ---------------------------------------------------------------------
+        st.session_state.history.append(
+            {
+                "prompt": prompt,
+                "chart_type": (
+                    qp.chart_type
+                    if not qp.is_refusal
+                    else "refused"
+                ),
+                "rows": len(df),
+                "query_plan": qp,
+                "dataframe": df,
+                "time": datetime.now().strftime("%H:%M"),
+            }
+        )
 
 # ============================================================================
 # RESULTS
