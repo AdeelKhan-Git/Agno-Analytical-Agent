@@ -1,26 +1,3 @@
-"""
-Semantic search over everything documented about the schema:
-table_descriptions.json, column_descriptions.json, and
-column_glossary.json — using Agno's OWN Knowledge + OllamaEmbedder +
-LanceDb, not a hand-rolled embedding client. Agno already provides this
-stack; there is no reason to reimplement embedding calls or vector
-storage ourselves.
-
-Storage: LanceDb, embedded/file-based via Agno's vectordb wrapper — no
-separate server. Persist LANCEDB_URI to a real volume in production.
-
-Embeddings: agno.knowledge.embedder.ollama.OllamaEmbedder, local via
-Ollama — nothing about your schema/business logic leaves your infra.
-
-NOTE ON KNOWN AGNO/OLLAMA-EMBEDDER BUGS: older Agno releases have had
-real bugs here (GitHub issues #2248 — get_embedding() returning an
-empty list due to a wrong response-key lookup; #5154 — the `dimensions`
-param being silently ignored). If you're on a recent Agno release these
-should be fixed, but the first time you run rebuild_index.py, actually
-check the log line reporting how many documents were embedded — if
-embeddings are silently empty, insert() will generally still "succeed"
-but search() will return nothing useful.
-"""
 import json
 import logging
 import os
