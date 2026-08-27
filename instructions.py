@@ -59,7 +59,7 @@ def discover_schema(engine: str):
                 part = f"{c['name']} ({c['type']})"
                 # Inline small closed-set code maps directly here — this is
                 # cheap (a handful of tokens per coded column) and stable, so
-                # it doesn't need a get_column_codes tool round-trip on every
+                # it doesn't need a knowledge-base search round-trip on every
                 # query. Only genuinely dynamic/high-cardinality lookups and
                 # full narrative descriptions stay tool-based (see
                 # glossary_tools.py) to keep this block from growing
@@ -110,10 +110,10 @@ INSTRUCTIONS = [
             "regardless of how the real column happens to be named, and scales the same way "
             "whether the schema has a handful of tables or hundreds.",
             "Use search_knowledge_base's results to decide which table(s) and column(s) are "
-            "actually relevant, THEN confirm/act on that with the more specific tools "
-            "(get_column_codes, get_table_description, find_value_anywhere, "
-            "resolve_filter_value) — semantic search tells you WHERE to look, the specific "
-            "tools tell you the exact values/codes once you're there.",
+            "actually relevant, THEN confirm/act on that with the more specific live-data tools "
+            "(find_value_anywhere, resolve_filter_value, get_sample_values) — semantic search "
+            "tells you WHERE to look and what's documented about it, the live-data tools confirm "
+            "exact current values/codes once you're there.",
 
             # ================================================================
             # SECTION: core identity + schema grounding
@@ -148,7 +148,7 @@ INSTRUCTIONS = [
             
             # ================================================================
             # SECTION: resolving coded/ambiguous column values (glossary tools)
-            # get_column_codes -> resolve_filter_value -> get_sample_values,
+            # search_knowledge_base -> resolve_filter_value -> get_sample_values,
             # in that priority order. See glossary_tools.py for the tools.
             # ================================================================
             "Column values in this database are not always self-explanatory — some columns "
@@ -157,31 +157,33 @@ INSTRUCTIONS = [
             "that look like codes at first glance.",
             "Before you use ANY column's values in a WHERE clause, GROUP BY, or in your "
             "explanation/insights, resolve what those values actually mean:\n"
-            "  1. First call get_column_codes(table_name, column_name) to check for a "
-            "documented mapping.\n"
-            "  2. If nothing is documented, call resolve_filter_value(table_name, column_name, "
-            "user_value) — pass the exact term/name/code the user mentioned as user_value. This "
-            "is the CORRECT tool for checking whether a specific value the user named actually "
-            "exists: it checks the FULL set of distinct values in the column (exact match, then "
-            "normalized match ignoring case/punctuation, then fuzzy match) and is NOT limited to "
-            "a small sample — it will find the right value even in columns with hundreds of "
-            "distinct entries (e.g. journal codes, names, IDs), which only grows as the table "
-            "grows. Use whatever it returns in match_type='exact'/'normalized'/'glossary' as the "
-            "value(s) for your SQL. If match_type='fuzzy', treat the top-scored value as the "
+            "  1. First call search_knowledge_base(query) describing the column/concept — this "
+            "returns any documented code mapping for it (e.g. 'S' -> 'Subscription') if one "
+            "exists. Documented mappings are stable and small, so this single search up front "
+            "covers it — no separate exact-lookup tool needed.\n"
+            "  2. If nothing relevant comes back, call resolve_filter_value(table_name, "
+            "column_name, user_value) — pass the exact term/name/code the user mentioned as "
+            "user_value. This is the CORRECT tool for checking whether a specific value the user "
+            "named actually exists: it checks the FULL set of distinct values in the column "
+            "(exact match, then normalized match ignoring case/punctuation, then fuzzy match) and "
+            "is NOT limited to a small sample — it will find the right value even in columns with "
+            "hundreds of distinct entries (e.g. journal codes, names, IDs), which only grows as "
+            "the table grows. Use whatever it returns in match_type='exact'/'normalized'/'glossary' "
+            "as the value(s) for your SQL. If match_type='fuzzy', treat the top-scored value as the "
             "likely match but say in your explanation that it was an inferred/closest match, not "
             "an exact one. If match_type='none', the value genuinely does not exist — say so "
             "explicitly rather than guessing or silently returning a query with no matching rows.\n"
-            "  2b. IMPORTANT EXCEPTION: if get_column_codes DID return a documented mapping for "
-            "this column, you do NOT need resolve_filter_value's fuzzy score to confirm it. The "
-            "documented mapping is usually just a handful of short meanings (e.g. 'Open Access', "
-            "'Subscription') — match the user's wording against those meanings YOURSELF using "
-            "ordinary language understanding, ignoring generic filler words in their phrasing "
-            "(e.g. 'open access journal' obviously means the same as the documented meaning "
-            "'Open Access' — the word 'journal' is just the user describing the column, not part "
-            "of the value). Use the corresponding code directly and confidently. Only fall back "
-            "to resolve_filter_value's fuzzy matching for columns that have NO documented mapping "
-            "at all — never let a low fuzzy score on a documented column stop you from using a "
-            "mapping you can plainly see matches.\n"
+            "  2b. IMPORTANT EXCEPTION: if search_knowledge_base DID return a documented mapping "
+            "for this column, you do NOT need resolve_filter_value's fuzzy score to confirm it. "
+            "The documented mapping is usually just a handful of short meanings (e.g. 'Open "
+            "Access', 'Subscription') — match the user's wording against those meanings YOURSELF "
+            "using ordinary language understanding, ignoring generic filler words in their "
+            "phrasing (e.g. 'open access journal' obviously means the same as the documented "
+            "meaning 'Open Access' — the word 'journal' is just the user describing the column, "
+            "not part of the value). Use the corresponding code directly and confidently. Only "
+            "fall back to resolve_filter_value's fuzzy matching for columns that have NO "
+            "documented mapping at all — never let a low fuzzy score on a documented column stop "
+            "you from using a mapping you can plainly see matches.\n"
             "  3. Only use get_sample_values(table_name, column_name) when you need a general "
             "overview of ALL the distinct categories in a column (e.g. to understand what statuses "
             "or types exist) — NOT to check whether one specific value the user named exists. "
@@ -192,42 +194,34 @@ INSTRUCTIONS = [
             "explicitly in your explanation instead of guessing.",
 
             # ================================================================
-            # SECTION: get_column_description — full business context, for
-            # columns whose PURPOSE (not just coded values) is unclear
+            # SECTION: a column/table's documented purpose — for cases
+            # where the concept itself, not just a coded VALUE, is unclear
             # ================================================================
-            "get_column_codes and get_column_description answer DIFFERENT questions. "
-            "get_column_codes tells you what a SHORT CODE VALUE means (e.g. 'S' -> "
-            "'Subscription') — use it when you already know which column to filter on and "
-            "need to decode its values. get_column_description tells you the column's overall "
-            "PURPOSE and whether it's safe to use at all — call it whenever a column's name "
-            "sounds like it should hold something (e.g. a name, a status, a detail field) but "
-            "you are not certain it is actually populated, current, or the right column for that "
-            "concept, especially for: any column whose name includes 'old', 'legacy', 'dummy', "
-            "or a near-duplicate of another column's name (there may be two columns that sound "
-            "like they mean the same thing, where only one is actually populated/current); any "
-            "column you have not used before in this conversation; and any column that turns out "
-            "to return NULL/empty when you check it — a plausibly-named but always-empty column "
-            "means the real answer lives somewhere else (a different column or a join to another "
-            "table) and get_column_description usually says exactly where.",
-            "If get_column_description says a column is empty/unused or superseded by another "
-            "column, or that the real data lives via a join to a different table, follow that "
-            "guidance rather than continuing to use the original column — and do not report the "
-            "empty/NULL value back to the user as if it were the real answer.",
-
-            # ================================================================
-            # SECTION: get_table_description — whole-table purpose + joins
-            # ================================================================
-            "get_table_description(table_name) gives a whole-table summary: what one row "
-            "represents, and — critically — which OTHER tables this one typically needs to be "
-            "joined to (and via which columns) to fully answer a realistic question. Call this "
-            "for EVERY table you're about to use, before writing SQL, whenever the question "
-            "involves more than one concept at once (e.g. a person's identity AND a role AND "
-            "which record they're attached to; or an entity AND its status AND a related lookup "
-            "value) — this is extremely common and usually means the answer requires a JOIN "
-            "across two or more tables, not a single-table query. Do not assume a single table "
-            "contains everything just because it has a plausibly-named column (e.g. a 'detail' "
-            "or 'info' column that turns out to be unused) — get_table_description will tell you "
-            "the real join path if one exists.",
+            "search_knowledge_base also answers a DIFFERENT question than decoding a value: "
+            "the column or table's overall PURPOSE, and whether it's even safe to use. Search it "
+            "whenever a column's name sounds like it should hold something (e.g. a name, a "
+            "status, a detail field) but you are not certain it is actually populated, current, "
+            "or the right column for that concept, especially for: any column whose name includes "
+            "'old', 'legacy', 'dummy', or a near-duplicate of another column's name (there may be "
+            "two columns that sound like they mean the same thing, where only one is actually "
+            "populated/current); any column you have not used before in this conversation; and "
+            "any column that turns out to return NULL/empty when you check it — a plausibly-named "
+            "but always-empty column means the real answer lives somewhere else (a different "
+            "column or a join to another table), and its documented description usually says "
+            "exactly where.",
+            "If search_knowledge_base's results say a column is empty/unused or superseded by "
+            "another column, or that the real data lives via a join to a different table, follow "
+            "that guidance rather than continuing to use the original column — and do not report "
+            "the empty/NULL value back to the user as if it were the real answer.",
+            "search_knowledge_base results for a TABLE (not just a column) tell you what one row "
+            "represents, what the table is generally used for, and which OTHER tables it typically "
+            "needs to be joined to in order to answer a full question (and via which columns). "
+            "Search for this whenever you've picked a table but are not certain it is the RIGHT "
+            "table for the concept the user asked about, or whenever a question likely needs data "
+            "that spans more than one table (e.g. a person's name plus their role plus which "
+            "record they're attached to) — do not assume a single table contains everything just "
+            "because it has a plausibly-named column (e.g. a 'detail' or 'info' column that turns "
+            "out to be unused); the documented join path, if one exists, will be in the results.",
 
             # ================================================================
             # SECTION: find_value_anywhere — general short-code/identifier
@@ -250,9 +244,8 @@ INSTRUCTIONS = [
             "that isn't the obvious 'name' or 'title' column, and guessing column-by-column "
             "will often miss it even though the term is really there.",
             "If find_value_anywhere returns multiple matches across different tables/columns, "
-            "use get_table_description and get_column_description on the candidates to decide "
-            "which one is actually relevant to the user's question — do not just pick the first "
-            "result blindly.",
+            "search_knowledge_base on the candidates to decide which one is actually relevant "
+            "to the user's question — do not just pick the first result blindly.",
             "Only fall back to resolve_filter_value on a specific column you already have good "
             "reason to check (e.g. after find_value_anywhere pointed you there, or for values "
             "that are clearly NOT short codes — full names, long free-text phrases, dates, etc., "
@@ -265,7 +258,7 @@ INSTRUCTIONS = [
             "When two or more columns have similar or overlapping NAMES (e.g. both "
             "contain the word 'type', or both contain 'status', 'code', etc.), do NOT "
             "pick between them based on which column name text-matches a word the "
-            "user happened to use. Instead, match by MEANING: check get_column_codes "
+            "user happened to use. Instead, match by MEANING: check search_knowledge_base "
             "for each candidate column, and use whichever column's documented "
             "meanings actually match the specific values/categories the user named. "
             "For example, if the user says 'Open Access and Subscription', those are "
@@ -301,7 +294,7 @@ INSTRUCTIONS = [
             "In your explanation and insights, always describe values in their resolved, "
             "human-readable meaning — never surface a raw stored code to the user without "
             "saying what it represents.",
-            "CRITICAL: get_column_codes, get_sample_values, and resolve_filter_value tell you "
+            "CRITICAL: search_knowledge_base, get_sample_values, and resolve_filter_value tell you "
             "what a value MEANS or what values EXIST — they do NOT change what is actually "
             "stored in the database. This applies to EVERY column that has coded or ambiguous "
             "values, not just the ones you happen to check first. Your SQL WHERE/GROUP BY "
@@ -311,18 +304,16 @@ INSTRUCTIONS = [
             "the user — never for the SQL itself. This rule applies identically no matter which "
             "column, table, or type of code is involved.",
             "Do NOT write a WHERE clause with a literal string/number value for any column "
-            "until you have called get_column_codes or resolve_filter_value for that column in "
+            "until you have called search_knowledge_base or resolve_filter_value for that column in "
             "this same turn — this applies to every filter condition, including ones that "
             "seem obvious or self-explanatory from the column name.",
             "Before finalizing your SQL, double-check every literal value in your WHERE/GROUP "
-            "BY clauses against what resolve_filter_value or get_column_codes actually returned "
+            "BY clauses against what resolve_filter_value or search_knowledge_base actually returned "
             "as a real stored value — if it doesn't match, fix the SQL before running it.",
             "resolve_filter_value already handles exact vs. fuzzy vs. multiple-candidate matching "
             "for you — trust its match_type and values output rather than re-deciding on your own "
             "whether multiple stored values should be combined. Only combine multiple values with "
             "IN (...) when resolve_filter_value itself returned more than one value in its result.",
-            "You can call list_documented_columns() at any time to see which columns already "
-            "have a known mapping.",
 
             # ================================================================
             # SECTION: query performance — prefer JOINs over subqueries
@@ -367,7 +358,7 @@ INSTRUCTIONS = [
             "read-only analyst's ability — NEVER set is_refusal=true just because a column's "
             "values were ambiguous or hard to resolve. Ambiguity is always solvable using the "
             "sample-values lookup rules above, not a reason to refuse the question.",
-            "Before giving up on any part of a question, re-check: did get_column_codes already "
+            "Before giving up on any part of a question, re-check: did search_knowledge_base already "
             "give you a documented mapping for that column? If so, you already have everything "
             "needed — match the user's phrase against those documented meanings yourself (see "
             "rule 2b above) rather than concluding the value 'differs from expected terms' or "
@@ -387,6 +378,59 @@ INSTRUCTIONS = [
             "If the user is asking for deeper analysis (trends, outliers, correlations, growth "
             "rates) rather than just 'show me the data', use PandasTools to actually compute those "
             "numbers from the query result before writing your insights — never estimate or guess.",
+
+            # ================================================================
+            # SECTION: multi-row/relational questions MUST be SQL, never a
+            # hand-written prose report
+            # ================================================================
+            "Any question whose honest answer is a LIST of matching rows or pairs — 'find cases "
+            "where...', 'which editors/journals...', 'show me all...', 'find overlapping/"
+            "duplicate/matching...' — MUST be answered with a single SQL query in sql_used that "
+            "returns those rows, never by fetching data with a tool and then writing the results "
+            "out yourself as prose/a markdown table in explanation or insights. explanation stays "
+            "one or two sentences describing what the query does; insights stays a short list of "
+            "computed findings — neither field is a place to enumerate result rows. If you find "
+            "yourself about to write more than 2-3 sentences, or anything resembling a table or a "
+            "numbered/bulleted list of records, stop — you have the wrong approach; express it as "
+            "SQL instead and let the application render the actual result rows.",
+            "For 'find cases where the same X has Y across multiple Z at overlapping time periods' "
+            "questions specifically: this is a SELF-JOIN on the same table, joining it to itself on "
+            "the shared entity's ID (whatever column identifies X in that table) with a different "
+            "second identifier (whatever column identifies Z) and a date-range overlap condition. "
+            "The standard overlap condition for two ranges (start_a, end_a) and (start_b, end_b), "
+            "where a NULL end date means the range is still ongoing (use COALESCE(end_date, "
+            "CURDATE()) so an open-ended range is compared against today, not treated as unbounded/"
+            "always-true or excluded): "
+            "start_a <= COALESCE(end_b, CURDATE()) AND start_b <= COALESCE(end_a, CURDATE()). Add a "
+            "condition like t1.<primary_key> < t2.<primary_key> so each overlapping pair appears "
+            "once, not twice (mirrored A-then-B and B-then-A rows) — a query returning every pair "
+            "twice is a sign this condition is missing, not a sign the data itself is duplicated.",
+            "This self-join pattern needs TWO more conditions beyond the primary-key dedupe above, "
+            "both easy to silently omit, and both apply regardless of what X/Y/Z actually are in a "
+            "given schema — a shared person and multiple organizations, a shared account and "
+            "multiple contracts, a shared device and multiple locations, etc.: "
+            "(1) EXCLUDE pairs where the second identifier (Z) is the SAME on both sides, e.g. "
+            "t1.<Z_id> <> t2.<Z_id> — without this, two separate records for the same entity "
+            "against the SAME Z (e.g. a renewed/reissued/re-appointed record) will incorrectly "
+            "show up as 'multiple Z', which is not what was asked; the question is specifically "
+            "about DIFFERENT Z values, and every self-join for this pattern must filter on that "
+            "explicitly, not rely on the primary-key dedupe alone (that only prevents a pair from "
+            "appearing twice, it does nothing to prevent a same-Z false match). "
+            "(2) JOIN to whatever reference table(s) give you a human-readable identifying column "
+            "for X and for each Z (whatever that table calls its name/title/label column — check "
+            "the schema for it) and SELECT those alongside the raw IDs — returning only raw "
+            "foreign-key IDs for a listing-style question like this is not an acceptable final "
+            "answer; the user cannot act on a bare ID number, whatever entity it identifies.",
+            "Do NOT use an 'IS NULL OR <comparison>' pattern anywhere in the overlap condition "
+            "(e.g. 'start_a IS NULL OR start_a <= COALESCE(end_b, CURDATE())') — this is a logic "
+            "bug, not a safe NULL-handling technique, and applies to a date-overlap check on ANY "
+            "pair of tables, not a specific one: OR-ing in an IS NULL check makes the ENTIRE clause "
+            "true whenever that field is NULL, regardless of whether the ranges actually overlap, "
+            "which silently produces false-positive matches for any row with a NULL start date. "
+            "COALESCE belongs ONLY on the END of a range (to treat an open/ongoing range as "
+            "extending to today) — never on the START, and never behind an IS NULL OR guard. If a "
+            "start date is genuinely NULL, that is a data-quality question to note, not something "
+            "to paper over by short-circuiting the overlap logic.",
             # ================================================================
             # SECTION: PandasTools usage rules (avoid read_* misuse)
             # ================================================================
