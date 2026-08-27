@@ -1,6 +1,7 @@
-import json
+import json,os
 import logging
 import re
+import threading
 from typing import List, Literal, Optional
 from pydantic import BaseModel, Field, field_validator
 from agno.models.openai import OpenAIChat
@@ -93,9 +94,18 @@ class QueryPlan(BaseModel):
 
 
 def build_agent():
-
+    model_id = os.environ.get("OLLAMA_MODEL")
+    if not model_id:
+        raise RuntimeError(
+            "OLLAMA_MODEL is not set. This must be exported by entrypoint.sh "
+            "after it builds the tuned model variant — running this app without "
+            "that means num_ctx/num_predict/temperature are not correctly "
+            "configured. If you're running locally without entrypoint.sh, set "
+            "OLLAMA_MODEL explicitly to a model you've already tuned/pulled."
+        )
+    logger.info("build_agent() using Ollama model: %s", model_id)
     return Agent(
-        model=Ollama(id="granite4.1:30b", options={"temperature": 0.2, "top_p": 0.95, "top_k": 20, "num_ctx": 8192}),
+        model =  Ollama(id=model_id),
         # model=OpenAIChat(id="gpt-4o", api_key=OPENAI_API_KEY),
         # model=Gemini(id="gemini-2.5-flash", api_key=GEMINI_API_KEY),
         tools=[
@@ -113,6 +123,19 @@ def build_agent():
         instructions=INSTRUCTIONS,
         markdown=False,
     )
+
+_agent = None
+_agent_lock = threading.Lock()
+
+
+def _get_agent():
+    global _agent
+    if _agent is None:
+        with _agent_lock:
+            if _agent is None:  # re-check inside the lock (double-checked locking)
+                logger.info("Building agent instance (first call — will be reused for all subsequent requests)")
+                _agent = build_agent()
+    return _agent
 
 
 # ============================================================================
@@ -278,72 +301,11 @@ def _validate_selected_columns_not_dead(sql: str) -> list:
     return problems
 
 
-# ============================================================================
-# SECTION: main entry point — runs the agent, parses its output, then
-# retries automatically if the validator above finds a problem
-# ============================================================================
-def _extract_all_tables(sql: str) -> set:
-    """Unlike _extract_main_table (which only grabs the first FROM table),
-    this pulls every table referenced via FROM or JOIN, so multi-table
-    queries are fully covered."""
-    tables = set()
-    for pattern in (r"FROM\s+([\w\.]+)", r"JOIN\s+([\w\.]+)"):
-        for m in re.findall(pattern, sql, flags=re.IGNORECASE):
-            tables.add(m)
-    return tables
-
-
-def _sql_references_column(sql: str, column_name: str) -> bool:
-    return re.search(rf"\b{re.escape(column_name)}\b", sql, flags=re.IGNORECASE) is not None
-
-
-def _validate_glossary_coverage(sql: str, user_prompt: str) -> list:
-    """Catches a DIFFERENT class of bug than _validate_literals: not a
-    wrong value already in the SQL, but a documented column whose real
-    meaning matches something the user asked for, that never made it into
-    the SQL at all — i.e. the agent silently dropped part of the question
-    instead of filtering on it. This is exactly what happened when 'open
-    access' was ignored entirely instead of filtering jtype='O'."""
-
-
-    glossary = GlossaryTools()._glossary
-    prompt_words = set(re.findall(r"[a-z0-9]+", user_prompt.lower()))
-    tables = _extract_all_tables(sql)
-
-    problems = []
-    for key, mapping in glossary.items():
-        parts = key.split(".")
-        if len(parts) < 2:
-            continue
-        glossary_table_bare = parts[-2]
-        glossary_column = parts[-1]
-
-        table_in_query = any(t.split(".")[-1].lower() == glossary_table_bare.lower() for t in tables)
-        if not table_in_query:
-            continue
-        if _sql_references_column(sql, glossary_column):
-            continue  # already used — nothing to flag
-
-        for code, meaning in mapping.items():
-            meaning_words = {w for w in re.findall(r"[a-z0-9]+", meaning.lower()) if len(w) > 3}
-            overlap = meaning_words & prompt_words
-            if overlap:
-                problems.append(
-                    f"POSSIBLE MISSING CONDITION: the user's question contains word(s) "
-                    f"{overlap} that overlap with the documented meaning '{meaning}' of "
-                    f"column '{glossary_column}' on a table used in this query, but "
-                    f"'{glossary_column}' is not referenced anywhere in your SQL. If the "
-                    f"question implies filtering by this, you likely dropped a condition — "
-                    f"add it. If it's genuinely unrelated, you may ignore this note."
-                )
-                break
-    return problems
-
-
 def plan(user_prompt: str, _max_retries: int = 2):
     logger.info("plan() called (retries left=%d) — prompt: %r", _max_retries, user_prompt)
-    agent = build_agent()
-    response = agent.run(user_prompt)
+    agent = _get_agent()
+    with _agent_lock:
+        response = agent.run(user_prompt)
     content = response.content
 
     result = None
@@ -376,7 +338,6 @@ def plan(user_prompt: str, _max_retries: int = 2):
     if result.sql_used and not result.is_refusal and _max_retries > 0:
         problems = _validate_literals(result.sql_used)
         problems += _validate_selected_columns_not_dead(result.sql_used)
-        # problems += _validate_glossary_coverage(result.sql_used, user_prompt)
         if problems:
             logger.warning(
                 "Validation found %d problem(s), triggering retry (retries left after this=%d): %s",
