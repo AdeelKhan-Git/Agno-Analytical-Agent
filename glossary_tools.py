@@ -12,23 +12,6 @@ from rapidfuzz import fuzz
 logger = logging.getLogger(__name__)
 
 GLOSSARY_PATH = os.path.join(os.path.dirname(__file__), "column_glossary.json")
-DESCRIPTIONS_PATH = os.path.join(os.path.dirname(__file__), "column_descriptions.json")
-TABLE_DESCRIPTIONS_PATH = os.path.join(os.path.dirname(__file__), "table_descriptions.json")
-
-# ---------------------------------------------------------------------- #
-# General "find this term anywhere" support. Deliberately has NO
-# knowledge of any specific table, column, or domain (no "journal",
-# "CMC", "role", etc. hardcoded anywhere below) — it works by inspecting
-# real column names/types from the database and sampling real stored
-# values, so the same logic covers a journal code, an editor's role
-# abbreviation, a status code, or anything else short and code-like on
-# ANY table, without per-case tuning.
-# ---------------------------------------------------------------------- #
-
-# A column is treated as "code-like" (worth sampling for exact/short-term
-# matches) if its name doesn't look like free-form prose/notes AND it's a
-# short text/character SQL type. This is a structural heuristic based on
-# the column's declared type, not a hardcoded list of column names.
 _CODE_LIKE_SQL_TYPES = ("char", "varchar", "text", "enum")
 _FREE_TEXT_NAME_HINTS = (
     "desc", "description", "note", "notes", "bio", "biography", "policy",
@@ -113,14 +96,8 @@ class GlossaryTools(Toolkit):
     def __init__(self):
         super().__init__(name="glossary_tools")
         self._glossary = self._load(GLOSSARY_PATH)
-        self._descriptions = self._load(DESCRIPTIONS_PATH)
-        self._table_descriptions = self._load(TABLE_DESCRIPTIONS_PATH)
-        self.register(self.get_column_codes)
         self.register(self.get_sample_values)
-        self.register(self.list_documented_columns)
         self.register(self.resolve_filter_value)
-        self.register(self.get_column_description)
-        self.register(self.get_table_description)
         self.register(self.find_value_anywhere)
 
     # ------------------------------------------------------------------ #
@@ -150,32 +127,6 @@ class GlossaryTools(Toolkit):
 
         return exact_key, None
 
-    def _lookup_description(self, table_name: str, column_name: str):
-        # column_descriptions.json is shaped {"ITS.journal": {"jtype": "..."}},
-        # one level shallower than column_glossary.json's flat "table.col" keys.
-        if table_name in self._descriptions and column_name in self._descriptions[table_name]:
-            return self._descriptions[table_name][column_name]
-
-        bare_table = table_name.split(".")[-1]
-        for desc_table, cols in self._descriptions.items():
-            if desc_table.split(".")[-1].lower() == bare_table.lower() and column_name in cols:
-                return cols[column_name]
-        return None
-
-    # ------------------------------------------------------------------ #
-    # tools exposed to the agent
-    # ------------------------------------------------------------------ #
-
-    def get_column_codes(self, table_name: str, column_name: str):
-        key, mapping = self._lookup_key(table_name, column_name)
-        if not mapping:
-            logger.info("get_column_codes(%s, %s) -> no documented mapping", table_name, column_name)
-            return (
-                f"No documented mapping for {key}. Call get_sample_values to see "
-                f"the actual stored values, and do not assume their meaning."
-            )
-        logger.info("get_column_codes(%s, %s) -> %s", table_name, column_name, mapping)
-        return json.dumps(mapping)
 
     def get_sample_values(self, table_name: str, column_name: str):
         query = (
@@ -198,53 +149,6 @@ class GlossaryTools(Toolkit):
             logger.warning("get_sample_values(%s, %s) failed: %s", table_name, column_name, e)
             return f"Could not sample values for {table_name}.{column_name}: {e}"
 
-    def list_documented_columns(self):
-        logger.info("list_documented_columns() -> %d documented column(s)", len(self._glossary))
-        return json.dumps(list(self._glossary.keys()))
-
-    def get_column_description(self, table_name: str, column_name: str):
-        """Full business-context paragraph for a column — WHY it exists, whether
-        it's dead/unused, which column to prefer if it's a legacy duplicate, and
-        join guidance. This is the detailed counterpart to get_column_codes
-        (which only gives a short code->meaning map for closed-set values).
-        Call this before relying on any column whose purpose isn't obvious from
-        its name alone, and always before assuming a plausibly-named column
-        (e.g. one that sounds like it should hold a person's name or a status)
-        actually holds real, populated data."""
-        description = self._lookup_description(table_name, column_name)
-        if not description:
-            logger.info("get_column_description(%s, %s) -> no documented description", table_name, column_name)
-            return (
-                f"No documented business description for {table_name}.{column_name}. "
-                f"Use get_sample_values to inspect actual stored values before assuming "
-                f"its meaning from the column name alone."
-            )
-        logger.info("get_column_description(%s, %s) -> found", table_name, column_name)
-        return description
-
-    def get_table_description(self, table_name: str):
-        """High-level, whole-table summary: what one row represents, what
-        the table is generally used for, and which OTHER tables it
-        typically needs to be joined to in order to answer a full
-        question (and via which columns). Call this whenever you've
-        picked a table via schema search but are not certain it is the
-        RIGHT table for the concept the user asked about, or whenever a
-        question likely needs data that spans more than one table (e.g.
-        a person's name plus their role plus which record they're
-        attached to) — the join guidance here tells you the path without
-        guessing at foreign keys yourself."""
-        bare_table = table_name.split(".")[-1].lower()
-        for desc_table, description in self._table_descriptions.items():
-            if desc_table.split(".")[-1].lower() == bare_table:
-                logger.info("get_table_description(%s) -> found", table_name)
-                return description
-        logger.info("get_table_description(%s) -> no documented description", table_name)
-        return (
-            f"No documented table-level description for {table_name}. Use "
-            f"get_column_description on its individual columns, or inspect its "
-            f"foreign keys in the schema block, to understand how it relates to "
-            f"other tables."
-        )
 
     def find_value_anywhere(self, search_term: str, table_name: str = None):
         """GENERAL-PURPOSE lookup for ANY short code, abbreviation, or
