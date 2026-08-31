@@ -1,60 +1,60 @@
 {
-  "ITS.journal.jtype": {
+  "journal.jtype": {
     "meaning": "use this column when ever asked about open access journals and subcription journals",
     "S": "subscription",
     "O": "open access"
   },
-  "ITS.journal.new_mps_journal": {
+  "journal.new_mps_journal": {
     "meaning": "Whether the journal is live on the new MPS publishing platform.",
     "1": "live",
     "0": "not live"
   },
-  "ITS.journal.submission_link": {
+  "journal.submission_link": {
     "meaning": "Whether the manuscript submission link is turned on or off for this journal.",
     "1": "on",
     "2": "off"
   },
-  "ITS.journal.is_visible": {
+  "journal.is_visible": {
     "meaning": "Whether the journal is shown or hidden on the public-facing site.",
     "Y": "show",
     "N": "hide"
   },
-  "ITS.journal.journal_sale": {
+  "journal.journal_sale": {
     "meaning": "Whether the journal is marked as for-sale.",
     "1": "not sale",
     "2": "sale"
   },
-  "ITS.journal.sale_journal_ppv": {
+  "journal.sale_journal_ppv": {
     "meaning": "For a sale journal, whether the pay-per-view price is displayed to readers.",
     "1": "price show",
     "2": "price not show"
   },
-  "ITS.journal.published": {
+  "journal.published": {
     "meaning": "Whether the journal record has been published.",
     "1": "published",
     "2": "not published"
   },
-  "ITS.journal.journal_status": {
+  "journal.journal_status": {
     "meaning": "Overall active/inactive status of the journal record.",
     "1": "active",
     "2": "not active"
   },
-  "ITS.journal.continues_publication_journal": {
+  "journal.continues_publication_journal": {
     "meaning": "Whether the journal follows a volume-based continuous-publication (CP) model, as opposed to discrete issues.",
     "1": "volume based cp journal",
     "0": "not volume based cp journal"
   },
-  "ITS.journal.IsIssue": {
+  "journal.IsIssue": {
     "meaning": "Whether the journal publishes in discrete issues (as opposed to continuous publication).",
     "1": "issued",
     "0": "not issued"
   },
-  "ITS.journal.cp_issue_journal": {
+  "journal.cp_issue_journal": {
     "meaning": "For continuous-publication journals, whether the journal is also organized into issues.",
     "0": "not issued based cp journal",
     "1": "issued based cp journal"
   },
-  "ITS.tbl_editors.status": {
+  "tbl_editors.status": {
     "meaning": "Editor account status.",
     "A": "active",
     "B": "block",
