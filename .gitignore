@@ -10,3 +10,7 @@ __pycache__/
 *$py.class
 convert.py
 data
+agno_SQLTool_cache
+agent_sessions.db
+agent_sessions.db-shm
+agent_sessions.db-wal
