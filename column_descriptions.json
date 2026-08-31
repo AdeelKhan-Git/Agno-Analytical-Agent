@@ -1,6 +1,6 @@
 {
-  "ITS.journal": {
-    "journal_id": "Primary key of the journal table. This is the primary key of ITS.journal and is the column that must be used for joins with ITS.tbl_ebm.journal_id. Always use journal_id for journal joins; do not use old_journal_id, old_jour_id, journal_id_dummy, or other legacy/duplicate IDs.",
+  "journal": {
+    "journal_id": "Primary key of the journal table. This is the primary key of journal and is the column that must be used for joins with tbl_ebm.journal_id. Always use journal_id for journal joins; do not use old_journal_id, old_jour_id, journal_id_dummy, or other legacy/duplicate IDs.",
     "old_journal_id": "A legacy/previous journal ID from before a past system migration. Not populated for every journal (some are NULL). Do not use for current joins — journal_id is the current key.",
     "nid": "An internal node/content ID (5-digit numeric). Not a foreign key to another table in this dataset — treat as an internal reference number, not a join key.",
     "publisher_id": "Numeric ID identifying the journal's publisher. There is no separate publishers table in this dataset — publisher_name_dummy on this same table holds the readable publisher name for this ID.",
@@ -81,18 +81,18 @@
     "sale_submission_link": "Submission link specific to a for-sale journal's workflow. Always empty/NULL in current data.",
     "sale_journal_ppv": "For a for-sale journal, whether the pay-per-view price is displayed to readers. Coded: 1 = price shown, 2 = price not shown. Only meaningful when journal_sale = 2 (sale)."
   },
-  "ITS.tbl_ebm": {
+  "tbl_ebm": {
     "ebm_id": "Primary key for this Editorial Board Management (EBM) record — i.e. one row represents one editor holding one role on one journal.",
     "added_by": "Numeric staff ID of who added this EBM record. No user-name lookup table is included in this dataset.",
-    "journal_id_jms": "The journal's identifier as tracked by the SEPARATE external JMS system. This is a DIFFERENT identifier from journal_id, maintained by a different system — it is NOT guaranteed to equal journal_id, even though the two happen to match in this dataset. NEVER use journal_id_jms to join to ITS.journal — always use journal_id for that. Only reference journal_id_jms when a question is specifically about the JMS-side identifier itself, not for any ordinary journal join.",
-    "journal_id": "Foreign key to ITS.journal.journal_id. ALWAYS use this column when joining tbl_ebm to the journal table.",
-    "editor_id": "Foreign key to ITS.tbl_editors.editor_id. ALWAYS use this column when the user asks for editor information or needs editor details; join tbl_ebm.editor_id to tbl_editors.editor_id.",
+    "journal_id_jms": "The journal's identifier as tracked by the SEPARATE external JMS system. This is a DIFFERENT identifier from journal_id, maintained by a different system — it is NOT guaranteed to equal journal_id, even though the two happen to match in this dataset. NEVER use journal_id_jms to join to journal — always use journal_id for that. Only reference journal_id_jms when a question is specifically about the JMS-side identifier itself, not for any ordinary journal join.",
+    "journal_id": "Foreign key to journal.journal_id. ALWAYS use this column when joining tbl_ebm to the journal table.",
+    "editor_id": "Foreign key to tbl_editors.editor_id. ALWAYS use this column when the user asks for editor information or needs editor details; join tbl_ebm.editor_id to tbl_editors.editor_id.",
     "ebm_role_id": "Duplicate/legacy copy of role_id. Do not use this column for role joins; use tbl_ebm.role_id, which is the correct foreign key column.",
-    "role_id": "Foreign key to ITS.tbl_ebm_role.role_id. ALWAYS use this column when the user asks about an editorial role or provides a role name; join tbl_ebm.role_id to tbl_ebm_role.role_id to identify/filter the role.",
+    "role_id": "Foreign key to tbl_ebm_role.role_id. ALWAYS use this column when the user asks about an editorial role or provides a role name; join tbl_ebm.role_id to tbl_ebm_role.role_id to identify/filter the role.",
     "region_id": "Numeric ID for the editor's assigned geographic region for this role. No separate regions lookup table is included — 'section_region' on this same table holds the readable region name.",
     "main_section": "The broad subject-area section this editorial role covers (e.g. 'Chemistry', 'Clinical Medicine'). A small fixed set of top-level subject categories.",
     "section": "The specific sub-section or manuscript-type category this role covers within main_section (e.g. 'Reviews', 'Drug Discovery'). More granular than main_section.",
-    "ebm_role_name": "A denormalized TEXT COPY of the role name, stored directly on this record for convenience — NOT the correct source to use for role information. NEVER filter or join on ebm_role_name to answer a role question. ALWAYS join to ITS.tbl_ebm_role via role_id and filter/match on tbl_ebm_role.role or tbl_ebm_role.nicename instead — that join table is the single source of truth for role identity, and ebm_role_name can be stale or inconsistent with it.",
+    "ebm_role_name": "A denormalized TEXT COPY of the role name, stored directly on this record for convenience — NOT the correct source to use for role information. NEVER filter or join on ebm_role_name to answer a role question. ALWAYS join to tbl_ebm_role via role_id and filter/match on tbl_ebm_role.role or tbl_ebm_role.nicename instead — that join table is the single source of truth for role identity, and ebm_role_name can be stale or inconsistent with it.",
     "conditional_ebm": "Whether this editorial appointment is conditional/provisional rather than a standard confirmed appointment. Coded: Y = conditional, N = standard.",
     "executive_ge": "Whether this is an Executive Guest Editor appointment specifically (a distinct sub-type of guest editorship). Coded: Y = yes, N = no.",
     "section_region": "The readable geographic region name for this editorial role (e.g. 'Europe', 'Asia'). Corresponds to region_id.",
@@ -123,14 +123,14 @@
     "flag": "A generic internal flag field. Always '0' in current data — no observed meaning to distinguish values; do not use for filtering unless a nonzero value is confirmed to appear.",
     "editor_user_id": "Duplicate of 'editor_id', referencing the same editor's user-level ID. Use 'editor_id' for joins to tbl_editors."
   },
-  "ITS.tbl_ebm_role": {
+  "tbl_ebm_role": {
     "role_id": "Primary key for this role definition row.",
     "role": "The editorial role name in its short/original form (e.g. 'Co-EIC', 'EIC'). Use this OR nicename when filtering by role name — both describe the same set of roles, just formatted differently.",
     "nicename": "The same role as 'role' but spelled out in full (e.g. 'Co Editor in Chief' instead of 'Co-EIC', 'Editor in Chief' instead of 'EIC'). Prefer matching against whichever form (role or nicename) the user's own wording resembles more closely.",
     "priority": "Numeric display/sort order for this role in editor listings — not a measure of seniority or importance, purely a UI ordering value.",
     "jms_role_id": "Foreign key referencing the equivalent role ID in the external JMS system. Not used for joins within this database — only relevant if cross-referencing against JMS."
   },
-  "ITS.tbl_editors": {
+  "tbl_editors": {
     "editor_id": "Primary key for the editor record. This is the ID used for joins from tbl_ebm.editor_id.",
     "fname": "The editor's first name (may include middle initials or suffixes bundled in for some records, e.g. 'Atta-ur-Rahman, FRS').",
     "mname": "The editor's middle name or initial. Not populated for all editors.",
