@@ -2,7 +2,9 @@ FROM python:3.11-slim-bookworm
 
 ENV DEBIAN_FRONTEND=noninteractive
 
+# ============================================================
 # Install required system packages
+# ============================================================
 RUN apt-get update && apt-get install -y --no-install-recommends \
     curl \
     ca-certificates \
@@ -14,16 +16,29 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     zstd \
     iproute2 \
     iputils-ping \
+    bash \
     && rm -rf /var/lib/apt/lists/*
 
+# ============================================================
 # Install Ollama
+# ============================================================
 RUN curl -fsSL https://ollama.com/install.sh | sh
 
+# ============================================================
+# Application directory
+# ============================================================
 WORKDIR /app
 
+# ============================================================
+# Python dependencies
+# ============================================================
 COPY requirements.txt .
+
 RUN pip install --no-cache-dir -r requirements.txt
 
+# ============================================================
+# Application files
+# ============================================================
 COPY agno_agent.py .
 COPY glossary_tools.py .
 COPY column_glossary.json .
@@ -33,16 +48,42 @@ COPY table_descriptions.json .
 COPY schema_knowledge.py .
 COPY instructions.py .
 COPY rebuild.py .
+COPY agno_SQLTool_cache ./agno_SQLTool_cache/
+COPY agent_sessions.db .
 COPY logging_config.py .
 COPY db.py .
 COPY app.py .
-COPY entrypoint.sh .
 
-RUN chmod +x entrypoint.sh
+# ============================================================
+# Entrypoint
+# ============================================================
+COPY entrypoint.sh /app/entrypoint.sh
 
+# IMPORTANT:
+# Convert Windows CRLF line endings to Linux LF.
+# This fixes:
+#   ./entrypoint.sh: not found
+#   trap: TERM: bad trap
+#   Syntax error: "&&" unexpected
+#
+# Also make the script executable.
+RUN sed -i 's/\r$//' /app/entrypoint.sh \
+    && chmod +x /app/entrypoint.sh
+
+# ============================================================
+# Environment
+# ============================================================
 ENV OLLAMA_MODEL=granite4.1:30b
 ENV OLLAMA_MODELS=/root/.ollama/models
 
+# ============================================================
+# Ports
+# ============================================================
 EXPOSE 8501 11434
 
-ENTRYPOINT ["./entrypoint.sh"]
+# ============================================================
+# Start application
+# ============================================================
+# Explicitly invoke Bash instead of relying on executable
+# detection/shebang handling.
+ENTRYPOINT ["/bin/bash", "/app/entrypoint.sh"]
