@@ -1,6 +1,7 @@
 import json
 import logging
 import os
+from collections import defaultdict
 
 from agno.knowledge.knowledge import Knowledge
 from agno.knowledge.embedder.ollama import OllamaEmbedder
@@ -11,60 +12,79 @@ logger = logging.getLogger(__name__)
 
 LANCEDB_URI = "./data/lancedb"
 EMBEDDER_MODEL = "nomic-embed-text"
-
-
 TABLE_NAME = "schema_knowledge"
 
-GLOSSARY_PATH = os.path.join(os.path.dirname(__file__), "column_glossary.json")
-DESCRIPTIONS_PATH = os.path.join(os.path.dirname(__file__), "column_descriptions.json")
-TABLE_DESCRIPTIONS_PATH = os.path.join(os.path.dirname(__file__), "table_descriptions.json")
+BASE_DIR = os.path.dirname(__file__)
+GLOSSARY_PATH = os.path.join(BASE_DIR, "column_glossary.json")
+DESCRIPTIONS_PATH = os.path.join(BASE_DIR, "column_descriptions.json")
+TABLE_DESCRIPTIONS_PATH = os.path.join(BASE_DIR, "table_descriptions.json")
 
 
 def _load_json(path: str) -> dict:
     if not os.path.exists(path):
         return {}
-    with open(path) as f:
+    with open(path, encoding="utf-8") as f:
         return json.load(f)
 
 
 def build_knowledge() -> Knowledge:
-    """Constructs the Knowledge object. Called both by rebuild_index.py
-    (to populate it) and by glossary_tools.py (to search it) — same
-    construction, so search always points at the same LanceDb table the
-    index was actually built into."""
     vector_db = LanceDb(
         uri=LANCEDB_URI,
         table_name=TABLE_NAME,
-        search_type=SearchType.hybrid,  # vector + keyword — glossary/column
-                                         # text is short, so exact term
-                                         # matches (e.g. an exact column
-                                         # name) benefit from the keyword
-                                         # half as much as semantic phrasing
-                                         # benefits from the vector half
-        embedder=OllamaEmbedder(
-            id=EMBEDDER_MODEL,
-            dimensions=768,
-        ),
+        search_type=SearchType.hybrid,
+        embedder=OllamaEmbedder(id=EMBEDDER_MODEL, dimensions=768),
     )
     return Knowledge(vector_db=vector_db, max_results=5)
 
 
-def _iter_documents():
-    """Yields (name, text_content) pairs from all three JSON files —
-    kept as small, focused chunks (one per table description, one per
-    column description, one per glossary entry) rather than one giant
-    blob per table, so semantic search can pinpoint the specific
-    relevant fact."""
-    table_descriptions = _load_json(TABLE_DESCRIPTIONS_PATH)
+def _table_columns(table: str, column_descriptions: dict) -> str:
+    columns = column_descriptions.get(table, {})
+    if not columns:
+        return ""
+    return "; ".join(f"{column}: {description}" for column, description in columns.items())
+
+
+def _build_relationship_documents(table_descriptions: dict):
     for table, description in table_descriptions.items():
-        yield f"{table} (table overview)", f"Table {table}: {description}"
+        text = str(description)
+        lowered = text.lower()
+        if "join" not in lowered and "connect" not in lowered and "relationship" not in lowered:
+            continue
 
+        yield (
+            f"{table} (relationship guide)",
+            f"Schema relationship guide for {table}. {description} "
+            "Use the documented relationship path when this table is relevant. "
+            "Do not invent alternate join keys or legacy identifiers."
+        )
+
+
+def _iter_documents():
+    table_descriptions = _load_json(TABLE_DESCRIPTIONS_PATH)
     column_descriptions = _load_json(DESCRIPTIONS_PATH)
-    for table, columns in column_descriptions.items():
-        for column, description in columns.items():
-            yield f"{table}.{column} (column description)", f"Table {table}, column {column}: {description}"
-
     glossary = _load_json(GLOSSARY_PATH)
+
+    # Table-level semantic anchors.
+    for table, description in table_descriptions.items():
+        yield (
+            f"{table} (table)",
+            f"TABLE: {table}. TABLE DESCRIPTION: {description}"
+        )
+
+    #  Relationship-aware documents.
+    yield from _build_relationship_documents(table_descriptions)
+
+    # Group all columns for a table into one document. This prevents unrelated
+    #    individual columns from consuming the top-k result budget.
+    for table, columns in column_descriptions.items():
+        column_text = _table_columns(table, column_descriptions)
+        if column_text:
+            yield (
+                f"{table} (columns)",
+                f"TABLE: {table}. COLUMNS AND DESCRIPTIONS: {column_text}"
+            )
+
+    # Keep coded-value mappings searchable by exact column/value terms.
     for qualified_col, mapping in glossary.items():
         parts = qualified_col.rsplit(".", 1)
         if len(parts) != 2:
@@ -73,28 +93,28 @@ def _iter_documents():
         meaning = mapping.get("meaning", "")
         codes = {k: v for k, v in mapping.items() if k != "meaning"}
         codes_text = "; ".join(f"{k} = {v}" for k, v in codes.items())
-        text_content = (
-            f"Table {table}, column {column}: {meaning} "
-            f"Stored codes: {codes_text}. Use the raw code in SQL, never the meaning."
+        yield (
+            f"{table}.{column} (value mapping)",
+            f"TABLE: {table}. COLUMN: {column}. "
+            f"MEANING: {meaning}. STORED VALUES/CODES: {codes_text}. "
+            "When filtering this column, use the raw stored database code/value, not the human-readable meaning."
         )
-        yield f"{table}.{column} (glossary)", text_content
 
 
 def rebuild(knowledge: Knowledge = None) -> int:
-    """Embeds and inserts every documented fact into the Knowledge
-    store. Meant to be run once, offline, via rebuild_index.py — or
-    again whenever the JSON docs change. NOT on every app startup."""
+
     knowledge = knowledge or build_knowledge()
     count = 0
+
     for name, text_content in _iter_documents():
         knowledge.insert(name=name, text_content=text_content)
         count += 1
+
     logger.info("Rebuilt schema knowledge index: %d document(s) inserted", count)
     if count == 0:
         logger.warning(
             "No documentation found to index — table_descriptions.json, "
-            "column_descriptions.json, and column_glossary.json are all "
-            "empty or missing."
+            "column_descriptions.json, and column_glossary.json are empty or missing."
         )
     return count
 
@@ -110,10 +130,6 @@ def get_knowledge() -> Knowledge:
 
 
 def search_schema_knowledge(query: str, top_k: int = 5) -> list[dict]:
-    """Public entry point used by the agent tool (see glossary_tools.py).
-    Note: Knowledge.search() takes the query as a positional string —
-    num_documents/max_results is configured once on the Knowledge
-    object's constructor (see build_knowledge above), not passed here."""
     knowledge = get_knowledge()
     results = knowledge.search(query)
     return [
