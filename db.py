@@ -1,7 +1,7 @@
 import logging
 import os
 import pandas as pd
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, text
 from dotenv import load_dotenv
 load_dotenv()
 
@@ -39,13 +39,10 @@ def run_sql(sql: str):
             raise ValueError(f"Query contains a forbidden keyword: {keyword!r}")
 
     logger.info("Executing SQL: %s", cleaned)
+    logger.debug("Executing SQL — repr: %r", cleaned)
     try:
-        print("REPR:")
-        print(repr(cleaned))
-
-        print("\nRAW:")
-        print(cleaned)
-        df = pd.read_sql_query(cleaned, ENGINE)
+        with ENGINE.connect().execution_options(no_parameters=True) as conn:
+            df = pd.read_sql_query(cleaned, conn)
     except Exception:
         logger.exception("SQL execution failed for query: %s", cleaned)
         raise
