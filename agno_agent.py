@@ -2,22 +2,60 @@ import json,os
 import logging
 import re
 import threading
-from typing import List, Literal, Optional
-from pydantic import BaseModel, Field, field_validator
+import time
+from typing import List, Literal, Optional, Callable
+from pydantic import BaseModel, Field, field_validator, model_validator
 from agno.models.openai import OpenAIChat
-from agno.agent import Agent
+from agno.agent import Agent, Toolkit
 from agno.models.google import Gemini
 from agno.models.ollama import Ollama
+from agno.models.vllm import VLLM
 from agno.tools.sql import SQLTools
+from agno.tools import tool
 from agno.tools.pandas import PandasTools
-from glossary_tools import GlossaryTools
-from db import ENGINE, GEMINI_API_KEY, OPENAI_API_KEY
+from agno.learn import LearnedKnowledgeConfig, LearningMachine, LearningMode
+from agno.run.agent import RunOutput, ToolCallStartedEvent, ToolCallCompletedEvent
+from agno.db.sqlite import SqliteDb
+from db import ENGINE, GEMINI_API_KEY, OPENAI_API_KEY, DB_URL
 import pandas as pd
 from instructions import INSTRUCTIONS
-from schema_knowledge import build_knowledge
+from schema_knowledge import build_knowledge, build_learning_knowledge
 
 logger = logging.getLogger(__name__)
 
+class SchemaAwareSQLTools(Toolkit):
+    def __init__(self, db_engine):
+        super().__init__(name="schema_aware_sql_tools")
+
+        self._inner = SQLTools(db_engine=db_engine)
+        self.register(self.list_tables)
+        self.register(self.describe_table)
+        self.register(self.run_sql_query)
+
+    @tool(cache_dir='agno_SQLTool_cache', cache_results=True, cache_ttl=3600)
+    def list_tables(self):
+        return self._inner.list_tables()
+
+    @tool(cache_dir='agno_SQLTool_cache', cache_results=True, cache_ttl=3600)
+    def describe_table(self, table_name):
+
+        if isinstance(table_name, dict):
+            table_name = table_name.get("table_name")
+
+        if not isinstance(table_name, str):
+            raise ValueError(
+                "table_name must be a string, "
+                "for example: 'journal'"
+            )
+
+        table_name = table_name.strip()
+
+        if not table_name:
+            raise ValueError("table_name cannot be empty")
+        return self._inner.describe_table(table_name)
+
+    def run_sql_query(self, query):
+        return self._inner.run_sql_query(query)
 
 CHART_TYPE_ALIASES = {
     "scatterplot": "scatter",
@@ -39,32 +77,52 @@ VALID_CHART_TYPES = ("bar", "pie", "line", "table", "scatter", "histogram")
 class QueryPlan(BaseModel):
     sql_used: Optional[str] = Field(
         default=None,
-        description="The final, validated SQL SELECT statement that answers the question. "
-        "Leave this as null/omitted if is_refusal is true — do not provide a SELECT at all "
-        "in that case.",
+        description=(
+            "The SQL SELECT statement that answers the user's database question. "
+            "This field is REQUIRED when is_refusal is false. "
+            "Only leave it null when is_refusal is true."
+        ),
     )
-    chart_type: Literal["bar", "pie", "line", "table", "scatter", "histogram"] = Field(
+
+    chart_type: Literal["bar","pie","line","table","scatter","histogram",] = Field(
         default="table",
-        description="Best-fit chart type for the shape of this result. Irrelevant when "
-        "is_refusal is true — just leave the default.",
+        description="Best-fit chart type for the SQL result.",
     )
     explanation: str = Field(
-        ..., description="One or two sentences on what the query does, OR — if is_refusal is "
-        "true — a clear, direct message saying you cannot fulfill the request and why."
+        ...,
+        description=(
+            "A short explanation of what the SQL query does. "
+            "If is_refusal is true, explain why the request cannot be fulfilled."
+        ),
     )
     is_refusal: bool = Field(
         default=False,
-        description="Set to true ONLY when the request cannot be fulfilled at all — e.g. it "
-        "requires a write operation (update/insert/delete), or asks for something outside a "
-        "read-only data analyst's ability. When true, sql_used must be omitted/null, and "
-        "explanation must clearly state you cannot do this and why.",
+        description=(
+            "Set to true only when the request cannot be fulfilled as a "
+            "read-only SQL analysis. If false, sql_used must contain SQL."
+        ),
     )
     insights: Optional[List[str]] = Field(
         default=None,
-        description="Optional list of short, concrete analytical findings (trends, outliers, "
-        "notable comparisons) if the question asked for analysis rather than just a chart. "
-        "Base these only on aggregate computations you actually ran — never invent numbers.",
+        description=(
+            "Short analytical findings based only on the actual SQL results. "
+            "Never invent numbers or findings."
+        ),
     )
+
+    @model_validator(mode="after")
+    def validate_sql_required(self):
+        if not self.is_refusal:
+            if not self.sql_used or not self.sql_used.strip():
+                raise ValueError(
+                    "sql_used is required when is_refusal is false. "
+                    "Always provide a SQL SELECT query for database questions."
+                )
+
+        if self.is_refusal:
+            self.sql_used = None
+
+        return self
 
     @field_validator("chart_type", mode="before")
     @classmethod
@@ -80,13 +138,18 @@ class QueryPlan(BaseModel):
     @classmethod
     def _normalize_insights(cls, value):
         if value is None:
-            return value
+            return None
+
         normalized = []
         for item in value:
             if isinstance(item, str):
                 normalized.append(item)
             elif isinstance(item, dict):
-                text = item.get("message") or item.get("text") or item.get("insight")
+                text = (
+                    item.get("message")
+                    or item.get("text")
+                    or item.get("insight")
+                )
                 normalized.append(text if text else str(item))
             else:
                 normalized.append(str(item))
@@ -103,29 +166,46 @@ def build_agent():
             "configured. If you're running locally without entrypoint.sh, set "
             "OLLAMA_MODEL explicitly to a model you've already tuned/pulled."
         )
-    logger.info("build_agent() using Ollama model: %s", model_id)
+
+    logger.info("build_agent() model: %s", model_id)
     return Agent(
-        model =  Ollama(id=model_id),
+        model = Ollama(id = model_id,options={"think": False}),
         # model=OpenAIChat(id="gpt-4o", api_key=OPENAI_API_KEY),
-        # model=Gemini(id="gemini-2.5-flash", api_key=GEMINI_API_KEY),
+        # model=Gemini(id="gemini-3.5-flash-lite", api_key=GEMINI_API_KEY),
         tools=[
-            SQLTools(db_engine=ENGINE),
+            SchemaAwareSQLTools(db_engine=ENGINE),
             PandasTools(),
-            GlossaryTools(),
         ],
         knowledge=build_knowledge(),
+        learning=LearningMachine(
+            knowledge=build_learning_knowledge(),
+            learned_knowledge=LearnedKnowledgeConfig(mode=LearningMode.AGENTIC)
+        ),
         search_knowledge=True,
-        description=( 
+        enable_agentic_knowledge_filters=True,
+        db=SqliteDb(db_file="agent_sessions.db"),
+        add_history_to_context=True,
+        num_history_runs=5,
+        description=(
             "You are a data analyst agent with direct access to a SQL database via your tools.\n"
-             ),
+        ),
         output_schema=QueryPlan,
-        use_json_mode=True,
+        retries=2,
         instructions=INSTRUCTIONS,
         markdown=False,
+        debug_mode=1
     )
 
 _agent = None
 _agent_lock = threading.Lock()
+
+_TOOL_PROGRESS_MESSAGES = {
+    "list_tables": "📋 Looking at what tables are available...",
+    "describe_table": "📐 Checking table structure...",
+    "search_knowledge_base": "📚 Looking up documented business context...",
+    "run_sql_query": "⚙️ Running SQL against the database...",
+}
+_DEFAULT_TOOL_PROGRESS = "🔧 Working on your question..."
 
 
 def _get_agent():
@@ -138,174 +218,152 @@ def _get_agent():
     return _agent
 
 
-# ============================================================================
-# SECTION: SQL literal-value validator — catches hallucinated/ambiguous
-# filter values that the agent's own SQL used, before we trust it
-# ============================================================================
-def _extract_literal_filters(sql: str):
-    filters = []
-    eq_pattern = r"(\w+(?:\.\w+)?)\s*=\s*'([^']*)'"
-    for col, val in re.findall(eq_pattern, sql):
-        filters.append((col.split(".")[-1], [val]))
-
-    in_pattern = r"(\w+(?:\.\w+)?)\s+IN\s*\(([^)]*)\)"
-    for col, values_blob in re.findall(in_pattern, sql, flags=re.IGNORECASE):
-        values = re.findall(r"'([^']*)'", values_blob)
-        if values:
-            filters.append((col.split(".")[-1], values))
-
-    return filters
+def _dialect_name(db_url: str) -> str:
+    db_url = db_url or ""
+    for key in ("mssql", "mysql", "postgresql", "sqlite"):
+        if db_url.startswith(key):
+            return key
+    return "unknown"
 
 
-def _extract_main_table(sql: str):
-    match = re.search(r"FROM\s+([\w\.]+)", sql, flags=re.IGNORECASE)
-    return match.group(1) if match else None
+def _wrap_for_dry_run(sql: str, dialect: str) -> str:
+    inner = sql.strip().rstrip(";")
+    if dialect == "mysql" or dialect == "postgresql":
+ 
+        return f"EXPLAIN {inner}"
+    if dialect == "sqlite":
+        return f"EXPLAIN QUERY PLAN {inner}"
+
+    if dialect == "mssql":
+        return f"SELECT TOP 1 1 AS _dry_run_ok FROM ({inner}) AS _dry_run_sq"
+    return f"SELECT 1 AS _dry_run_ok FROM ({inner}) AS _dry_run_sq LIMIT 1"
 
 
-def _validate_literals(sql: str):
-    table = _extract_main_table(sql)
-    if not table:
-        return []
+def _validate_sql_executes(sql: str) -> list:
+    dialect = _dialect_name(DB_URL)
+    dry_run_sql = _wrap_for_dry_run(sql, dialect)
+    started = time.perf_counter()
+    try:
 
-    problems = []
-    for column, values in _extract_literal_filters(sql):
-        try:
-            query = (
-                f"SELECT DISTINCT {column} FROM {table} "
-                f"WHERE {column} IS NOT NULL"
-            )
-            df = pd.read_sql_query(query, ENGINE)
-            actual_values_raw = df[column].astype(str).tolist()
-            actual_values_lower = {v.lower() for v in actual_values_raw}
-        except Exception as e:
-            logger.debug("_validate_literals could not sample %s.%s: %s", table, column, e)
-            continue
-
-        for v in values:
-            v_lower = v.lower()
-
-            if v_lower not in actual_values_lower:
-                sample = actual_values_raw[:10]
-                logger.warning(
-                    "HALLUCINATED value detected: %s.%s = %r does not exist. Real values include: %s",
-                    table, column, v, sample,
-                )
-                problems.append(
-                    f"HALLUCINATED: column '{column}' does not actually contain the value "
-                    f"'{v}'. Real stored values include: {sample}"
-                )
-                continue
-
-            similar_others = [
-                other for other in actual_values_raw
-                if other.lower() != v_lower
-                and (v_lower in other.lower() or other.lower() in v_lower)
-            ]
-            if similar_others:
-                logger.warning(
-                    "AMBIGUOUS value detected: %s.%s = %r has similar-but-different values: %s",
-                    table, column, v, similar_others,
-                )
-                problems.append(
-                    f"AMBIGUOUS: column '{column}' was filtered to '{v}', but these other "
-                    f"DIFFERENT stored values are similar and may also be relevant to the "
-                    f"user's question: {similar_others}. Resolve this by using an exact match "
-                    f"if the user's wording matches one of them exactly, or by including ALL "
-                    f"relevant values with IN (...) — do not refuse the question over this."
-                )
-    return problems
+        with ENGINE.connect().execution_options(no_parameters=True) as conn:
+            pd.read_sql_query(dry_run_sql, conn)
+    except Exception as e:
+        elapsed_ms = (time.perf_counter() - started) * 1000
+        # Keep only the first line — the DB driver's message (e.g. "Unknown
+        # column 'r.nicemat' in 'field list'") is what's actually useful;
+        # the rest is SQLAlchemy/DBAPI traceback noise.
+        db_message = str(e).strip().split("\n")[0]
+        logger.warning(
+            "SQL FAILED TO EXECUTE against the real database (%.1fms): %s | SQL: %s",
+            elapsed_ms, db_message, sql,
+        )
+        return [
+            f"SQL EXECUTION ERROR: the database rejected this SQL: {db_message}. "
+            f"This means a table or column name in the SQL does not actually exist "
+            f"(a hallucinated or misspelled name), or there is a syntax error. "
+            f"Call describe_table() again for every table referenced in this SQL "
+            f"and use ONLY the exact column names it returns — do not assume or "
+            f"guess a column name, and do not confuse a column that belongs to one "
+            f"joined table with a similarly-named one on another."
+        ]
+    elapsed_ms = (time.perf_counter() - started) * 1000
+    logger.info("SQL execution validation passed in %.1fms", elapsed_ms)
+    if elapsed_ms > 2000:
+        logger.warning(
+            "SQL execution validation took %.1fms — unusually slow for an EXPLAIN/dry-run; "
+            "check DB load or whether the dialect fallback (1-row subquery) is being used "
+            "instead of a true EXPLAIN.",
+            elapsed_ms,
+        )
+    return []
 
 
-# ============================================================================
-# SECTION: dead/empty-column validator — catches the model selecting a
-# column that is real (not hallucinated) but effectively always NULL in
-# production, so the query "succeeds" while silently returning nothing
-# useful. General on purpose: works for ANY table/column, computed live
-# from actual data, not a hardcoded list of known-dead columns.
-# ============================================================================
-_DEAD_COLUMN_NULL_RATIO_THRESHOLD = 0.98  # >=98% NULL across the sample counts as dead
-_DEAD_COLUMN_SAMPLE_ROWS = 500
+def plan(user_prompt: str, _max_retries: int = 2, on_progress: Optional[Callable[[str], None]] = None,
+         session_id: Optional[str] = None, _original_question: Optional[str] = None,
+         on_step: Optional[Callable[[dict], None]] = None):
 
+    if _original_question is None:
+        _original_question = user_prompt
 
-def _extract_select_columns(sql: str) -> list[tuple[str, str]]:
-    """Returns (table_hint_or_None, column_name) pairs for columns that
-    appear in the SELECT list specifically — not WHERE/JOIN/GROUP BY,
-    since a dead column being FILTERED on (e.g. checking it's non-null)
-    is a different, less risky pattern than a dead column being the
-    actual thing returned to the user."""
-    match = re.search(r"SELECT\s+(.*?)\s+FROM\s+", sql, flags=re.IGNORECASE | re.DOTALL)
-    if not match:
-        return []
-    select_list = match.group(1)
-    if select_list.strip() == "*":
-        return []
-
-    columns = []
-    for raw in select_list.split(","):
-        raw = raw.strip()
-        # strip aggregate wrappers like COUNT(x), SUM(x) — those aren't
-        # "selecting the raw column value" the way a bare column ref is
-        if re.match(r"^\w+\s*\(", raw):
-            continue
-        # drop an "AS alias" suffix
-        raw = re.split(r"\s+AS\s+", raw, flags=re.IGNORECASE)[0].strip()
-        m = re.match(r"^(?:(\w+)\.)?(\w+)$", raw)
-        if m:
-            table_hint, col = m.groups()
-            columns.append((table_hint, col))
-    return columns
-
-
-def _validate_selected_columns_not_dead(sql: str) -> list:
-    table = _extract_main_table(sql)
-    if not table:
-        return []
-
-    select_cols = _extract_select_columns(sql)
-    if not select_cols:
-        return []
-
-    problems = []
-    for _table_hint, column in select_cols:
-        try:
-            query = (
-                f"SELECT "
-                f"SUM(CASE WHEN {column} IS NULL OR {column} = '' THEN 1 ELSE 0 END) AS null_count, "
-                f"COUNT(*) AS total_count "
-                f"FROM (SELECT {column} FROM {table} LIMIT {_DEAD_COLUMN_SAMPLE_ROWS}) AS sample"
-            )
-            df = pd.read_sql_query(query, ENGINE)
-            null_count = int(df["null_count"].iloc[0] or 0)
-            total_count = int(df["total_count"].iloc[0] or 0)
-        except Exception as e:
-            logger.debug("_validate_selected_columns_not_dead could not sample %s.%s: %s", table, column, e)
-            continue
-
-        if total_count == 0:
-            continue
-        null_ratio = null_count / total_count
-        if null_ratio >= _DEAD_COLUMN_NULL_RATIO_THRESHOLD:
-            logger.warning(
-                "DEAD COLUMN selected: %s.%s is %.0f%% NULL/empty across a %d-row sample",
-                table, column, null_ratio * 100, total_count,
-            )
-            problems.append(
-                f"DEAD COLUMN: '{column}' on {table} is {null_ratio * 100:.0f}% NULL/empty "
-                f"across a real sample of {total_count} rows — selecting it will not return "
-                f"a useful answer even though the column exists and the query runs "
-                f"successfully. Call get_column_description('{table}', '{column}') and/or "
-                f"get_table_description('{table}') to find where this data actually lives "
-                f"(often a different, similarly-named column, or a join to another table) "
-                f"before finalizing your SQL."
-            )
-    return problems
-
-
-def plan(user_prompt: str, _max_retries: int = 2):
-    logger.info("plan() called (retries left=%d) — prompt: %r", _max_retries, user_prompt)
+    logger.info("plan() called (retries left=%d, session_id=%s) — prompt: %r", _max_retries, session_id, user_prompt)
     agent = _get_agent()
+
+    def _notify(message: str):
+        if on_progress is None:
+            return
+        try:
+            on_progress(message)
+        except Exception:
+            # A broken UI callback must never take down the actual query —
+            # log and keep going.
+            logger.debug("on_progress callback raised, ignoring", exc_info=True)
+
+    def _emit_step(step: dict):
+        if on_step is None:
+            return
+        try:
+            on_step(step)
+        except Exception:
+            logger.debug("on_step callback raised, ignoring", exc_info=True)
+
+    _notify("🔍 Understanding your question...")
+
+    # Tracks in-flight calls by tool_call_id so the "completed" event can be
+    # matched back to its "started" event to compute elapsed time and pair
+    # the result with the original arguments in one combined UI step.
+    _started_at: dict[str, float] = {}
+
+    response = None
     with _agent_lock:
-        response = agent.run(user_prompt)
+        for event in agent.run(user_prompt, stream=True, stream_events=True, yield_run_output=True,
+                                session_id=session_id):
+            if isinstance(event, ToolCallStartedEvent) and event.tool and event.tool.tool_name:
+                tool_name = event.tool.tool_name
+                tool_args = getattr(event.tool, "tool_args", None) or {}
+                call_id = getattr(event.tool, "tool_call_id", None)
+                if call_id:
+                    _started_at[call_id] = time.time()
+
+                message = _TOOL_PROGRESS_MESSAGES.get(tool_name, _DEFAULT_TOOL_PROGRESS)
+                logger.debug("Tool call started: %s -> %r", tool_name, message)
+                _notify(message)
+                _emit_step({
+                    "tool_name": tool_name,
+                    "tool_args": tool_args,
+                    "status": "started",
+                    "result": None,
+                    "elapsed_ms": None,
+                })
+
+            elif isinstance(event, ToolCallCompletedEvent) and event.tool and event.tool.tool_name:
+                tool_name = event.tool.tool_name
+                tool_args = getattr(event.tool, "tool_args", None) or {}
+                call_id = getattr(event.tool, "tool_call_id", None)
+                result = getattr(event.tool, "result", None)
+
+                elapsed_ms = None
+                if call_id and call_id in _started_at:
+                    elapsed_ms = (time.time() - _started_at.pop(call_id)) * 1000
+
+                logger.debug("Tool call completed: %s (%.0fms)", tool_name,
+                             elapsed_ms if elapsed_ms is not None else -1)
+                _emit_step({
+                    "tool_name": tool_name,
+                    "tool_args": tool_args,
+                    "status": "completed",
+                    "result": result,
+                    "elapsed_ms": elapsed_ms,
+                })
+
+            elif isinstance(event, RunOutput):
+                response = event
+
+    if response is None:
+        # Should not happen — yield_run_output=True guarantees a final
+        # RunOutput is yielded — but fail loudly rather than silently
+        # proceeding with an undefined `response`.
+        raise RuntimeError("agent.run() streaming did not yield a final RunOutput")
+
     content = response.content
 
     result = None
@@ -335,25 +393,31 @@ def plan(user_prompt: str, _max_retries: int = 2):
         result.is_refusal, result.sql_used, result.chart_type,
     )
 
+    # Single validation concern left: does this SQL actually execute against
+    # the real database (real tables/columns, valid syntax)? Value-level
+    # correctness (right filter value, right column choice) is now the
+    # LearningMachine's job over time, not a per-request heuristic here.
     if result.sql_used and not result.is_refusal and _max_retries > 0:
-        problems = _validate_literals(result.sql_used)
-        problems += _validate_selected_columns_not_dead(result.sql_used)
+        _validation_started = time.perf_counter()
+        problems = _validate_sql_executes(result.sql_used)
+        logger.info(
+            "SQL validation took %.1fms (%d problem(s) found)",
+            (time.perf_counter() - _validation_started) * 1000, len(problems),
+        )
         if problems:
             logger.warning(
                 "Validation found %d problem(s), triggering retry (retries left after this=%d): %s",
                 len(problems), _max_retries - 1, problems,
             )
+            _notify("🔁 Fixing an invalid table/column reference...")
             correction_prompt = (
                 f"Your previous SQL was:\n{result.sql_used}\n\n"
                 f"This SQL has problems:\n" + "\n".join(f"- {p}" for p in problems) +
-                f"\n\nRe-answer the original question: {user_prompt!r}\n"
-                f"Use resolve_filter_value(table_name, column_name, user_value) to find the "
-                f"correct real stored value(s) before writing new SQL — it checks the FULL set "
-                f"of distinct values, not a capped sample, so it will find the right value even "
-                f"in high-cardinality columns. Use exactly what it returns. Do NOT set "
-                f"is_refusal — you must still produce a working sql_used."
+                f"\n\nRe-answer the original question: {_original_question!r}\n"
+                f"Do NOT set is_refusal — you must still produce a working sql_used."
             )
-            retried = plan(correction_prompt, _max_retries=_max_retries - 1)
+            retried = plan(correction_prompt, _max_retries=_max_retries - 1, on_progress=on_progress,
+                            session_id=session_id, _original_question=_original_question, on_step=on_step)
 
             if retried.sql_used:
                 logger.info("Retry produced usable SQL — using retried result")
@@ -365,22 +429,22 @@ def plan(user_prompt: str, _max_retries: int = 2):
             result.is_refusal = True
             if not result.explanation:
                 result.explanation = (
-                    "Could not confidently resolve ambiguous filter values for this "
-                    "question after retrying — please rephrase with more specific wording."
+                    "Could not produce SQL that executes successfully against the "
+                    "database after retrying — please rephrase with more specific wording."
                 )
             return result
-
 
     if not result.sql_used and not result.is_refusal and _max_retries > 0:
         logger.warning("No SQL produced and not a refusal — triggering retry to force real SQL")
         correction_prompt = (
-            f"Re-answer the original question: {user_prompt!r}\n"
+            f"Re-answer the original question: {_original_question!r}\n"
             f"You did not produce any SQL last time and instead only wrote an explanation. "
             f"This question needs a real SQL query — write one (e.g. a SELECT DISTINCT for "
             f"a listing request) and put it in sql_used. Do not describe values from a "
             f"lookup tool in your explanation instead of running real SQL."
         )
-        retried = plan(correction_prompt, _max_retries=_max_retries - 1)
+        retried = plan(correction_prompt, _max_retries=_max_retries - 1, on_progress=on_progress,
+                        session_id=session_id, _original_question=_original_question, on_step=on_step)
         if retried.sql_used or retried.is_refusal:
             return retried
         return result
