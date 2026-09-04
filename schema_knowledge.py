@@ -2,7 +2,7 @@ import json
 import logging
 import os
 from collections import defaultdict
-
+from agno.db.sqlite import SqliteDb
 from agno.knowledge.knowledge import Knowledge
 from agno.knowledge.embedder.ollama import OllamaEmbedder
 from agno.vectordb.lancedb import LanceDb
@@ -18,6 +18,8 @@ BASE_DIR = os.path.dirname(__file__)
 GLOSSARY_PATH = os.path.join(BASE_DIR, "column_glossary.json")
 DESCRIPTIONS_PATH = os.path.join(BASE_DIR, "column_descriptions.json")
 TABLE_DESCRIPTIONS_PATH = os.path.join(BASE_DIR, "table_descriptions.json")
+CONTENTS_DB_FILE = os.path.join(BASE_DIR, "knowledge_contents.db")
+LEARNING_DB_FILE = os.path.join(BASE_DIR, "learning_knowledge_contents.db")
 
 
 def _load_json(path: str) -> dict:
@@ -34,54 +36,46 @@ def build_knowledge() -> Knowledge:
         search_type=SearchType.hybrid,
         embedder=OllamaEmbedder(id=EMBEDDER_MODEL, dimensions=768),
     )
-    return Knowledge(vector_db=vector_db, max_results=5)
+    return Knowledge(vector_db=vector_db,max_results=5,contents_db=SqliteDb(db_file=CONTENTS_DB_FILE))
 
-
-def _table_columns(table: str, column_descriptions: dict) -> str:
-    columns = column_descriptions.get(table, {})
-    if not columns:
-        return ""
-    return "; ".join(f"{column}: {description}" for column, description in columns.items())
-
-
-def _build_relationship_documents(table_descriptions: dict):
-    for table, description in table_descriptions.items():
-        text = str(description)
-        lowered = text.lower()
-        if "join" not in lowered and "connect" not in lowered and "relationship" not in lowered:
-            continue
-
-        yield (
-            f"{table} (relationship guide)",
-            f"Schema relationship guide for {table}. {description} "
-            "Use the documented relationship path when this table is relevant. "
-            "Do not invent alternate join keys or legacy identifiers."
-        )
-
+def build_learning_knowledge() -> Knowledge:
+    vector_db = LanceDb(
+        uri="./learning/lancedb",
+        table_name="learning_agent",
+        search_type=SearchType.hybrid,
+        embedder=OllamaEmbedder(id=EMBEDDER_MODEL, dimensions=768),
+    )
+    return Knowledge(vector_db=vector_db,max_results=5,contents_db=SqliteDb(db_file=LEARNING_DB_FILE))
 
 def _iter_documents():
     table_descriptions = _load_json(TABLE_DESCRIPTIONS_PATH)
     column_descriptions = _load_json(DESCRIPTIONS_PATH)
     glossary = _load_json(GLOSSARY_PATH)
 
-    # Table-level semantic anchors.
+    # Table-level semantic anchors (also carries relationship/join guidance
+    # inline, since almost every table description already documents its
+    # joins — see the merged wording note further down in table_descriptions.json).
     for table, description in table_descriptions.items():
         yield (
             f"{table} (table)",
-            f"TABLE: {table}. TABLE DESCRIPTION: {description}"
+            f"TABLE: {table}. TABLE DESCRIPTION: {description}",
+            {"table": table, "kind": "table"},
         )
 
-    #  Relationship-aware documents.
-    yield from _build_relationship_documents(table_descriptions)
-
-    # Group all columns for a table into one document. This prevents unrelated
-    #    individual columns from consuming the top-k result budget.
+    # One document PER COLUMN, not one grouped document per table. This
+    # keeps each column's embedding focused on just that column's meaning
+    # (which column to use for which user intent), instead of diluting a
+    # single vector across every column in the table. It costs more
+    # documents/embedding calls, but retrieval precision is the actual
+    # goal here — the model needs to reliably land on the ONE correct
+    # column for a given question (e.g. jms_jcode vs subtitle vs title),
+    # not get a vague "somewhere in this table" match.
     for table, columns in column_descriptions.items():
-        column_text = _table_columns(table, column_descriptions)
-        if column_text:
+        for column, description in columns.items():
             yield (
-                f"{table} (columns)",
-                f"TABLE: {table}. COLUMNS AND DESCRIPTIONS: {column_text}"
+                f"{table}.{column} (column)",
+                f"TABLE: {table}. COLUMN: {column}. MEANING: {description}",
+                {"table": table, "column": column, "kind": "column"},
             )
 
     # Keep coded-value mappings searchable by exact column/value terms.
@@ -97,17 +91,17 @@ def _iter_documents():
             f"{table}.{column} (value mapping)",
             f"TABLE: {table}. COLUMN: {column}. "
             f"MEANING: {meaning}. STORED VALUES/CODES: {codes_text}. "
-            "When filtering this column, use the raw stored database code/value, not the human-readable meaning."
+            "When filtering this column, use the raw stored database code/value, not the human-readable meaning.",
+            {"table": table, "column": column, "kind": "value_mapping"},
         )
 
 
 def rebuild(knowledge: Knowledge = None) -> int:
-
     knowledge = knowledge or build_knowledge()
     count = 0
 
-    for name, text_content in _iter_documents():
-        knowledge.insert(name=name, text_content=text_content)
+    for name, text_content, metadata in _iter_documents():
+        knowledge.insert(name=name, text_content=text_content, metadata=metadata)
         count += 1
 
     logger.info("Rebuilt schema knowledge index: %d document(s) inserted", count)
