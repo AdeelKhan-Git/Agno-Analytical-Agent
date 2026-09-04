@@ -1,60 +1,60 @@
 {
   "journal": {
-    "description": "One row per journal. This is the main/master journal table and contains journal identity, access type, publication/lifecycle information, identifiers, journal metrics, and descriptive information. The primary key used for joins is journal_id. ALWAYS use journal_id when joining this table to tbl_ebm; do not use old_journal_id, old_jour_id, journal_id_dummy, or journal_id_jms for the current journal join. For journal identification, use title when the user provides or asks for the journal's full name. Use subtitle when the user refers to a journal by its short code/abbreviation such as CMC, COC, CDR, etc. Code/abbreviation values must be matched against subtitle according to the application's journal-code convention; do not substitute unrelated legacy identifier columns. For subscription vs Open Access questions, ALWAYS use jtype: O = Open Access and S = Subscription. Do not use journal_type or IsOpenAccess for this classification. This table does not directly contain the actual editor/person assignments. When the user asks who is an Editor-in-Chief, Regional Editor, Section Editor, or any other editor/role for a journal, join journal.journal_id to tbl_ebm.journal_id, then use tbl_ebm.role_id to join tbl_ebm_role.role_id and tbl_ebm.editor_id to join tbl_editors.editor_id. eic_detail and eic_detail_old are not the source for identifying the actual Editor-in-Chief.",
+    "description": "One row per journal. This is the main/master journal table — the source of truth for a journal's identity, access type, publication/lifecycle status, identifiers, and descriptive/marketing information. The primary key for joins is journal_id. For journal identification: use title when the user provides or asks for the journal's full name; use jms_jcode when the user refers to a journal by its short code/abbreviation such as CMC, COC, CDR, CPD, CP, etc. For subscription vs Open Access questions, use jtype (O = Open Access, S = Subscription). This table does not by itself contain who the actual editors are or what roles they hold; those assignments live in tbl_ebm, reachable via the join below.",
     "joins": [
       {
         "from": "journal.journal_id",
         "to": "tbl_ebm.journal_id",
         "on": "journal.journal_id = tbl_ebm.journal_id",
-        "note": "Verified — the correct journal join, in both directions. journal_id_jms on tbl_ebm is a DIFFERENT identifier from a separate external system and must never be used for this join, even though it currently holds matching values in this dataset."
+        "note": "This join connects a journal to its actual editorial board: it lets you find every editor and every role assigned to a given journal (via tbl_ebm), which this table alone cannot answer."
       }
     ]
   },
 
   "tbl_ebm": {
-    "description": "One row represents one editor holding one editorial role for one journal. This is the central relationship/junction table connecting journals, editors, and editorial roles. ALWAYS use journal_id to join to journal.journal_id — NEVER journal_id_jms, which is a separate external-system identifier that only coincidentally matches journal_id in this dataset. ALWAYS use editor_id to join to tbl_editors.editor_id when editor/person information is requested. ALWAYS use role_id to join to tbl_ebm_role.role_id when the user mentions or asks about an editorial role — never filter directly on ebm_role_name, which is a denormalized text copy kept only for convenience and can be stale. Do not choose another ID simply because it appears to contain similar data: journal_id is the correct column to use for the journal join, editor_id is the correct column to use for the editor join, and role_id is the correct column to use for the role join. ebm_role_id is a duplicate of role_id and should not be preferred for joins. This table contains assignment-level information such as main_section, section, region, acceptance_date, resign_date, approval information, and ebm_status. ebm_status describes the status of the specific editor-role-journal assignment and is independent from tbl_editors.status. For current/active editor assignments, normally filter ebm_status = 'Active' unless the user explicitly asks about resigned, historical, or inactive assignments. Questions combining a journal, person/editor, and role should normally use this table as the join hub.",
+    "description": "One row represents one editor holding one editorial role for one journal. This is the central relationship/junction table connecting journals, editors, and editorial roles — most questions that combine any two of 'which journal', 'which person', and 'which role' need this table as the hub. Use journal_id to join to journal.journal_id. Use editor_id to join to tbl_editors.editor_id for editor/person details. Use ebm_role_id to join to tbl_ebm_role.role_id for role identification. This table also carries assignment-level details such as main_section, section, region, acceptance_date, resign_date, approval status, and ebm_status. ebm_status describes the status of THIS specific editor-role-journal assignment and is a separate concept from tbl_editors.status (the editor's own account status). For current/active assignments, normally filter ebm_status = 'Active' unless the user explicitly asks about resigned, historical, or inactive assignments.",
     "joins": [
       {
         "from": "tbl_ebm.journal_id",
         "to": "journal.journal_id",
         "on": "tbl_ebm.journal_id = journal.journal_id",
-        "note": "Verified — the correct journal join. Do NOT substitute journal_id_jms here; it is a different identifier from a separate external system."
+        "note": "This join gives you the journal's identity and attributes for an editorial assignment — its title, jms_jcode, jtype (Open Access/Subscription), and other journal-level fields — none of which live on tbl_ebm itself."
       },
       {
         "from": "tbl_ebm.editor_id",
         "to": "tbl_editors.editor_id",
         "on": "tbl_ebm.editor_id = tbl_editors.editor_id",
-        "note": "Verified — direct FK-equivalent relationship."
+        "note": "This join gives you the actual person behind an assignment — their name, degree, institute/university, country, and other profile fields — none of which live on tbl_ebm itself."
       },
       {
-        "from": "tbl_ebm.role_id",
+        "from": "tbl_ebm.ebm_role_id",
         "to": "tbl_ebm_role.role_id",
-        "on": "tbl_ebm.role_id = tbl_ebm_role.role_id",
-        "note": "Verified — the correct role join. Do NOT filter on ebm_role_name directly; join here and filter/match on tbl_ebm_role.role or tbl_ebm_role.nicename instead. ebm_role_id on tbl_ebm duplicates role_id — either can be used, but role_id is the correct one to join on."
+        "on": "tbl_ebm.ebm_role_id = tbl_ebm_role.role_id",
+        "note": "This join gives you the real, current role name (role and nicename) for an assignment — resolve the role through this join."
       }
     ]
   },
 
   "tbl_ebm_role": {
-    "description": "One row per defined editorial role. This is a role lookup/reference table, not a table containing individual editor assignments. The primary key used for joins is role_id. Use role_id to join tbl_ebm.role_id to this table whenever the user asks about an editorial role such as EIC, Co-EIC, Regional Editor, Section Editor, or another role. The role column contains the shorter/original role name, while nicename contains the more readable/full role name. When interpreting the user's role wording, match against role or nicename as appropriate. This table tells the system what a role means, but it does NOT identify which editor holds that role or which journal the role belongs to. To find the actual person or journal associated with a role, join this table to tbl_ebm using role_id, then use tbl_ebm.editor_id for the editor and tbl_ebm.journal_id for the journal. Do not use this table alone to answer questions asking who holds a role.",
+    "description": "One row per defined editorial role. This is a role lookup/reference table — it defines what each role MEANS, but does not by itself say who holds it or for which journal. The primary key is role_id. Use role_id to join tbl_ebm.ebm_role_id to this table whenever the user asks about an editorial role such as EIC, Co-EIC, Regional Editor, Section Editor, or another role. role holds the shorter/original form of the role name; nicename holds the fuller, more readable form. Match against whichever of the two more closely resembles the user's own wording.",
     "joins": [
       {
         "from": "tbl_ebm_role.role_id",
-        "to": "tbl_ebm.role_id",
-        "on": "tbl_ebm_role.role_id = tbl_ebm.role_id",
-        "note": "Verified — the reverse direction of the role join declared on tbl_ebm."
+        "to": "tbl_ebm.ebm_role_id",
+        "on": "tbl_ebm_role.role_id = tbl_ebm.ebm_role_id",
+        "note": "This join gives you every actual assignment that uses this role — which editor holds it and on which journal — which this table cannot answer on its own."
       }
     ]
   },
 
   "tbl_editors": {
-    "description": "One row per editor/person. This table contains the editor's identity and profile information, including editor_id, first/middle/last name, academic degrees, professional titles, university/institute/department, expertise, country, contact information, and researcher identifiers such as ORCID, Scopus ID, and ResearcherID. The primary key used for joins is editor_id. ALWAYS use editor_id when joining editor information to tbl_ebm.editor_id. This table does NOT directly determine which journal or editorial role an editor has; those relationships are stored in tbl_ebm. Therefore, when the user asks which journals an editor works for, what role an editor holds, or any combination of editor + journal + role, use tbl_ebm as the relationship table and join through editor_id. The editor's status column describes the person's account status (A = Active, B = Blocked, D = Deleted) and is separate from tbl_ebm.ebm_status, which describes the status of a particular journal-role assignment. Do not treat editor status and assignment status as the same thing.",
+    "description": "One row per editor/person. This table holds an editor's identity and profile information — name, academic degree, professional title, university/institute/department, area of expertise, country, contact details, and researcher identifiers such as ORCID, Scopus ID, and ResearcherID. The primary key is editor_id. This table does not by itself say which journal an editor works for or what role they hold — those relationships live in tbl_ebm, reachable via the join below. The status column here describes the person's own account status (A = Active, B = Blocked, D = Deleted) and is a separate concept from tbl_ebm.ebm_status, which describes the status of one specific journal-role assignment.",
     "joins": [
       {
         "from": "tbl_editors.editor_id",
         "to": "tbl_ebm.editor_id",
         "on": "tbl_editors.editor_id = tbl_ebm.editor_id",
-        "note": "Verified — the reverse direction of the editor join declared on tbl_ebm."
+        "note": "This join gives you every journal and role assignment this editor actually holds — which this table cannot answer on its own."
       }
     ]
   }
