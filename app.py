@@ -98,7 +98,14 @@ st.markdown(f"""
     font-weight: 600; margin-right: 4px;
 }}
 
-/* Centered full-screen loading overlay */
+/* ======================================================================
+   FULL-SCREEN LOADER — the ONLY thing visible while a request is in
+   flight. One surface, one source of truth: no st.status() running
+   alongside it (that was the earlier bug — two competing UI systems,
+   one hidden behind the other). Content here is deliberately limited to
+   clean, human-readable step labels — never raw SQL, tool args, or JSON.
+   Full technical detail is still available afterward in the SQL tab.
+   ====================================================================== */
 .loading-overlay {{
     position: fixed;
     inset: 0;
@@ -106,36 +113,115 @@ st.markdown(f"""
     display: flex;
     align-items: center;
     justify-content: center;
-    background: rgba(255, 255, 255, 0.85);
-    backdrop-filter: blur(2px);
+    background: rgba(255, 255, 255, 0.92);
+    backdrop-filter: blur(3px);
 }}
-.loading-box {{
+.loading-card {{
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 14px;
-    padding: 28px 36px;
-    border-radius: 16px;
+    gap: 22px;
+    padding: 40px 48px;
+    border-radius: 20px;
     background: white;
-    box-shadow: 0 8px 30px rgba(0,0,0,0.12);
+    box-shadow: 0 20px 60px rgba(79, 70, 229, 0.12), 0 2px 8px rgba(0,0,0,0.06);
+    width: min(480px, 90vw);
+    animation: card-in 0.25s ease-out;
 }}
-.loading-spinner {{
-    width: 42px;
-    height: 42px;
+@keyframes card-in {{
+    from {{ opacity: 0; transform: translateY(8px) scale(0.98); }}
+    to   {{ opacity: 1; transform: translateY(0) scale(1); }}
+}}
+.loading-spinner-big {{
+    width: 46px;
+    height: 46px;
     border: 4px solid #eef2ff;
     border-top: 4px solid {ACCENT};
     border-radius: 50%;
     animation: loading-spin 0.8s linear infinite;
 }}
-.loading-text {{
-    font-weight: 600;
-    color: #374151;
-    font-size: 0.95rem;
-}}
 @keyframes loading-spin {{
     0% {{ transform: rotate(0deg); }}
     100% {{ transform: rotate(360deg); }}
 }}
+.loading-headline {{
+    font-weight: 700;
+    color: #1f2937;
+    font-size: 1.05rem;
+    text-align: center;
+}}
+.loading-steps {{
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}}
+.loading-step {{
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 9px 4px;
+    font-size: 0.88rem;
+    color: #9ca3af;
+    transition: color 0.2s ease;
+}}
+.loading-step.is-done {{
+    color: #374151;
+}}
+.loading-step.is-active {{
+    color: {ACCENT};
+    font-weight: 600;
+}}
+.loading-step-icon {{
+    width: 20px;
+    text-align: center;
+    flex-shrink: 0;
+    font-size: 0.95rem;
+}}
+.loading-step.is-active .loading-step-icon {{
+    animation: pulse-icon 1s ease-in-out infinite;
+}}
+@keyframes pulse-icon {{
+    0%, 100% {{ opacity: 1; }}
+    50% {{ opacity: 0.4; }}
+}}
+
+/* ======================================================================
+   LEARNING-MODE LOADER — a visually distinct variant of the loading
+   overlay shown ONLY when the user's message is an "error:" correction.
+   Amber/orange instead of indigo, and a different headline/icon set, so
+   it's immediately clear this is a different kind of request (teaching
+   the agent a correction) rather than a normal question being answered.
+   Reuses the exact same card/step/spinner structure as the regular
+   loader — only the color and copy differ.
+   ====================================================================== */
+.learning-card {{
+    box-shadow: 0 20px 60px rgba(217, 119, 6, 0.14), 0 2px 8px rgba(0,0,0,0.06);
+}}
+.learning-spinner-big {{
+    width: 46px;
+    height: 46px;
+    border: 4px solid #fef3c7;
+    border-top: 4px solid #d97706;
+    border-radius: 50%;
+    animation: loading-spin 0.8s linear infinite;
+}}
+.learning-badge {{
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 12px;
+    border-radius: 999px;
+    background: #fef3c7;
+    color: #92400e;
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    margin-bottom: 4px;
+}}
+.learning-step.is-done {{ color: #374151; }}
+.learning-step.is-active {{ color: #d97706; font-weight: 600; }}
 </style>
 """, unsafe_allow_html=True)
 
@@ -149,6 +235,19 @@ if "plan" not in st.session_state:
     st.session_state.df = None
 if "current_prompt" not in st.session_state:
     st.session_state.current_prompt = None
+if "current_is_learning" not in st.session_state:
+    st.session_state.current_is_learning = False
+
+# agent_session_id: one stable UUID per BROWSER session, generated once and
+# kept in st.session_state so it survives reruns within the same browser
+# tab but is unique per user/tab. Passed to plan() -> agent.run(session_id=...)
+# so Agno's own conversation history is scoped correctly per user — without
+# this, every prompt looks like a brand new, unrelated conversation to Agno,
+# and the model has no memory of already having called describe_table on a
+# table earlier in the SAME user's session.
+if "agent_session_id" not in st.session_state:
+    import uuid
+    st.session_state.agent_session_id = str(uuid.uuid4())
 
 
 def _dialect_label(db_url: str) -> str:
@@ -212,12 +311,14 @@ with st.sidebar:
         st.session_state.plan = None
         st.session_state.df = None
         st.session_state.current_prompt = None
+        st.session_state.current_is_learning = False
         st.rerun()
     if b2.button("🗑 Reset", width='stretch', help="Clear everything including history"):
         st.session_state.history = []
         st.session_state.plan = None
         st.session_state.df = None
         st.session_state.current_prompt = None
+        st.session_state.current_is_learning = False
         st.rerun()
 
     # --- History ---
@@ -237,6 +338,7 @@ with st.sidebar:
                 st.session_state.plan = h["query_plan"]
                 st.session_state.df = h["dataframe"]
                 st.session_state.current_prompt = h["prompt"]  # full text, for the main-page display
+                st.session_state.current_is_learning = h.get("is_learning", False)
                 st.rerun()
 
             # Small refresh icon to deliberately re-run against the DB,
@@ -341,7 +443,6 @@ def pick_defaults(chart_type: str, df: pd.DataFrame, a: dict) -> dict:
         return {"x": x, "y": y}
 
     if chart_type == "pie":
-        # Prefer a low-cardinality categorical column for slices.
         low_card = [c for c in a["categorical_non_id"] if df[c].nunique(dropna=True) <= 12]
         names = _first_available(low_card, a["name_cols"], a["categorical_non_id"], fallback=cols)
         values = _first_available(a["money_cols"], a["count_cols"], a["numeric_non_id"], fallback=cols)
@@ -393,30 +494,187 @@ def pretty_label(col: str) -> str:
 
 
 # ============================================================================
+# BIG-SCREEN LOADER — one clean surface, human-readable only
+# ============================================================================
+# Deliberately does NOT expose raw SQL, tool arguments, or JSON results —
+# that content lives in the SQL tab after the answer is ready, where the
+# user can actually read it at their own pace, not flash past in a
+# fast-moving technical log. What's shown here is a short, fixed list of
+# CONCEPTUAL stages, each one lighting up as the matching tool actually
+# runs — plausible progress the user can follow, not a raw trace.
+_STAGE_LABELS = [
+    ("understand", "🧠", "Understanding your question"),
+    ("lookup", "📚", "Looking up business context"),
+    ("schema", "📐", "Checking table structure"),
+    ("resolve", "🔎", "Matching your wording to real data"),
+    ("query", "⚙️", "Running your query"),
+]
+
+# Maps a real tool name to the conceptual stage it belongs to — several
+# tools can map to the same stage (e.g. resolve_filter_value AND
+# find_value_anywhere both mean "matching your wording to real data").
+_TOOL_TO_STAGE = {
+    "search_knowledge_base": "lookup",
+    "list_tables": "schema",
+    "describe_table": "schema",
+    "resolve_filter_value": "resolve",
+    "find_value_anywhere": "resolve",
+    "get_sample_values": "resolve",
+    "run_sql_query": "query",
+}
+
+
+def render_loader(placeholder, active_stage: str, done_stages: set):
+    """Renders the ENTIRE loading experience as one HTML blob into
+    `placeholder` — headline + fixed stage list, with each stage's CSS
+    class reflecting done/active/pending. No st.status(), no separate
+    container competing for the same visual space."""
+    rows = []
+    for key, icon, label in _STAGE_LABELS:
+        if key in done_stages and key != active_stage:
+            cls, shown_icon = "is-done", "✓"
+        elif key == active_stage:
+            cls, shown_icon = "is-active", icon
+        else:
+            cls, shown_icon = "", "○"
+        rows.append(
+            f'<div class="loading-step {cls}">'
+            f'<span class="loading-step-icon">{shown_icon}</span>{label}</div>'
+        )
+
+    placeholder.markdown(
+        f"""
+        <div class="loading-overlay">
+            <div class="loading-card">
+                <div class="loading-spinner-big"></div>
+                <div class="loading-headline">Working on your answer...</div>
+                <div class="loading-steps">{''.join(rows)}</div>
+            </div>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+
+
+def make_loader_step_handler(placeholder):
+    """Returns an on_step(step) callback that advances the big-screen
+    loader's stage list as real tool calls stream in. Multiple different
+    tools can map to the same conceptual stage — that stage is marked
+    active as soon as ANY of its tools starts, and marked done once we
+    move on to a later stage (so a fast tool doesn't visibly flicker)."""
+    state = {"active": "understand", "done": set()}
+
+    def on_step(step: dict):
+        if step["status"] != "started":
+            return  # only stage TRANSITIONS matter for this display
+        stage = _TOOL_TO_STAGE.get(step["tool_name"])
+        if stage is None or stage == state["active"]:
+            return
+        state["done"].add(state["active"])
+        state["active"] = stage
+        render_loader(placeholder, state["active"], state["done"])
+
+    return on_step
+
+
+# ============================================================================
+# LEARNING MODE — triggered only when the user's message starts with
+# "error:". This is a distinct request type (teaching the agent a
+# correction, not asking a normal question), so it gets its own detection,
+# its own loader copy/color, and its own stage list built around
+# save_learning/log_decision instead of the normal query-answering tools.
+# ============================================================================
+LEARNING_TRIGGER_PREFIX = "error:"
+
+
+def is_learning_prompt(text: str) -> bool:
+    """A prompt is a learning/correction request only if it EXPLICITLY
+    starts with the trigger prefix (case-insensitive, allowing leading
+    whitespace) — never inferred from wording alone, so an ordinary
+    question that happens to mention the word "error" does not
+    accidentally switch modes."""
+    return text.strip().lower().startswith(LEARNING_TRIGGER_PREFIX)
+
+
+_LEARNING_STAGE_LABELS = [
+    ("diagnose", "🩺", "Diagnosing what went wrong"),
+    ("lookup", "📚", "Checking schema and documented rules"),
+    ("verify", "🔎", "Verifying the correct value/column"),
+    ("save", "💾", "Saving this as a learned correction"),
+]
+
+# Maps a real tool name to the learning-mode conceptual stage it belongs
+# to. save_learning/log_decision are the tools unique to this mode; the
+# rest are the same schema/verification tools used in normal mode, just
+# grouped differently here since the NARRATIVE is "diagnose and fix",
+# not "answer a question".
+_LEARNING_TOOL_TO_STAGE = {
+    "search_learnings": "diagnose",
+    "search_knowledge_base": "lookup",
+    "list_tables": "lookup",
+    "describe_table": "lookup",
+    "run_sql_query": "verify",
+    "save_learning": "save",
+    "log_decision": "save",
+}
+
+
+def render_learning_loader(placeholder, active_stage: str, done_stages: set):
+    """Same structure as render_loader, but amber-themed and with
+    learning-specific copy, so it's visually unmistakable that the agent
+    is in correction/learning mode rather than answering a new question."""
+    rows = []
+    for key, icon, label in _LEARNING_STAGE_LABELS:
+        if key in done_stages and key != active_stage:
+            cls, shown_icon = "is-done", "✓"
+        elif key == active_stage:
+            cls, shown_icon = "is-active", icon
+        else:
+            cls, shown_icon = "", "○"
+        rows.append(
+            f'<div class="loading-step learning-step {cls}">'
+            f'<span class="loading-step-icon">{shown_icon}</span>{label}</div>'
+        )
+
+    placeholder.markdown(
+        f"""
+        <div class="loading-overlay">
+            <div class="loading-card learning-card">
+                <div class="learning-spinner-big"></div>
+                <div>
+                    <div class="learning-badge">🎓 Learning mode</div>
+                    <div class="loading-headline">Teaching the agent this correction...</div>
+                </div>
+                <div class="loading-steps">{''.join(rows)}</div>
+            </div>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+
+
+def make_learning_step_handler(placeholder):
+    """Same pattern as make_loader_step_handler, but drives the
+    learning-mode stage list and tool mapping instead."""
+    state = {"active": "diagnose", "done": set()}
+
+    def on_step(step: dict):
+        if step["status"] != "started":
+            return
+        stage = _LEARNING_TOOL_TO_STAGE.get(step["tool_name"])
+        if stage is None or stage == state["active"]:
+            return
+        state["done"].add(state["active"])
+        state["active"] = stage
+        render_learning_loader(placeholder, state["active"], state["done"])
+
+    return on_step
+
+
+# ============================================================================
 # EXAMPLE PROMPTS (shown before any query has been run)
 # ============================================================================
-# EXAMPLES = [
-#     "Total revenue by store",
-#     "Top 10 best-selling products",
-#     "Monthly order trend this year",
-#     "Which customers spent the most?",
-# ]
-
-prompt = st.chat_input("Ask anything about your data...")
-# if not prompt:
-#     prompt = st.session_state.pop("example", None)
-# if not prompt:
-#     prompt = st.session_state.pop("force_prompt", None)
-
-# if st.session_state.plan is None and not prompt:
-#     st.markdown("##### Try one of these:")
-#     st.markdown('<div class="chip-row">', unsafe_allow_html=True)
-#     cols = st.columns(len(EXAMPLES))
-#     for c, ex in zip(cols, EXAMPLES):
-#         if c.button(ex, width='stretch'):
-#             st.session_state["example"] = ex
-#             st.rerun()
-#     st.markdown('</div>', unsafe_allow_html=True)
+prompt = st.chat_input("Ask anything about your data... (start with 'error:' to correct a wrong answer)")
 
 # ============================================================================
 # RUN QUERY
@@ -424,226 +682,107 @@ prompt = st.chat_input("Ask anything about your data...")
 if prompt:
     logger.info("User submitted prompt: %r", prompt)
 
-    # ------------------------------------------------------------------------
-    # Initialize state
-    # ------------------------------------------------------------------------
     df = pd.DataFrame()
     qp = None
     query_error = None
 
-    # ------------------------------------------------------------------------
-    # Create loading overlay
-    # ------------------------------------------------------------------------
-    loader_placeholder = st.empty()
+    learning_mode = is_learning_prompt(prompt)
 
-    loader_placeholder.markdown(
-        """
-        <div class="loading-overlay">
-            <div class="loading-box">
-                <div class="loading-spinner"></div>
-                <div class="loading-text">
-                    Analyzing your question...
-                </div>
-            </div>
-        </div>
-        """,
-        unsafe_allow_html=True,
-    )
+    loader_placeholder = st.empty()
+    if learning_mode:
+        logger.info("Learning-mode prompt detected (starts with %r)", LEARNING_TRIGGER_PREFIX)
+        render_learning_loader(loader_placeholder, "diagnose", set())
+        on_step = make_learning_step_handler(loader_placeholder)
+    else:
+        render_loader(loader_placeholder, "understand", set())
+        on_step = make_loader_step_handler(loader_placeholder)
 
     try:
-        # ====================================================================
-        # AI PROCESSING
-        # ====================================================================
-        with st.status("🤖 AI is thinking...", expanded=True) as status:
+        # ----------------------------------------------------------------
+        # STEP 1: PLAN
+        # ----------------------------------------------------------------
+        try:
+            qp = plan(
+                prompt,
+                session_id=st.session_state.agent_session_id,
+                on_step=on_step,
+            )
+            logger.info(
+                "Plan generated successfully. refusal=%s sql=%s",
+                qp.is_refusal, bool(qp.sql_used),
+            )
+        except Exception as e:
+            query_error = e
+            logger.exception("Planning failed for prompt: %r", prompt)
+            qp = None
 
-            # ----------------------------------------------------------------
-            # STEP 1: PLAN
-            # ----------------------------------------------------------------
+        # ----------------------------------------------------------------
+        # STEP 2: EXECUTE SQL (if any)
+        # ----------------------------------------------------------------
+        if qp is not None and query_error is None and qp.sql_used and not qp.is_refusal:
+            if learning_mode:
+                render_learning_loader(loader_placeholder, "save", {"diagnose", "lookup", "verify"})
+            else:
+                render_loader(loader_placeholder, "query", {"understand", "lookup", "schema", "resolve"})
             try:
-                st.write("🔍 Understanding your question...")
-
-                qp = plan(prompt)
-
-                logger.info(
-                    "Plan generated successfully. refusal=%s sql=%s",
-                    qp.is_refusal,
-                    bool(qp.sql_used),
-                )
-
+                df = run_sql(qp.sql_used)
+                logger.info("SQL executed successfully: %d rows, %d columns", len(df), len(df.columns))
             except Exception as e:
                 query_error = e
-
-                logger.exception(
-                    "Planning failed for prompt: %r",
-                    prompt,
-                )
-
-                status.update(
-                    label="❌ Failed while generating the query plan",
-                    state="error",
-                )
-
-                # Stop processing this request, but DON'T raise.
-                qp = None
-
-            # ----------------------------------------------------------------
-            # STEP 2: PROCESS PLAN
-            # ----------------------------------------------------------------
-            if qp is not None and query_error is None:
-
-                # ============================================================
-                # REFUSAL
-                # ============================================================
-                if qp.is_refusal:
-                    logger.info(
-                        "Request refused: %s",
-                        qp.explanation,
-                    )
-
-                    status.update(
-                        label="Request cannot be fulfilled",
-                        state="error",
-                    )
-
-                    df = pd.DataFrame()
-
-                # ============================================================
-                # NO SQL
-                # ============================================================
-                elif not qp.sql_used:
-                    logger.info(
-                        "No SQL generated. Explanation: %s",
-                        qp.explanation,
-                    )
-
-                    status.update(
-                        label="Completed",
-                        state="complete",
-                    )
-
-                    df = pd.DataFrame()
-
-                # ============================================================
-                # SQL GENERATED
-                # ============================================================
-                else:
-
-                    st.write("⚙️ Executing SQL...")
-
-                    try:
-                        # ----------------------------------------------------
-                        # Execute SQL
-                        # ----------------------------------------------------
-                        df = run_sql(qp.sql_used)
-
-                        logger.info(
-                            "SQL executed successfully: %d rows, %d columns",
-                            len(df),
-                            len(df.columns),
-                        )
-
-                        status.update(
-                            label="✅ Query completed",
-                            state="complete",
-                        )
-
-                    except Exception as e:
-                        query_error = e
-
-                        logger.exception(
-                            "SQL execution failed.\nSQL: %s",
-                            qp.sql_used,
-                        )
-
-                        status.update(
-                            label="❌ SQL execution failed",
-                            state="error",
-                        )
-
-                        # IMPORTANT:
-                        # Do NOT `raise` here.
-                        #
-                        # Raising the exception would terminate execution
-                        # before the loader cleanup code.
-                        df = pd.DataFrame()
+                logger.exception("SQL execution failed.\nSQL: %s", qp.sql_used)
+                df = pd.DataFrame()
 
     except Exception as e:
-        # ====================================================================
-        # UNEXPECTED ERROR
-        # ====================================================================
         query_error = e
-
-        logger.exception(
-            "Unexpected error while processing prompt: %r",
-            prompt,
-        )
+        logger.exception("Unexpected error while processing prompt: %r", prompt)
 
     finally:
-        # ====================================================================
-        # CRITICAL LOADER CLEANUP
-        #
-        # This ALWAYS executes:
-        #   - success
-        #   - SQL error
-        #   - LLM error
-        #   - retrieval error
-        #   - unexpected exception
-        # ====================================================================
+        # Loader is the ONLY thing on screen during processing — always
+        # clear it, success or failure, so the app never gets stuck showing
+        # a spinner after the request has actually finished.
         try:
             loader_placeholder.empty()
         except Exception:
             logger.exception("Failed to remove loading overlay")
 
     # =========================================================================
-    # HANDLE ERROR AFTER LOADER HAS BEEN REMOVED
+    # HANDLE ERROR
     # =========================================================================
     if query_error is not None:
+        # Keep the prompt visible even on failure — the user should still
+        # see what they asked, not just a bare error with no context for
+        # what triggered it.
+        st.session_state.current_prompt = prompt
+        st.session_state.current_is_learning = learning_mode
+        st.chat_message("user").write(prompt)
 
-        st.error(
-            "❌ Something went wrong while processing your request."
-        )
-
-        # ------------------------------------------------------------
-        # Show technical error details in an expandable section.
-        # This is useful during development but doesn't clutter the UI.
-        # ------------------------------------------------------------
-        with st.expander("🔍 Error details", expanded=False):
+        if learning_mode:
+            st.error(f"❌ Learning-mode correction failed to process: {query_error}")
+        else:
+            st.error(f"❌ Something went wrong while processing your request: {query_error}")
+        with st.expander("🔍 Full error details", expanded=True):
             st.exception(query_error)
-
-        # ------------------------------------------------------------
-        # Clear failed query state
-        # ------------------------------------------------------------
         st.session_state.plan = None
         st.session_state.df = None
-        st.session_state.current_prompt = None
 
     # =========================================================================
     # SUCCESS / REFUSAL / EXPLANATION RESULT
     # =========================================================================
     elif qp is not None:
-
-        # ---------------------------------------------------------------------
-        # Save current result
-        # ---------------------------------------------------------------------
         st.session_state.plan = qp
         st.session_state.df = df
         st.session_state.current_prompt = prompt
+        st.session_state.current_is_learning = learning_mode
 
-        # ---------------------------------------------------------------------
-        # Add to history
-        # ---------------------------------------------------------------------
         st.session_state.history.append(
             {
                 "prompt": prompt,
-                "chart_type": (
-                    qp.chart_type
-                    if not qp.is_refusal
-                    else "refused"
-                ),
+                "chart_type": qp.chart_type if not qp.is_refusal else "refused",
                 "rows": len(df),
                 "query_plan": qp,
                 "dataframe": df,
                 "time": datetime.now().strftime("%H:%M"),
+                "is_learning": learning_mode,
             }
         )
 
@@ -657,22 +796,17 @@ if st.session_state.plan:
     if st.session_state.current_prompt:
         st.chat_message("user").write(st.session_state.current_prompt)
 
+    if st.session_state.get("current_is_learning"):
+        st.markdown(
+            '<span class="learning-badge">🎓 Learning mode — correction taught to the agent</span>',
+            unsafe_allow_html=True,
+        )
+
     if qp.is_refusal:
         st.warning(f"🚫 {qp.explanation}")
     elif not qp.sql_used:
-        # No SQL was actually executed — the agent answered from its lookup
-        # tools directly instead of writing a real query. This is NOT the
-        # same as "query ran and matched 0 rows" and must not be shown as
-        # such — show the explanation plainly instead.
         st.info(f"ℹ️ {qp.explanation}")
     else:
-        # --- CHANGED: previously called st.stop() the instant df was empty,
-        # which hid EVERYTHING below it — including the SQL tab. That made a
-        # perfectly legitimate "zero matches" answer look like something had
-        # broken, since there was no way to see what SQL actually ran or
-        # confirm it was a real (not buggy) empty result. Now we still show
-        # metrics/insights/SQL, and only skip the parts that don't make
-        # sense for zero rows (the chart + data table). ---
         a, b, c = st.columns(3)
         a.metric("Rows", f"{len(df):,}")
         b.metric("Columns", len(df.columns))
@@ -708,11 +842,10 @@ if st.session_state.plan:
                 ct = st.selectbox("Chart Type", chart_types, index=chart_types.index(default_chart))
 
                 defaults = pick_defaults(ct, df, analysis)
-    # Ensure defaults always exist
                 for key in defaults:
                     if defaults[key] is None:
                         defaults[key] = df.columns[0]
-            
+
                 col1, col2, col3 = st.columns(3)
 
                 if ct == "bar":
@@ -722,22 +855,16 @@ if st.session_state.plan:
                     color = col3.selectbox("Color By", color_options)
                     hover = build_hover_data(df, analysis, exclude=[x, y])
                     labels = {}
-
                     if x is not None:
                         labels[x] = pretty_label(x)
-
                     if y is not None:
                         labels[y] = pretty_label(y)
 
                     fig = px.bar(
-                        df,
-                        x=x,
-                        y=y,
+                        df, x=x, y=y,
                         color=None if color == "None" else color,
-                        hover_data=hover,
-                        barmode="group",
-                        color_discrete_sequence=PALETTE,
-                        labels=labels,
+                        hover_data=hover, barmode="group",
+                        color_discrete_sequence=PALETTE, labels=labels,
                     )
                 elif ct == "line":
                     x = col1.selectbox("X Axis", cols, index=cols.index(defaults["x"]) if defaults["x"] in cols else 0)
@@ -748,34 +875,23 @@ if st.session_state.plan:
                                             index=color_options.index(suggested_color) if suggested_color in color_options else 0)
                     hover = build_hover_data(df, analysis, exclude=[x, y])
                     labels = {}
-
                     if x is not None:
                         labels[x] = pretty_label(x)
-
                     if y is not None:
                         labels[y] = pretty_label(y)
 
                     fig = px.line(
-                        df,
-                        x=x,
-                        y=y,
+                        df, x=x, y=y,
                         color=None if color == "None" else color,
-                        markers=True,
-                        hover_data=hover,
-                        color_discrete_sequence=PALETTE,
-                        labels=labels,
+                        markers=True, hover_data=hover,
+                        color_discrete_sequence=PALETTE, labels=labels,
                     )
-
                 elif ct == "pie":
                     x = col1.selectbox("Category", cats or cols, index=(cats or cols).index(defaults["names"]) if defaults["names"] in (cats or cols) else 0)
                     y = col2.selectbox("Value", nums or cols, index=(nums or cols).index(defaults["values"]) if defaults["values"] in (nums or cols) else 0)
                     hover = build_hover_data(df, analysis, exclude=[x, y])
-                    fig = px.pie(
-                        df, names=x, values=y, hover_data=hover,
-                        color_discrete_sequence=PALETTE,
-                    )
+                    fig = px.pie(df, names=x, values=y, hover_data=hover, color_discrete_sequence=PALETTE)
                     fig.update_traces(textinfo="percent+label")
-
                 elif ct == "scatter":
                     x = col1.selectbox("X Axis", nums or cols, index=(nums or cols).index(defaults["x"]) if defaults["x"] in (nums or cols) else 0)
                     y_options = nums or cols
@@ -785,21 +901,15 @@ if st.session_state.plan:
                     color = col3.selectbox("Color By", color_options)
                     hover = build_hover_data(df, analysis, exclude=[x, y])
                     labels = {}
-
                     if x is not None:
                         labels[x] = pretty_label(x)
-
                     if y is not None:
                         labels[y] = pretty_label(y)
 
                     fig = px.scatter(
-                        df,
-                        x=x,
-                        y=y,
+                        df, x=x, y=y,
                         color=None if color == "None" else color,
-                        hover_data=hover,
-                        color_discrete_sequence=PALETTE,
-                        labels=labels,
+                        hover_data=hover, color_discrete_sequence=PALETTE, labels=labels,
                     )
                 else:  # histogram
                     x = col1.selectbox("Column", nums or cols, index=(nums or cols).index(defaults["x"]) if defaults["x"] in (nums or cols) else 0)
@@ -807,28 +917,20 @@ if st.session_state.plan:
                     color = col3.selectbox("Color By", color_options)
                     hover = build_hover_data(df, analysis, exclude=[x])
                     labels = {}
-
                     if x is not None:
                         labels[x] = pretty_label(x)
 
                     fig = px.histogram(
-                        df,
-                        x=x,
+                        df, x=x,
                         color=None if color == "None" else color,
-                        hover_data=hover,
-                        color_discrete_sequence=PALETTE,
-                        labels=labels,
+                        hover_data=hover, color_discrete_sequence=PALETTE, labels=labels,
                     )
 
                 fig.update_layout(
-                    template="plotly_white",
-                    height=560,
-                    hovermode="closest",
-                    legend_title_text="",
-                    font=dict(family="Inter, sans-serif", size=13),
+                    template="plotly_white", height=560, hovermode="closest",
+                    legend_title_text="", font=dict(family="Inter, sans-serif", size=13),
                     margin=dict(t=30, l=10, r=10, b=10),
                 )
-                st.caption(f"Debug: figure has {len(fig.data)} trace(s)")  # TEMPORARY — remove once confirmed working
             st.plotly_chart(fig, width='stretch')
 
             with t2:
