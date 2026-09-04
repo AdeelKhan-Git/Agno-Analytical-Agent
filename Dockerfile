@@ -40,16 +40,16 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Application files
 # ============================================================
 COPY agno_agent.py .
-COPY glossary_tools.py .
 COPY column_glossary.json .
 COPY column_descriptions.json .
 COPY data/ ./data/
+COPY learning/ ./learning/
 COPY table_descriptions.json .
 COPY schema_knowledge.py .
 COPY instructions.py .
 COPY rebuild.py .
-COPY agno_SQLTool_cache ./agno_SQLTool_cache/
 COPY agent_sessions.db .
+COPY knowledge_contents.db .
 COPY logging_config.py .
 COPY db.py .
 COPY app.py .
@@ -73,7 +73,7 @@ RUN sed -i 's/\r$//' /app/entrypoint.sh \
 # ============================================================
 # Environment
 # ============================================================
-ENV OLLAMA_MODEL=granite4.1:30b
+ENV OLLAMA_MODEL=qwen3.8:27b
 ENV OLLAMA_MODELS=/root/.ollama/models
 
 # ============================================================
