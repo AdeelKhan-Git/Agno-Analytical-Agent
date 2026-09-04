@@ -10,7 +10,13 @@ __pycache__/
 *$py.class
 convert.py
 data
+learning
 agno_SQLTool_cache
 agent_sessions.db
+knowledge_contents.db
+knowledge_contents.db-shm
+knowledge_contents.db-wal
 agent_sessions.db-shm
 agent_sessions.db-wal
+test_check_lancedb_count.py
+test_schema_search.py
