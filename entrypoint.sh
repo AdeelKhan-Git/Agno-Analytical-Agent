@@ -9,11 +9,14 @@ set -e
 ############################################################
 # Ollama runtime tuning — set BEFORE `ollama serve` starts
 #
-# Keep the global default short so the embedding model and
-# anything else without an explicit override can unload.
-#
-# The main Granite model is kept resident separately using
-# the background keep-alive pinger below.
+# Keep the global default short so anything WITHOUT an
+# explicit keep-alive override can unload on its own. The
+# main Granite model AND the embedding model are both kept
+# resident deliberately, via their own periodic keep-alive
+# pingers below — the search_knowledge_base tool calls the
+# embedder on every single knowledge-base search, so it needs
+# to stay loaded the same way the main model does, not reload
+# from disk on every search.
 ############################################################
 
 export OLLAMA_KEEP_ALIVE="${OLLAMA_KEEP_ALIVE:-2m}"
@@ -27,7 +30,7 @@ OLLAMA_PID=$!
 
 # Ensure background processes are cleaned up when the
 # container exits or receives a termination signal.
-trap 'kill "$OLLAMA_PID" "${KEEPALIVE_PID:-}" 2>/dev/null || true' EXIT INT TERM
+trap 'kill "$OLLAMA_PID" "${KEEPALIVE_PID:-}" "${EMBEDDER_KEEPALIVE_PID:-}" 2>/dev/null || true' EXIT INT TERM
 
 echo "Waiting for Ollama..."
 
@@ -43,7 +46,7 @@ echo "Ollama is ready."
 ############################################################
 
 # This MUST match the model configured for the application.
-MODEL="${OLLAMA_MODEL:-granite4.1:30b}"
+MODEL="${OLLAMA_MODEL:-qwen3.8:27b}"
 
 if ! ollama list | awk '{print $1}' | grep -Fxq "$MODEL"; then
     echo "Downloading model: $MODEL"
@@ -227,21 +230,58 @@ else
 fi
 
 ############################################################
-# Explicitly unload embedding model from VRAM
+# Keep the EMBEDDING model resident too
 #
-# The main Granite model should remain the primary VRAM user.
+# search_knowledge_base calls the embedder on EVERY single
+# knowledge-base search the main model makes at query time —
+# not just during index building. Unloading it after the
+# index build (the previous behavior) meant every real search
+# during actual usage had to reload nomic-embed-text from disk
+# into VRAM first, adding avoidable latency to every search.
 #
-# keep_alive=0 forces the embedding model to unload immediately.
+# GPU headroom check (see conversation): main tuned model at
+# num_ctx=16384 uses ~24GB; nomic-embed-text is only ~0.4GB —
+# keeping both resident simultaneously still leaves ~23GB
+# free, so there's no capacity reason to unload it.
+#
+# Same pattern as the main model: one warm-up call, then a
+# periodic keep_alive=-1 ping faster than the 2-minute global
+# default so it never actually expires.
 ############################################################
 
-echo "Unloading embedding model from VRAM (keep_alive=0)..."
+echo "======================================"
+echo "Warming up embedding model: $EMBEDDER_MODEL..."
+echo "======================================"
 
-curl -s \
-    http://127.0.0.1:11434/api/generate \
-    -d "{\"model\": \"$EMBEDDER_MODEL\", \"keep_alive\": 0}" \
-    >/dev/null 2>&1 || true
+if curl -s \
+    http://127.0.0.1:11434/api/embed \
+    -d "{\"model\": \"$EMBEDDER_MODEL\", \"input\": \"warmup\"}" \
+    >/dev/null 2>&1
+then
+    echo "Embedding model warmed and resident in memory."
+else
+    echo "Embedding model warm-up call failed."
+    echo "Continuing anyway — first search_knowledge_base call will load it."
+fi
 
-echo "Embedding model unloaded."
+EMBEDDER_PING_INTERVAL_SECONDS=90
+
+(
+    while true; do
+
+        sleep "$EMBEDDER_PING_INTERVAL_SECONDS"
+
+        curl -s \
+            http://127.0.0.1:11434/api/embed \
+            -d "{\"model\": \"$EMBEDDER_MODEL\", \"input\": \" \", \"keep_alive\": -1}" \
+            >/dev/null 2>&1 || true
+
+    done
+) &
+
+EMBEDDER_KEEPALIVE_PID=$!
+
+echo "Started embedding-model ($EMBEDDER_MODEL) keep-alive pinger (pid $EMBEDDER_KEEPALIVE_PID, every ${EMBEDDER_PING_INTERVAL_SECONDS}s)."
 
 ############################################################
 # Start Streamlit
