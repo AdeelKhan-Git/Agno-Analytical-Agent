@@ -21,46 +21,34 @@ TABLE_DESCRIPTIONS_PATH = os.path.join(BASE_DIR, "table_descriptions.json")
 CONTENTS_DB_FILE = os.path.join(BASE_DIR, "knowledge_contents.db")
 LEARNING_DB_FILE = os.path.join(BASE_DIR, "learning_knowledge_contents.db")
 
-
-# ============================================================================
-# nomic-embed-text is an ASYMMETRIC embedder: per its own model card, text
-# meant to be SEARCHED FOR must be prefixed "search_query: " and text meant
-# to be SEARCHED IN must be prefixed "search_document: " — retrieval quality
-# drops measurably without this (confirmed independently by an external
-# code review of this repo, and by Agno's own docs, which ship the exact
-# same two-instance pattern for CohereEmbedder's input_type param —
-# https://docs.agno.com/knowledge/concepts/embedder/cohere/cohere-embedder:
-# "A single instance used by a vector database therefore applies the same
-# input type to document insertion and query search" — document_embedder
-# and query_embedder are built as two separate instances there).
-# OllamaEmbedder has no built-in prefix/input_type concept at all (checked
-# agno/knowledge/embedder/ollama.py — get_embedding() sends raw text
-# unconditionally), so that split has to be implemented here.
-# ============================================================================
-class _PrefixedOllamaEmbedder(OllamaEmbedder):
-    """Two instances of this (one per _prefix) are used below: one for
-    indexing (rebuild.py — 'search_document: '), one for live query
-    search (the running agent — 'search_query: '), both pointed at the
-    SAME on-disk LanceDb table. The differing prefix only changes what
-    text is fed to the model, not the resulting vector space or
-    dimensionality — mixing them at index vs. query time is exactly how
-    this model is meant to be used, not a mismatch.
-    """
-    _prefix: str = "search_document: "
+class NomicDocumentEmbedder(OllamaEmbedder):
 
     def get_embedding(self, text: str):
-        return super().get_embedding(f"{self._prefix}{text}")
+        return super().get_embedding(f"search_document: {text}")
 
     async def async_get_embedding(self, text: str):
-        return await super().async_get_embedding(f"{self._prefix}{text}")
+        return await super().async_get_embedding(f"search_document: {text}")
+
+    def get_embedding_and_usage(self, text: str):
+        return super().get_embedding_and_usage(f"search_document: {text}")
+
+    async def async_get_embedding_and_usage(self, text: str):
+        return await super().async_get_embedding_and_usage(f"search_document: {text}")
 
 
-class _DocumentEmbedder(_PrefixedOllamaEmbedder):
-    _prefix = "search_document: "
+class NomicQueryEmbedder(OllamaEmbedder):
 
+    def get_embedding(self, text: str):
+        return super().get_embedding(f"search_query: {text}")
 
-class _QueryEmbedder(_PrefixedOllamaEmbedder):
-    _prefix = "search_query: "
+    async def async_get_embedding(self, text: str):
+        return await super().async_get_embedding(f"search_query: {text}")
+
+    def get_embedding_and_usage(self, text: str):
+        return super().get_embedding_and_usage(f"search_query: {text}")
+
+    async def async_get_embedding_and_usage(self, text: str):
+        return await super().async_get_embedding_and_usage(f"search_query: {text}")
 
 
 def _load_json(path: str) -> dict:
@@ -70,56 +58,58 @@ def _load_json(path: str) -> dict:
         return json.load(f)
 
 
-def _build_schema_knowledge(embedder) -> Knowledge:
+_table_docs_cache = None
+
+
+def load_table_docs_for_retriever() -> dict:
+    global _table_docs_cache
+    if _table_docs_cache is not None:
+        return _table_docs_cache
+
+    table_descriptions = _load_json(TABLE_DESCRIPTIONS_PATH)
+    join_partners = defaultdict(set)
+
+    for table, entry in table_descriptions.items():
+        for join in (entry or {}).get("joins", []):
+            from_table = str(join.get("from", "")).split(".")[0]
+            to_table = str(join.get("to", "")).split(".")[0]
+            if from_table and to_table and from_table != to_table:
+                join_partners[from_table].add(to_table)
+                join_partners[to_table].add(from_table)
+
+    _table_docs_cache = {
+        "join_partners": {table: sorted(partners) for table, partners in join_partners.items()}
+    }
+    return _table_docs_cache
+
+
+def build_knowledge(mode: str = "query") -> Knowledge:
+
+    if mode == "index":
+        embedder = NomicDocumentEmbedder(id=EMBEDDER_MODEL, dimensions=768)
+    elif mode == "query":
+        embedder = NomicQueryEmbedder(id=EMBEDDER_MODEL, dimensions=768)
+    else:
+        raise ValueError(f"build_knowledge(mode=...) must be 'index' or 'query', got {mode!r}")
+
     vector_db = LanceDb(
         uri=LANCEDB_URI,
         table_name=TABLE_NAME,
         search_type=SearchType.hybrid,
         embedder=embedder,
     )
-    return Knowledge(vector_db=vector_db, max_results=20, contents_db=SqliteDb(db_file=CONTENTS_DB_FILE))
-
-
-def build_knowledge() -> Knowledge:
-    """Query-time construction — used by the live agent's
-    search_knowledge_base tool. Uses 'search_query: ', matching how a
-    user's question should be embedded, NOT how the indexed documents
-    were embedded (see build_knowledge_for_indexing for that)."""
-    return _build_schema_knowledge(_QueryEmbedder(id=EMBEDDER_MODEL, dimensions=768))
-
-
-def build_knowledge_for_indexing() -> Knowledge:
-    """Indexing-time construction — used ONLY by rebuild.py. Uses
-    'search_document: ', matching how nomic-embed-text expects text that
-    will be SEARCHED IN (as opposed to searched FOR) to be embedded."""
-    return _build_schema_knowledge(_DocumentEmbedder(id=EMBEDDER_MODEL, dimensions=768))
+    return Knowledge(vector_db=vector_db, max_results=10, contents_db=SqliteDb(db_file=CONTENTS_DB_FILE))
 
 
 def build_learning_knowledge() -> Knowledge:
-    """The same asymmetric-prefix problem applies here in principle, but
-    the clean two-instance split above does NOT apply cleanly: Agno's
-    LearningMachine owns insert (save_learning) and search
-    (search_learnings, and the automatic add_learnings_to_context recall
-    before every run) internally, through this SAME Knowledge object,
-    interleaved live during normal operation — there's no separate
-    "index once, then only ever query" phase to split into two instances
-    the way rebuild.py vs. the live agent works for the static schema
-    docs above.
-    Falls back to Nomic's own documented alternative for this exact
-    situation: "If you want to do semantic similarity search instead of
-    question answering, you should encode both queries and documents
-    with the search_document task type" (Nomic Atlas docs). Using
-    search_document uniformly on both sides is principled, not a
-    shortcut — it's Nomic's own recommended fallback when query/document
-    embedding calls can't be cleanly separated.
-    """
+    embedder = NomicDocumentEmbedder(id=EMBEDDER_MODEL, dimensions=768)
     vector_db = LanceDb(
         uri="./learning/lancedb",
         table_name="learning_agent",
         search_type=SearchType.hybrid,
-        embedder=_DocumentEmbedder(id=EMBEDDER_MODEL, dimensions=768),
+        embedder=embedder,
     )
-    return Knowledge(vector_db=vector_db, max_results=20, contents_db=SqliteDb(db_file=LEARNING_DB_FILE))
+    return Knowledge(vector_db=vector_db, max_results=5, contents_db=SqliteDb(db_file=LEARNING_DB_FILE))
 
 
 def _iter_documents():
@@ -137,14 +127,6 @@ def _iter_documents():
             {"table": table, "kind": "table"},
         )
 
-    # One document PER COLUMN, not one grouped document per table. This
-    # keeps each column's embedding focused on just that column's meaning
-    # (which column to use for which user intent), instead of diluting a
-    # single vector across every column in the table. It costs more
-    # documents/embedding calls, but retrieval precision is the actual
-    # goal here — the model needs to reliably land on the ONE correct
-    # column for a given question (e.g. jms_jcode vs subtitle vs title),
-    # not get a vague "somewhere in this table" match.
     for table, columns in column_descriptions.items():
         for column, description in columns.items():
             yield (
@@ -172,7 +154,8 @@ def _iter_documents():
 
 
 def rebuild(knowledge: Knowledge = None) -> int:
-    knowledge = knowledge or build_knowledge_for_indexing()
+
+    knowledge = knowledge or build_knowledge(mode="index")
     count = 0
 
     for name, text_content, metadata in _iter_documents():
@@ -192,9 +175,10 @@ _knowledge = None
 
 
 def get_knowledge() -> Knowledge:
+
     global _knowledge
     if _knowledge is None:
-        _knowledge = build_knowledge()
+        _knowledge = build_knowledge(mode="query")
     return _knowledge
 
 
