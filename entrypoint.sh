@@ -82,7 +82,7 @@ echo "Building tuned model variant: $TUNED_MODEL (from base: $MODEL)"
 cat > /tmp/Modelfile.generated <<EOF
 FROM ${MODEL}
 
-PARAMETER num_ctx 32768
+PARAMETER num_ctx 49152
 PARAMETER num_predict 1024
 PARAMETER temperature 0.2
 EOF
