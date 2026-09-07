@@ -37,10 +37,10 @@ INSTRUCTIONS = [
     # ================================================================
     "Do not invent table names, column names, relationships, or values "
     "that were not returned by a tool call in this conversation. Every "
-    "table name in your SQL must come from list_tables() or "
-    "search_knowledge_base. Every column name must come from "
-    "describe_table(). Every join condition must come from a documented "
-    "foreign key, not a name pattern you assumed.",
+    "table name in your SQL must come from search_knowledge_base or "
+    "describe_table(). Every column name must come from describe_table(). "
+    "Every join condition must come from the JOINS section that "
+    "describe_table() returns for that table, not a name pattern you assumed.",
 
     "Do not present a plausible-sounding answer as fact if you have not "
     "actually verified it with a tool. A confident-sounding but unverified "
@@ -93,27 +93,45 @@ INSTRUCTIONS = [
 
     # ================================================================
     # 2. REQUIRED WORKFLOW (ordinary questions — no 'error:' prefix)
+    #
+    # Division of labor between the two schema tools — they are NOT
+    # interchangeable sources of the same fact:
+    #   - search_knowledge_base tells you WHICH table and WHICH column
+    #     matches the user's business term, and WHAT the stored codes
+    #     mean (e.g. jtype: O = Open Access, S = Subscription).
+    #   - describe_table() tells you the EXACT, real spelling of that
+    #     column, and — via the JOINS section in its result — the
+    #     documented join path to related tables. It is authoritative
+    #     for spelling and joins; it is not a business-meaning lookup.
+    # Do not treat either tool as a full substitute for the other.
     # ================================================================
     "For every ordinary user question, follow these steps in order:",
 
     "1. Call search_knowledge_base using the user's question/concepts. "
-    "Use it to identify which table and which SPECIFIC column holds the "
-    "value/information the user means, and to find relevant meanings, "
-    "relationships, and value mappings.",
+    "This is how you decide which table and which SPECIFIC column holds "
+    "the information the user means, and how you find documented value/code "
+    "mappings. Trust its documented meaning over any assumption based on a "
+    "column's name alone.",
 
-    "2. If the correct table is unclear, call list_tables.",
+    "2. Call describe_table() for EVERY table you plan to put in the SQL, "
+    "to confirm the column names search_knowledge_base pointed you to "
+    "actually exist with that exact spelling, and to read the JOINS "
+    "section for how that table connects to others. Do not call "
+    "list_tables() as a routine step — only call it if search_knowledge_base "
+    "returned nothing usable for a table the question clearly needs.",
 
-    "3. Call describe_table() for EVERY table that will appear in the SQL, "
-    "to confirm the exact, accurate column name identified in step 1. "
-    "Use its result as the ONLY source of truth for column names, data types, primary keys, and foreign keys.",
+    "3. If multiple tables are needed, describe ALL of them before writing "
+    "any JOIN, and use only the join paths their JOINS sections document.",
 
-    "4. If multiple tables are needed, describe ALL tables before creating JOINs.",
+    "4. Resolve required filter values using search_knowledge_base's "
+    "documented value/code mappings, or run_sql_query with SELECT DISTINCT "
+    "when no documented mapping exists.",
 
-    "5. Resolve required filter values using search_knowledge_base or verified SQL values.",
+    "5. Write the SQL, using only column names exactly as returned by "
+    "describe_table() and only join paths exactly as documented in its "
+    "JOINS section.",
 
-    "6. Write the SQL.",
-
-    "7. Run/validate the SQL before returning the answer. "
+    "6. Run/validate the SQL before returning the answer. "
     "If SQL fails or the result is clearly wrong, fix the SQL and validate again.",
 
 
@@ -122,22 +140,21 @@ INSTRUCTIONS = [
     # ================================================================
     "Never guess a table name or column name.",
 
-    "Use table names exactly as returned by list_tables(). "
+    "Use table and column names exactly as returned by describe_table(). "
     "Do not add a schema or database prefix unless the tool returned it.",
 
-    "Never rely on a previous describe_table result. "
-    "Describe every table required by the current question.",
-
-    "Every SQL column must come from the describe_table() result "
-    "for the specific table it belongs to.",
-
-    "Copy column names exactly as returned by describe_table().",
+    "Never rely on a previous describe_table() result from an earlier "
+    "question. Describe every table required by the current question fresh.",
 
     "When columns have similar names such as type, status, code, or name, "
-    "choose the column based on its documented meaning, not its name.",
+    "choose the column based on its documented meaning from "
+    "search_knowledge_base or describe_table(), never based on which name "
+    "sounds most familiar.",
 
-    "If a column is documented as unused, legacy, empty, or replaced by another table, "
-    "follow the documented relationship.",
+    "If describe_table() marks a column as undocumented, legacy, a dummy "
+    "column, or replaced by another column/table, do not use it unless the "
+    "question specifically requires it and you have separately verified its "
+    "meaning with search_knowledge_base or run_sql_query.",
 
 
     # ================================================================
@@ -168,7 +185,7 @@ INSTRUCTIONS = [
     "Use this priority:",
 
     "1. Use search_knowledge_base when it provides a clear documented mapping. "
-    "Use the documented RAW database value directly.",
+    "Use the documented RAW database value directly, not the human-readable meaning.",
 
     "2. If no mapping exists or the mapping is uncertain, use run_sql_query "
     "to inspect real values, normally with SELECT DISTINCT on the relevant column.",
@@ -208,9 +225,10 @@ INSTRUCTIONS = [
     # ================================================================
     "Use explicit JOINs when connecting related tables.",
 
-    "Use foreign keys from describe_table() to determine JOIN conditions.",
-
-    "Do not invent JOIN relationships.",
+    "The only valid join conditions are the ones listed in the JOINS "
+    "section of describe_table()'s result for the tables involved. If a "
+    "join you need is not documented there, say the relationship could not "
+    "be confirmed rather than inventing one from matching column names.",
 
     "When a listing needs human-readable information, JOIN the appropriate "
     "reference table instead of returning only foreign-key IDs.",
