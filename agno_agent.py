@@ -19,9 +19,102 @@ from agno.db.sqlite import SqliteDb
 from db import ENGINE, GEMINI_API_KEY, OPENAI_API_KEY, DB_URL
 import pandas as pd
 from instructions import INSTRUCTIONS
-from schema_knowledge import build_knowledge, build_learning_knowledge
+from schema_knowledge import (
+    build_learning_knowledge,
+    get_knowledge,
+    load_table_docs_for_retriever,
+)
 
 logger = logging.getLogger(__name__)
+
+_SCHEMA_DOCS_BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+_TABLE_DESCRIPTIONS_PATH = os.path.join(_SCHEMA_DOCS_BASE_DIR, "table_descriptions.json")
+_COLUMN_DESCRIPTIONS_PATH = os.path.join(_SCHEMA_DOCS_BASE_DIR, "column_descriptions.json")
+
+
+def _load_json_doc(path: str) -> dict:
+    if not os.path.exists(path):
+        logger.warning("Schema doc file not found: %s", path)
+        return {}
+    try:
+        with open(path, encoding="utf-8") as f:
+            return json.load(f)
+    except Exception:
+        logger.exception("Failed to load/parse schema doc file: %s", path)
+        return {}
+
+
+def _format_curated_table_description(table_name: str, raw_columns_json: str) -> str:
+    table_docs = _load_json_doc(_TABLE_DESCRIPTIONS_PATH)
+    column_docs = _load_json_doc(_COLUMN_DESCRIPTIONS_PATH)
+
+    table_entry = table_docs.get(table_name)
+    documented_columns = column_docs.get(table_name, {})
+
+    try:
+        real_columns = json.loads(raw_columns_json)
+    except Exception:
+      
+        return raw_columns_json
+
+    if not isinstance(real_columns, list):
+        return raw_columns_json
+
+    lines = [f"TABLE {table_name}"]
+
+    if table_entry and table_entry.get("description"):
+        lines.append(str(table_entry["description"]))
+    else:
+        lines.append(
+            "(No documented table-level description found for this table — "
+            "treat column meanings below with extra care and verify with "
+            "search_knowledge_base if the correct column is unclear.)"
+        )
+
+    documented_names = set(documented_columns.keys())
+    real_column_names = [c.get("name") for c in real_columns if c.get("name")]
+    real_column_meta = {c.get("name"): c for c in real_columns if c.get("name")}
+
+    documented_lines = []
+    undocumented_lines = []
+
+    for col_name in real_column_names:
+        meta = real_column_meta.get(col_name, {})
+        col_type = meta.get("type", "?")
+        if col_name in documented_names:
+            meaning = documented_columns[col_name]
+            documented_lines.append(f"  {col_name} ({col_type}): {meaning}")
+        else:
+            undocumented_lines.append(f"  {col_name} ({col_type}): undocumented — no confirmed meaning")
+
+    if documented_lines:
+        lines.append("")
+        lines.append("COLUMNS")
+        lines.extend(documented_lines)
+
+    if undocumented_lines:
+        lines.append("")
+        lines.append(
+            "RAW COLUMNS, UNDOCUMENTED — avoid using these unless the "
+            "question specifically requires them and you have verified "
+            "their meaning with search_knowledge_base or run_sql_query first:"
+        )
+        lines.extend(undocumented_lines)
+
+    joins = (table_entry or {}).get("joins") or []
+    if joins:
+        lines.append("")
+        lines.append("JOINS")
+        for j in joins:
+            on = j.get("on") or f"{j.get('from', '?')} = {j.get('to', '?')}"
+            note = j.get("note", "")
+            join_line = f"  {on}"
+            if note:
+                join_line += f"   -- {note}"
+            lines.append(join_line)
+
+    return "\n".join(lines)
+
 
 class SchemaAwareSQLTools(Toolkit):
     def __init__(self, db_engine):
@@ -52,8 +145,11 @@ class SchemaAwareSQLTools(Toolkit):
 
         if not table_name:
             raise ValueError("table_name cannot be empty")
-        return self._inner.describe_table(table_name)
 
+        raw_result = self._inner.describe_table(table_name)
+        return _format_curated_table_description(table_name, raw_result)
+    
+    @tool(cache_dir='agno_SQLTool_cache', cache_results=True, cache_ttl=3600)
     def run_sql_query(self, query):
         return self._inner.run_sql_query(query)
 
@@ -156,6 +252,79 @@ class QueryPlan(BaseModel):
         return normalized
 
 
+
+_RETRIEVER_TABLE_STAGE_RESULTS = 10
+_RETRIEVER_COLUMN_STAGE_RESULTS_PER_TABLE = 15
+
+
+def schema_knowledge_retriever(query: str, num_documents: int = None, **kwargs):
+
+    # get_knowledge() returns a cached, mode="query" Knowledge instance —
+    # correct task-prefix for embedding this search query, and reused
+    # across calls instead of reopening LanceDb/the embedder every time.
+    knowledge = get_knowledge()
+
+    # Stage 1: which tables is this question actually about?
+    table_docs = knowledge.search(
+        query,
+        max_results=_RETRIEVER_TABLE_STAGE_RESULTS,
+        filters={"kind": "table"},
+    )
+    selected_tables = {
+        doc.meta_data.get("table")
+        for doc in table_docs
+        if doc.meta_data and doc.meta_data.get("table")
+    }
+
+    if not selected_tables:
+        # Nothing matched at the table level at all — fall back to an
+        # unscoped search rather than returning nothing, so a genuinely
+        # novel/oddly-worded question still gets SOME context.
+        logger.warning(
+            "schema_knowledge_retriever: no tables matched query %r in Stage 1, "
+            "falling back to an unscoped search", query,
+        )
+        fallback_docs = knowledge.search(query, max_results=num_documents or 10)
+        return [doc.to_dict() for doc in fallback_docs]
+
+    # Union in each selected table's documented join partners, so a hub
+    # table (e.g. tbl_ebm, which most cross-table questions need) is
+    # never missing just because the question's wording pointed at the
+    # tables on either side of it instead of the hub itself.
+    join_partner_tables = load_table_docs_for_retriever().get("join_partners", {})
+    expanded_tables = set(selected_tables)
+    for table in selected_tables:
+        expanded_tables.update(join_partner_tables.get(table, []))
+
+    logger.info(
+        "schema_knowledge_retriever: Stage 1 selected tables=%s, expanded with join partners=%s",
+        sorted(selected_tables), sorted(expanded_tables - selected_tables),
+    )
+
+    # Stage 2: columns + value mappings, scoped to just those tables.
+    # One filtered search per table (dict filters only — see note above
+    # on why a single IN(...) call doesn't work on LanceDb), unioned and
+    # de-duplicated by document name.
+    seen_names = set()
+    result_docs = list(table_docs)  # keep the table-level docs too — they carry join/description context
+    for table in expanded_tables:
+        table_scoped_docs = knowledge.search(
+            query,
+            max_results=_RETRIEVER_COLUMN_STAGE_RESULTS_PER_TABLE,
+            filters={"table": table},
+        )
+        for doc in table_scoped_docs:
+            if doc.name in seen_names:
+                continue
+            seen_names.add(doc.name)
+            result_docs.append(doc)
+
+    if num_documents is not None and len(result_docs) > num_documents:
+        result_docs = result_docs[:num_documents]
+
+    return [doc.to_dict() for doc in result_docs]
+
+
 def build_agent():
     model_id = os.environ.get("OLLAMA_MODEL")
     if not model_id:
@@ -169,23 +338,23 @@ def build_agent():
 
     logger.info("build_agent() model: %s", model_id)
     return Agent(
-        model = Ollama(id = model_id,options={"think": False}),
+        model = Ollama(id = model_id),
         # model=OpenAIChat(id="gpt-4o", api_key=OPENAI_API_KEY),
         # model=Gemini(id="gemini-3.5-flash-lite", api_key=GEMINI_API_KEY),
         tools=[
             SchemaAwareSQLTools(db_engine=ENGINE),
             PandasTools(),
         ],
-        knowledge=build_knowledge(),
+        knowledge=get_knowledge(),
+        knowledge_retriever=schema_knowledge_retriever,
         learning=LearningMachine(
             knowledge=build_learning_knowledge(),
             learned_knowledge=LearnedKnowledgeConfig(mode=LearningMode.AGENTIC)
         ),
         search_knowledge=True,
-        enable_agentic_knowledge_filters=True,
         db=SqliteDb(db_file="agent_sessions.db"),
         add_history_to_context=True,
-        num_history_runs=5,
+        num_history_runs=1,
         description=(
             "You are a data analyst agent with direct access to a SQL database via your tools.\n"
         ),
@@ -197,7 +366,7 @@ def build_agent():
     )
 
 _agent = None
-_agent_lock = threading.Lock()
+_agent_build_lock = threading.Lock()
 
 _TOOL_PROGRESS_MESSAGES = {
     "list_tables": "📋 Looking at what tables are available...",
@@ -211,7 +380,7 @@ _DEFAULT_TOOL_PROGRESS = "🔧 Working on your question..."
 def _get_agent():
     global _agent
     if _agent is None:
-        with _agent_lock:
+        with _agent_build_lock:
             if _agent is None:  # re-check inside the lock (double-checked locking)
                 logger.info("Building agent instance (first call — will be reused for all subsequent requests)")
                 _agent = build_agent()
@@ -314,49 +483,48 @@ def plan(user_prompt: str, _max_retries: int = 2, on_progress: Optional[Callable
     _started_at: dict[str, float] = {}
 
     response = None
-    with _agent_lock:
-        for event in agent.run(user_prompt, stream=True, stream_events=True, yield_run_output=True,
-                                session_id=session_id):
-            if isinstance(event, ToolCallStartedEvent) and event.tool and event.tool.tool_name:
-                tool_name = event.tool.tool_name
-                tool_args = getattr(event.tool, "tool_args", None) or {}
-                call_id = getattr(event.tool, "tool_call_id", None)
-                if call_id:
-                    _started_at[call_id] = time.time()
+    for event in agent.run(user_prompt, stream=True, stream_events=True, yield_run_output=True,
+                            session_id=session_id):
+        if isinstance(event, ToolCallStartedEvent) and event.tool and event.tool.tool_name:
+            tool_name = event.tool.tool_name
+            tool_args = getattr(event.tool, "tool_args", None) or {}
+            call_id = getattr(event.tool, "tool_call_id", None)
+            if call_id:
+                _started_at[call_id] = time.time()
 
-                message = _TOOL_PROGRESS_MESSAGES.get(tool_name, _DEFAULT_TOOL_PROGRESS)
-                logger.debug("Tool call started: %s -> %r", tool_name, message)
-                _notify(message)
-                _emit_step({
-                    "tool_name": tool_name,
-                    "tool_args": tool_args,
-                    "status": "started",
-                    "result": None,
-                    "elapsed_ms": None,
-                })
+            message = _TOOL_PROGRESS_MESSAGES.get(tool_name, _DEFAULT_TOOL_PROGRESS)
+            logger.debug("Tool call started: %s -> %r", tool_name, message)
+            _notify(message)
+            _emit_step({
+                "tool_name": tool_name,
+                "tool_args": tool_args,
+                "status": "started",
+                "result": None,
+                "elapsed_ms": None,
+            })
 
-            elif isinstance(event, ToolCallCompletedEvent) and event.tool and event.tool.tool_name:
-                tool_name = event.tool.tool_name
-                tool_args = getattr(event.tool, "tool_args", None) or {}
-                call_id = getattr(event.tool, "tool_call_id", None)
-                result = getattr(event.tool, "result", None)
+        elif isinstance(event, ToolCallCompletedEvent) and event.tool and event.tool.tool_name:
+            tool_name = event.tool.tool_name
+            tool_args = getattr(event.tool, "tool_args", None) or {}
+            call_id = getattr(event.tool, "tool_call_id", None)
+            result = getattr(event.tool, "result", None)
 
-                elapsed_ms = None
-                if call_id and call_id in _started_at:
-                    elapsed_ms = (time.time() - _started_at.pop(call_id)) * 1000
+            elapsed_ms = None
+            if call_id and call_id in _started_at:
+                elapsed_ms = (time.time() - _started_at.pop(call_id)) * 1000
 
-                logger.debug("Tool call completed: %s (%.0fms)", tool_name,
-                             elapsed_ms if elapsed_ms is not None else -1)
-                _emit_step({
-                    "tool_name": tool_name,
-                    "tool_args": tool_args,
-                    "status": "completed",
-                    "result": result,
-                    "elapsed_ms": elapsed_ms,
-                })
+            logger.debug("Tool call completed: %s (%.0fms)", tool_name,
+                         elapsed_ms if elapsed_ms is not None else -1)
+            _emit_step({
+                "tool_name": tool_name,
+                "tool_args": tool_args,
+                "status": "completed",
+                "result": result,
+                "elapsed_ms": elapsed_ms,
+            })
 
-            elif isinstance(event, RunOutput):
-                response = event
+        elif isinstance(event, RunOutput):
+            response = event
 
     if response is None:
         # Should not happen — yield_run_output=True guarantees a final
