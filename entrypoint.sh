@@ -20,7 +20,8 @@ set -e
 ############################################################
 
 export OLLAMA_KEEP_ALIVE="${OLLAMA_KEEP_ALIVE:-2m}"
-
+export OLLAMA_NUM_PARALLEL="${OLLAMA_NUM_PARALLEL:-1}"
+export OLLAMA_FLASH_ATTENTION="${OLLAMA_FLASH_ATTENTION:-1}"
 echo "======================================"
 echo "Starting Ollama..."
 echo "======================================"
@@ -83,7 +84,6 @@ cat > /tmp/Modelfile.generated <<EOF
 FROM ${MODEL}
 
 PARAMETER num_ctx 49152
-PARAMETER num_predict 1024
 PARAMETER temperature 0.2
 EOF
 
