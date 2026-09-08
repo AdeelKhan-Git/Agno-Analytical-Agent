@@ -23,6 +23,7 @@ from schema_knowledge import (
     build_learning_knowledge,
     get_knowledge,
     load_table_docs_for_retriever,
+    _format_doc_compact,
 )
 
 logger = logging.getLogger(__name__)
@@ -126,21 +127,31 @@ class SchemaAwareSQLTools(Toolkit):
         self.register(self.run_sql_query)
 
     @tool(cache_dir='agno_SQLTool_cache', cache_results=True, cache_ttl=3600)
-    def list_tables(self):
+    def list_tables(self) -> str:
+        """List every table name available in the connected database.
+
+        Call this first if you are not yet sure which tables exist.
+        Returns a plain list of table names — it does not describe their
+        columns; use describe_table(table_name) for that.
+        """
         return self._inner.list_tables()
 
     @tool(cache_dir='agno_SQLTool_cache', cache_results=True, cache_ttl=3600)
-    def describe_table(self, table_name):
+    def describe_table(self, table_name: str) -> str:
+        """Describe one table's real columns, types, documented meanings,
+        and known joins to other tables.
 
-        if isinstance(table_name, dict):
-            table_name = table_name.get("table_name")
+        Args:
+            table_name: The exact table name to describe, e.g. "journal".
+                Must be a single table name string, not a list or a dict.
 
-        if not isinstance(table_name, str):
-            raise ValueError(
-                "table_name must be a string, "
-                "for example: 'journal'"
-            )
-
+        Returns:
+            A text block with the table description, each column's
+            documented meaning where available, undocumented columns
+            flagged as such, and any known JOIN relationships. Always
+            call this for every table before writing SQL against it —
+            never assume a column name or meaning.
+        """
         table_name = table_name.strip()
 
         if not table_name:
@@ -148,9 +159,22 @@ class SchemaAwareSQLTools(Toolkit):
 
         raw_result = self._inner.describe_table(table_name)
         return _format_curated_table_description(table_name, raw_result)
-    
+
     @tool(cache_dir='agno_SQLTool_cache', cache_results=True, cache_ttl=3600)
-    def run_sql_query(self, query):
+    def run_sql_query(self, query: str) -> str:
+        """Execute a read-only SQL query against the database and return
+        the results.
+
+        Args:
+            query: A single SELECT (or WITH ... SELECT) statement. Only
+                use exact table/column names previously confirmed via
+                describe_table — never guess a name.
+
+        Returns:
+            The query results. Use this to explore distinct values or
+            verify assumptions before producing the final answer, not
+            just to fetch the final answer's data.
+        """
         return self._inner.run_sql_query(query)
 
 CHART_TYPE_ALIASES = {
@@ -207,17 +231,9 @@ class QueryPlan(BaseModel):
     )
 
     @model_validator(mode="after")
-    def validate_sql_required(self):
-        if not self.is_refusal:
-            if not self.sql_used or not self.sql_used.strip():
-                raise ValueError(
-                    "sql_used is required when is_refusal is false. "
-                    "Always provide a SQL SELECT query for database questions."
-                )
-
+    def _normalize_refusal(self):
         if self.is_refusal:
             self.sql_used = None
-
         return self
 
     @field_validator("chart_type", mode="before")
@@ -285,7 +301,7 @@ def schema_knowledge_retriever(query: str, num_documents: int = None, **kwargs):
             "falling back to an unscoped search", query,
         )
         fallback_docs = knowledge.search(query, max_results=num_documents or 10)
-        return [doc.to_dict() for doc in fallback_docs]
+        return [_format_doc_compact(doc) for doc in fallback_docs]
 
     # Union in each selected table's documented join partners, so a hub
     # table (e.g. tbl_ebm, which most cross-table questions need) is
@@ -322,7 +338,7 @@ def schema_knowledge_retriever(query: str, num_documents: int = None, **kwargs):
     if num_documents is not None and len(result_docs) > num_documents:
         result_docs = result_docs[:num_documents]
 
-    return [doc.to_dict() for doc in result_docs]
+    return [_format_doc_compact(doc) for doc in result_docs]
 
 
 def build_agent():
@@ -338,12 +354,13 @@ def build_agent():
 
     logger.info("build_agent() model: %s", model_id)
     return Agent(
-        model = Ollama(id = model_id),
+        model = Ollama(id = model_id, request_params={"think": False}, keep_alive=-1),
         # model=OpenAIChat(id="gpt-4o", api_key=OPENAI_API_KEY),
         # model=Gemini(id="gemini-3.5-flash-lite", api_key=GEMINI_API_KEY),
+
+        # parser_model=Ollama(id=model_id, request_params={"think": False}, keep_alive=-1),
         tools=[
             SchemaAwareSQLTools(db_engine=ENGINE),
-            PandasTools(),
         ],
         knowledge=get_knowledge(),
         knowledge_retriever=schema_knowledge_retriever,
@@ -351,15 +368,17 @@ def build_agent():
             knowledge=build_learning_knowledge(),
             learned_knowledge=LearnedKnowledgeConfig(mode=LearningMode.AGENTIC)
         ),
-        search_knowledge=True,
+        search_knowledge=False,
         db=SqliteDb(db_file="agent_sessions.db"),
-        add_history_to_context=True,
+        add_knowledge_to_context=True,
+        add_history_to_context=False,
         num_history_runs=1,
         description=(
             "You are a data analyst agent with direct access to a SQL database via your tools.\n"
         ),
+        # compress_tool_results=True,
         output_schema=QueryPlan,
-        retries=2,
+        retries=0,
         instructions=INSTRUCTIONS,
         markdown=False,
         debug_mode=1
@@ -447,6 +466,40 @@ def _validate_sql_executes(sql: str) -> list:
     return []
 
 
+def _log_run_metrics(response: RunOutput) -> None:
+
+    try:
+        run_metrics = getattr(response, "metrics", None)
+        if run_metrics is not None:
+            logger.info("run metrics (aggregate): %r", run_metrics)
+
+        messages = getattr(response, "messages", None) or []
+        turn_count = 0
+        for msg in messages:
+            msg_metrics = getattr(msg, "metrics", None)
+            if not msg_metrics:
+                continue
+            turn_count += 1
+            role = getattr(msg, "role", "?")
+            prompt_eval_count = getattr(msg_metrics, "input_tokens", None)
+            output_tokens = getattr(msg_metrics, "output_tokens", None)
+            # Ollama-specific timing fields, if the provider surfaces them
+            # through Agno's Metrics object (prompt_eval_duration /
+            # eval_duration in nanoseconds on the raw Ollama response).
+            prompt_eval_duration = getattr(msg_metrics, "prompt_eval_duration", None)
+            eval_duration = getattr(msg_metrics, "eval_duration", None)
+            logger.info(
+                "turn %d (%s) — input_tokens=%s output_tokens=%s "
+                "prompt_eval_duration=%s eval_duration=%s",
+                turn_count, role, prompt_eval_count, output_tokens,
+                prompt_eval_duration, eval_duration,
+            )
+        logger.info("total turns with metrics this run: %d", turn_count)
+    except Exception:
+        # Metrics logging must never break an actual answer.
+        logger.debug("Failed to log run metrics", exc_info=True)
+
+
 def plan(user_prompt: str, _max_retries: int = 2, on_progress: Optional[Callable[[str], None]] = None,
          session_id: Optional[str] = None, _original_question: Optional[str] = None,
          on_step: Optional[Callable[[dict], None]] = None):
@@ -531,6 +584,8 @@ def plan(user_prompt: str, _max_retries: int = 2, on_progress: Optional[Callable
         # RunOutput is yielded — but fail loudly rather than silently
         # proceeding with an undefined `response`.
         raise RuntimeError("agent.run() streaming did not yield a final RunOutput")
+
+    _log_run_metrics(response)
 
     content = response.content
 
