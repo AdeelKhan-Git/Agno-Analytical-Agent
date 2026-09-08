@@ -38,8 +38,37 @@ class NomicDocumentEmbedder(OllamaEmbedder):
 
 class NomicQueryEmbedder(OllamaEmbedder):
 
+    # schema_knowledge_retriever calls the embedder once for the table-stage
+    # search plus once per expanded (join-partner-included) table, all with
+    # the SAME query string — that's 11+ embed HTTP round trips to Ollama
+    # for a single user question. Caching the query text -> embedding
+    # mapping fixes that.
+    #
+    # NOTE: this is deliberately NOT @lru_cache directly on the instance
+    # method — that would include `self` in the cache key, and
+    # OllamaEmbedder is a Pydantic model with no __hash__, which raised
+    # "unhashable type: 'NomicQueryEmbedder'" on every single call and
+    # silently broke retrieval (Stage 1 found zero tables every time,
+    # since the search itself was erroring out). Caching only on `text`,
+    # in a plain dict, avoids hashing the embedder instance at all.
+    _embedding_cache: dict = {}
+    _EMBEDDING_CACHE_MAXSIZE = 512
+
     def get_embedding(self, text: str):
-        return super().get_embedding(f"search_query: {text}")
+        cached = NomicQueryEmbedder._embedding_cache.get(text)
+        if cached is not None:
+            return cached
+        result = super().get_embedding(f"search_query: {text}")
+        if len(NomicQueryEmbedder._embedding_cache) >= NomicQueryEmbedder._EMBEDDING_CACHE_MAXSIZE:
+            # Simple unbounded-growth guard — not true LRU, just drop
+            # everything and start over once the cache is full. Query
+            # text repeats heavily within a single question (same string
+            # embedded once per expanded table) and much less across
+            # different questions, so this is cheap insurance, not a
+            # perf-critical eviction policy.
+            NomicQueryEmbedder._embedding_cache.clear()
+        NomicQueryEmbedder._embedding_cache[text] = result
+        return result
 
     async def async_get_embedding(self, text: str):
         return await super().async_get_embedding(f"search_query: {text}")
@@ -59,6 +88,28 @@ def _load_json(path: str) -> dict:
 
 
 _table_docs_cache = None
+
+
+def _format_doc_compact(doc) -> str:
+    """Render a knowledge Document as a compact text block instead of a
+    JSON dict. Agno's default context renderer does
+    json.dumps(doc.to_dict(), indent=2), which repeats the document name
+    and full meta_data alongside the content and adds indentation — all
+    of that is pure token overhead the model has to read past. Returning
+    plain strings from the retriever means Agno just joins them as-is.
+    """
+    meta = doc.meta_data or {}
+    kind = meta.get("kind", "")
+    table = meta.get("table", "")
+    column = meta.get("column", "")
+
+    header_bits = [b for b in (table, column) if b]
+    header = ".".join(header_bits) if header_bits else (doc.name or "")
+    if kind:
+        header = f"{header} ({kind})" if header else f"({kind})"
+
+    content = (doc.content or "").strip()
+    return f"{header}\n{content}" if header else content
 
 
 def load_table_docs_for_retriever() -> dict:
@@ -98,7 +149,11 @@ def build_knowledge(mode: str = "query") -> Knowledge:
         search_type=SearchType.hybrid,
         embedder=embedder,
     )
-    return Knowledge(vector_db=vector_db, max_results=10, contents_db=SqliteDb(db_file=CONTENTS_DB_FILE))
+    return Knowledge(
+        vector_db=vector_db,
+        max_results=60,
+        contents_db=SqliteDb(db_file=CONTENTS_DB_FILE),
+    )
 
 
 def build_learning_knowledge() -> Knowledge:
