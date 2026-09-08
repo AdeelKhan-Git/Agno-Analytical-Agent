@@ -354,7 +354,7 @@ def build_agent():
 
     logger.info("build_agent() model: %s", model_id)
     return Agent(
-        model = Ollama(id = model_id, request_params={"think": False}, keep_alive=-1),
+        model = Ollama(id = model_id, request_params={"think": "low"}, keep_alive=-1),
         # model=OpenAIChat(id="gpt-4o", api_key=OPENAI_API_KEY),
         # model=Gemini(id="gemini-3.5-flash-lite", api_key=GEMINI_API_KEY),
 
