@@ -273,7 +273,12 @@ _RETRIEVER_TABLE_STAGE_RESULTS = 10
 _RETRIEVER_COLUMN_STAGE_RESULTS_PER_TABLE = 15
 
 
-def schema_knowledge_retriever(query: str, num_documents: int = None, **kwargs):
+def schema_knowledge_retriever(query: str, num_documents: int = None, run_context=None, **kwargs):
+    search_query = query
+    if run_context is not None and getattr(run_context, "dependencies", None):
+        original_question = run_context.dependencies.get("question")
+        if original_question:
+            search_query = original_question
 
     # get_knowledge() returns a cached, mode="query" Knowledge instance —
     # correct task-prefix for embedding this search query, and reused
@@ -282,7 +287,7 @@ def schema_knowledge_retriever(query: str, num_documents: int = None, **kwargs):
 
     # Stage 1: which tables is this question actually about?
     table_docs = knowledge.search(
-        query,
+        search_query,
         max_results=_RETRIEVER_TABLE_STAGE_RESULTS,
         filters={"kind": "table"},
     )
@@ -298,9 +303,9 @@ def schema_knowledge_retriever(query: str, num_documents: int = None, **kwargs):
         # novel/oddly-worded question still gets SOME context.
         logger.warning(
             "schema_knowledge_retriever: no tables matched query %r in Stage 1, "
-            "falling back to an unscoped search", query,
+            "falling back to an unscoped search", search_query,
         )
-        fallback_docs = knowledge.search(query, max_results=num_documents or 10)
+        fallback_docs = knowledge.search(search_query, max_results=num_documents or 10)
         return [_format_doc_compact(doc) for doc in fallback_docs]
 
     # Union in each selected table's documented join partners, so a hub
@@ -325,7 +330,7 @@ def schema_knowledge_retriever(query: str, num_documents: int = None, **kwargs):
     result_docs = list(table_docs)  # keep the table-level docs too — they carry join/description context
     for table in expanded_tables:
         table_scoped_docs = knowledge.search(
-            query,
+            search_query,
             max_results=_RETRIEVER_COLUMN_STAGE_RESULTS_PER_TABLE,
             filters={"table": table},
         )
@@ -371,8 +376,9 @@ def build_agent():
         search_knowledge=False,
         db=SqliteDb(db_file="agent_sessions.db"),
         add_knowledge_to_context=True,
-        add_history_to_context=False,
-        num_history_runs=1,
+        add_history_to_context=True,
+        max_tool_calls_from_history=0,
+        num_history_runs=2,
         description=(
             "You are a data analyst agent with direct access to a SQL database via your tools.\n"
         ),
@@ -437,10 +443,7 @@ def _validate_sql_executes(sql: str) -> list:
             pd.read_sql_query(dry_run_sql, conn)
     except Exception as e:
         elapsed_ms = (time.perf_counter() - started) * 1000
-        # Keep only the first line — the DB driver's message (e.g. "Unknown
-        # column 'r.nicemat' in 'field list'") is what's actually useful;
-        # the rest is SQLAlchemy/DBAPI traceback noise.
-        db_message = str(e).strip().split("\n")[0]
+        db_message = str(getattr(e, "orig", e)).strip()
         logger.warning(
             "SQL FAILED TO EXECUTE against the real database (%.1fms): %s | SQL: %s",
             elapsed_ms, db_message, sql,
@@ -483,11 +486,18 @@ def _log_run_metrics(response: RunOutput) -> None:
             role = getattr(msg, "role", "?")
             prompt_eval_count = getattr(msg_metrics, "input_tokens", None)
             output_tokens = getattr(msg_metrics, "output_tokens", None)
-            # Ollama-specific timing fields, if the provider surfaces them
-            # through Agno's Metrics object (prompt_eval_duration /
-            # eval_duration in nanoseconds on the raw Ollama response).
-            prompt_eval_duration = getattr(msg_metrics, "prompt_eval_duration", None)
-            eval_duration = getattr(msg_metrics, "eval_duration", None)
+            # Ollama's own timing (prompt_eval_duration / eval_duration, in
+            # nanoseconds) is NOT a top-level attribute on Agno's Metrics
+            # object — it only shows up inside provider_metrics (confirmed
+            # from agno/metrics.py: provider_metrics: Optional[Dict[str, Any]]).
+            # Reading it as a top-level attribute always returned None here.
+            provider_metrics = getattr(msg_metrics, "provider_metrics", None) or {}
+            prompt_eval_duration_ns = provider_metrics.get("prompt_eval_duration")
+            eval_duration_ns = provider_metrics.get("eval_duration")
+            prompt_eval_duration = (
+                prompt_eval_duration_ns / 1e9 if prompt_eval_duration_ns is not None else None
+            )
+            eval_duration = eval_duration_ns / 1e9 if eval_duration_ns is not None else None
             logger.info(
                 "turn %d (%s) — input_tokens=%s output_tokens=%s "
                 "prompt_eval_duration=%s eval_duration=%s",
@@ -498,6 +508,23 @@ def _log_run_metrics(response: RunOutput) -> None:
     except Exception:
         # Metrics logging must never break an actual answer.
         logger.debug("Failed to log run metrics", exc_info=True)
+
+
+
+# Mirrors app.py's LEARNING_TRIGGER_PREFIX / is_learning_prompt(). Duplicated
+# here (not imported) because app.py imports plan() from this module —
+# importing app.py back would be circular. A learning/correction message
+# ("error: ...") is teaching the agent a fix, not asking a database
+# question, so it should never trigger the "you didn't produce SQL, try
+# again" retry: that retry burns a full ~7k-token run re-answering
+# something that was never a question in the first place (observed in
+# logs: "Re-answer the original question: 'error: always provide SQL for
+# the final answer'", three times).
+_LEARNING_TRIGGER_PREFIX = "error:"
+
+
+def _is_learning_prompt(text: str) -> bool:
+    return bool(text) and text.strip().lower().startswith(_LEARNING_TRIGGER_PREFIX)
 
 
 def plan(user_prompt: str, _max_retries: int = 2, on_progress: Optional[Callable[[str], None]] = None,
@@ -537,7 +564,8 @@ def plan(user_prompt: str, _max_retries: int = 2, on_progress: Optional[Callable
 
     response = None
     for event in agent.run(user_prompt, stream=True, stream_events=True, yield_run_output=True,
-                            session_id=session_id):
+                            session_id=session_id,
+                            dependencies={"question": _original_question}):
         if isinstance(event, ToolCallStartedEvent) and event.tool and event.tool.tool_name:
             tool_name = event.tool.tool_name
             tool_args = getattr(event.tool, "tool_args", None) or {}
@@ -642,14 +670,29 @@ def plan(user_prompt: str, _max_retries: int = 2, on_progress: Optional[Callable
             retried = plan(correction_prompt, _max_retries=_max_retries - 1, on_progress=on_progress,
                             session_id=session_id, _original_question=_original_question, on_step=on_step)
 
-            if retried.sql_used:
-                logger.info("Retry produced usable SQL — using retried result")
-                return retried
-            if result.sql_used:
-                logger.info("Retry produced nothing usable — falling back to original (imperfect) result")
-                return result
-            logger.warning("Neither original nor retry produced usable SQL — marking as refusal")
+            if retried.sql_used and not retried.is_refusal:
+                # Don't trust the retry just because it produced SOME sql_used —
+                # re-check it against the real database. Without this, a retry
+                # that reproduces the exact same broken SQL (or a different but
+                # still-broken query) gets returned and executed for real by
+                # app.py, even though we already know it's invalid.
+                retry_problems = _validate_sql_executes(retried.sql_used)
+                if not retry_problems:
+                    logger.info("Retry produced valid SQL (re-verified) — using retried result")
+                    return retried
+                logger.warning(
+                    "Retry's SQL ALSO failed re-validation: %s — refusing rather than "
+                    "returning known-broken SQL", retry_problems,
+                )
+            # Either the retry produced no SQL, or its SQL also failed
+            # re-validation. In both cases, the ORIGINAL result's SQL is
+            # already confirmed broken (that's why we retried in the first
+            # place) — it must never be returned as-is, since app.py will
+            # execute whatever sql_used contains. Refuse instead of handing
+            # back SQL we already know is invalid.
+            logger.warning("Neither original nor retry produced valid SQL — marking as refusal")
             result.is_refusal = True
+            result.sql_used = None
             if not result.explanation:
                 result.explanation = (
                     "Could not produce SQL that executes successfully against the "
@@ -657,7 +700,10 @@ def plan(user_prompt: str, _max_retries: int = 2, on_progress: Optional[Callable
                 )
             return result
 
-    if not result.sql_used and not result.is_refusal and _max_retries > 0:
+    if (
+        not result.sql_used and not result.is_refusal and _max_retries > 0
+        and not _is_learning_prompt(_original_question)
+    ):
         logger.warning("No SQL produced and not a refusal — triggering retry to force real SQL")
         correction_prompt = (
             f"Re-answer the original question: {_original_question!r}\n"
