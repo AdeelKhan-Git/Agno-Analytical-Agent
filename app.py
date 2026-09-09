@@ -679,6 +679,51 @@ prompt = st.chat_input("Ask anything about your data... (start with 'error:' to 
 # ============================================================================
 # RUN QUERY
 # ============================================================================
+# ============================================================================
+# PREVIOUS-SQL REUSE FOR FOLLOW-UPS
+#
+# add_history_to_context=False means the agent has no memory of the
+# previous turn at all (that's deliberate — it stops full tool traces
+# from a prior question being replayed into every new one). But that
+# also means a follow-up like "and the regional editor too?" has nothing
+# to build on and re-does the whole describe_table/search cycle from
+# scratch. The thing worth reusing is the previous SQL, not the previous
+# tool trace: st.session_state.history already keeps the full QueryPlan
+# (including sql_used) for every turn, so prepend the last successful
+# question + its SQL to the prompt actually sent to the model. Deliberately
+# passed as `user_prompt` (what the model sees this turn) while the bare
+# `prompt` is kept as `_original_question` (used for retry wording and for
+# scoping table retrieval to the real question, not this extra context).
+# ============================================================================
+
+
+def _build_prompt_with_previous_sql(current_prompt: str, is_learning: bool) -> str:
+    if is_learning:
+        # Corrections are teaching the agent something new, not a follow-up
+        # question — don't mix in unrelated prior SQL context.
+        return current_prompt
+
+    history = st.session_state.get("history") or []
+    if not history:
+        return current_prompt
+
+    last = history[-1]
+    last_qp = last.get("query_plan")
+    if last_qp is None or last.get("is_learning") or not getattr(last_qp, "sql_used", None):
+        # No usable previous SQL to build on (refusal, learning turn, or
+        # somehow missing) — nothing to prepend.
+        return current_prompt
+
+    return (
+        f"Previous question: {last.get('prompt', '')!r}\n"
+        f"Previous SQL: {last_qp.sql_used}\n\n"
+        f"New question: {current_prompt}\n"
+        f"If the previous SQL already covers the right tables and filters, "
+        f"edit it to answer the new question rather than starting over — "
+        f"only call tools to verify a name or value it doesn't already contain."
+    )
+
+
 if prompt:
     logger.info("User submitted prompt: %r", prompt)
 
@@ -702,10 +747,12 @@ if prompt:
         # STEP 1: PLAN
         # ----------------------------------------------------------------
         try:
+            model_prompt = _build_prompt_with_previous_sql(prompt, learning_mode)
             qp = plan(
-                prompt,
+                model_prompt,
                 session_id=st.session_state.agent_session_id,
                 on_step=on_step,
+                _original_question=prompt,
             )
             logger.info(
                 "Plan generated successfully. refusal=%s sql=%s",
