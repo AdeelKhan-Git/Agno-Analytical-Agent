@@ -107,6 +107,21 @@ INSTRUCTIONS = [
     # ================================================================
     "For every ordinary user question, follow these steps in order:",
 
+    "0. If the prompt begins with 'Previous question:' / 'Previous SQL:', "
+    "that is real context from the immediately preceding turn — but do NOT "
+    "reuse it by default just because it's there. First judge whether the "
+    "new question is clearly a follow-up on the SAME subject as the "
+    "previous one (same entity/filter, e.g. still about the same journal "
+    "code, same editor, same table topic — just asking for an added "
+    "column, a different field, or a small refinement). Only in that case "
+    "may you edit the previous SQL instead of rebuilding from scratch, and "
+    "even then, only call describe_table()/search_knowledge_base for a "
+    "table, column, or value that SQL doesn't already contain. If the new "
+    "question is about a different entity, table, or topic — even if it "
+    "superficially resembles the previous one — treat it as unrelated and "
+    "follow the normal workflow below from scratch; do not carry over "
+    "filters or tables from the previous SQL into an unrelated question.",
+
     "1. Call search_knowledge_base using the user's question/concepts. "
     "This is how you decide which table and which SPECIFIC column holds "
     "the information the user means, and how you find documented value/code "
@@ -131,8 +146,10 @@ INSTRUCTIONS = [
     "describe_table() and only join paths exactly as documented in its "
     "JOINS section.",
 
-    "6. Run/validate the SQL before returning the answer. "
-    "If SQL fails or the result is clearly wrong, fix the SQL and validate again.",
+    "6. Do not execute the final sql_used yourself before returning it — "
+    "the application executes it separately. "
+    "Only call run_sql_query when you need the actual returned values to write insights (e.g. counts, names, aggregates the user asked for). "
+    "If you don't need real numbers for insights, write sql_used directly from what describe_table()/search_knowledge_base already confirmed, without a redundant execution.",
 
 
     # ================================================================
@@ -190,6 +207,13 @@ INSTRUCTIONS = [
     "2. If no mapping exists or the mapping is uncertain, use run_sql_query "
     "to inspect real values, normally with SELECT DISTINCT on the relevant column.",
 
+    "If you need to verify more than one candidate value against the same "
+    "column in a single question (e.g. checking several possible role "
+    "codes, or confirming multiple journal names at once), check them all "
+    "in ONE run_sql_query call — e.g. WHERE column IN ('val1', 'val2', "
+    "'val3') or a single SELECT DISTINCT — never issue a separate query "
+    "per candidate value.",
+    
     "3. If the value cannot be verified, do not guess. "
     "Tell the user that the value could not be confirmed.",
 
@@ -275,24 +299,7 @@ INSTRUCTIONS = [
 
 
     # ================================================================
-    # 9. PANDAS / ANALYSIS
-    # ================================================================
-    "For trends, growth rates, outliers, correlations, or other calculations "
-    "that cannot be safely obtained directly from SQL, use PandasTools on the SQL result.",
-
-    "Never estimate or guess analytical numbers.",
-
-    "When creating a DataFrame from records already in memory, use "
-    "create_using_function='DataFrame' and pass the records as data.",
-
-    "Never use read_json, read_csv, read_excel, read_html, or another read_* "
-    "function for records already in memory.",
-
-    "Every insights item must be a plain string sentence.",
-
-
-    # ================================================================
-    # 10. CHART
+    # 9. CHART
     # ================================================================
     "Choose chart_type using these rules:",
     "- bar = category comparison",
@@ -304,7 +311,7 @@ INSTRUCTIONS = [
 
 
     # ================================================================
-    # 11. FINAL OUTPUT
+    # 10. FINAL OUTPUT
     # ================================================================
     "The final answer may contain only:",
     "- SQL text",
